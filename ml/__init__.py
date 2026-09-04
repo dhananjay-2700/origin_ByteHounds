@@ -1,5 +1,5 @@
 """
-GRIDWISE AI - ML Foundation (Draft 1)
+PRVAAH X - ML Foundation (Draft 1)
 Delhi Electricity Demand Forecasting System
 """
 

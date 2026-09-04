@@ -9,9 +9,27 @@ interface DataHealthModalProps {
 }
 
 export const DataHealthModal: React.FC<DataHealthModalProps> = ({ isOpen, onClose }) => {
+  const [healthData, setHealthData] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const fetchHealth = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/data-health");
+        if (res.ok) {
+          const data = await res.json();
+          setHealthData(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch data health", err);
+      }
+    };
+    fetchHealth();
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  const metrics = [
+  const metrics = healthData?.metrics || [
     { name: "Load Data", score: 98, status: "Verified" },
     { name: "Weather Data", score: 95, status: "Verified" },
     { name: "Missing Values", score: 96, status: "Cleaned" },
@@ -45,15 +63,15 @@ export const DataHealthModal: React.FC<DataHealthModalProps> = ({ isOpen, onClos
         {/* Score Banner */}
         <div className="flex items-center justify-between p-4 mb-5 bg-gradient-to-r from-emerald-950/60 to-emerald-900/20 rounded-xl border border-emerald-500/30">
           <div>
-            <div className="text-3xl font-extrabold text-emerald-400 font-mono">94 / 100</div>
-            <div className="text-xs font-semibold text-emerald-300 tracking-wider">EXCELLENT PIPELINE HEALTH</div>
+            <div className="text-3xl font-extrabold text-emerald-400 font-mono">{healthData?.overall_score || 94} / 100</div>
+            <div className="text-xs font-semibold text-emerald-300 tracking-wider">{healthData?.status_label || "EXCELLENT"} PIPELINE HEALTH</div>
           </div>
           <ShieldCheck className="w-10 h-10 text-emerald-400/80" />
         </div>
 
         {/* Sub-Metrics Grid */}
         <div className="space-y-2.5 mb-6">
-          {metrics.map((m, i) => (
+          {metrics.map((m: { name: string; score: number; status: string }, i: number) => (
             <div
               key={i}
               className="flex items-center justify-between p-2.5 bg-gray-900/60 rounded-lg border border-gray-800/80"

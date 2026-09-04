@@ -1,4 +1,4 @@
-# GRIDWISE AI — Custom Model Interface Specification
+# PRVAAH X — Custom Model Interface Specification
 
 This document details the exact input/output contracts for connecting your team's custom in-house trained model to all 7 platform intelligence features.
 
@@ -213,5 +213,5 @@ When a request arrives at the backend, it packages live Delhi SCADA telemetry an
 ## Zero-Downtime Guarantee
 
 If your model endpoint is offline, returning HTTP 500, or currently being retrained:
-**GRIDWISE AI automatically falls back to its built-in Delhi physics & domain rules engine.**
+**PRVAAH X automatically falls back to its built-in Delhi physics & domain rules engine.**
 Your dashboard, APIs, and WebSockets will continue operating 100% of the time with zero downtime.

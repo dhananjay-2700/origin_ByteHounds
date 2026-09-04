@@ -1,5 +1,5 @@
 """
-Preprocessing pipeline for GRIDWISE AI electricity demand forecasting.
+Preprocessing pipeline for PRVAAH X electricity demand forecasting.
 Aggregates 5-minute data to hourly resolution, flags incomplete hours,
 handles missing gaps deterministically, and aligns weather variables.
 """

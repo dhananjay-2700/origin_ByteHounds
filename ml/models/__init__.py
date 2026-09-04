@@ -1,4 +1,4 @@
-"""Models package for GRIDWISE AI."""
+"""Models package for PRVAAH X."""
 from .baselines import (
     evaluate_baselines,
     predict_previous_hour,

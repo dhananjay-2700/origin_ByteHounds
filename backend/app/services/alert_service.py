@@ -8,7 +8,7 @@ from ..config import api_credentials
 from ..db.models import GridAlert
 from ..models.schemas import AlertItem, AlertListResponse
 
-logger = logging.getLogger("GridwiseAlerts")
+logger = logging.getLogger("PrvaahXAlerts")
 
 async def dispatch_webhook_notification(alert: GridAlert):
     """
@@ -16,12 +16,12 @@ async def dispatch_webhook_notification(alert: GridAlert):
     Executes asynchronously with a short timeout so grid operations are never blocked.
     """
     payload = {
-        "text": f"🚨 *GRIDWISE ALERT: {alert.severity}* — {alert.title}\n"
+        "text": f"🚨 *PRVAAH X ALERT: {alert.severity}* — {alert.title}\n"
                 f"*Substation:* {alert.substation}\n"
                 f"*Parameter:* {alert.parameter} = {alert.current_value} (Limit: {alert.threshold_value})\n"
                 f"*Details:* {alert.message}\n"
                 f"*Time:* {alert.timestamp.isoformat() if alert.timestamp else 'Now'}",
-        "gridwise_alert": {
+        "prvaah_x_alert": {
             "id": alert.alert_id,
             "severity": alert.severity,
             "substation": alert.substation,

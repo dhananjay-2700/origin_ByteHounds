@@ -1,5 +1,5 @@
 """
-Baseline forecasting models for benchmarking GRIDWISE AI ML foundation.
+Baseline forecasting models for benchmarking PRVAAH X ML foundation.
 Includes:
   1. Previous Hour (Origin Persistence: y_hat(T+h) = y_T)
   2. Previous Day (24-hour Seasonal Persistence: y_hat(T+h) = y_{T+h-24})

@@ -1,7 +1,10 @@
 import pickle
 import pandas as pd
 import numpy as np
-import xgboost as xgb
+try:
+    import xgboost as xgb
+except ImportError:
+    xgb = None
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from models import LoadData, WeatherData, Capacity

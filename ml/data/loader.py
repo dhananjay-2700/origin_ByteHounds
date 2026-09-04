@@ -1,5 +1,5 @@
 """
-Data loader for GRIDWISE AI electricity demand and Open-Meteo weather datasets.
+Data loader for PRVAAH X electricity demand and Open-Meteo weather datasets.
 """
 
 import logging

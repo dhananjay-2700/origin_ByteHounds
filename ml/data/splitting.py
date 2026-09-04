@@ -1,5 +1,5 @@
 """
-Chronological dataset splitting module for GRIDWISE AI.
+Chronological dataset splitting module for PRVAAH X.
 Enforces strict temporal ordering: Train < Validation < Test.
 Zero random sampling or shuffling.
 """

@@ -1,5 +1,5 @@
 """
-GRIDWISE AI - Top-level Inference Entry Point
+PRVAAH X - Top-level Inference Entry Point
 Provides CLI and API access to 24-hour demand forecasting.
 
 Usage:
@@ -20,7 +20,7 @@ __all__ = ["predict_next_24_hours"]
 
 
 def main():
-    parser = argparse.ArgumentParser(description="GRIDWISE AI 24-Hour Electricity Demand Forecast")
+    parser = argparse.ArgumentParser(description="PRVAAH X 24-Hour Electricity Demand Forecast")
     parser.add_argument(
         "--origin",
         type=str,
@@ -31,7 +31,7 @@ def main():
 
     df_fc = predict_next_24_hours(forecast_origin=args.origin)
     print("\n========================================================")
-    print("GRIDWISE AI - 24-HOUR ELECTRICITY DEMAND FORECAST")
+    print("PRVAAH X - 24-HOUR ELECTRICITY DEMAND FORECAST")
     print("========================================================")
     print(f"Total Forecast Points: {len(df_fc)}")
     print(f"Forecast Horizon Range: {df_fc['timestamp'].min()} to {df_fc['timestamp'].max()}\n")

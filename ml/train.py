@@ -1,5 +1,5 @@
 """
-GRIDWISE AI - ML FOUNDATION (DRAFT 1)
+PRVAAH X - ML FOUNDATION (DRAFT 1)
 Master Training Entry Point
 
 Executes the complete training workflow when invoked:
@@ -79,7 +79,7 @@ def run_training_pipeline() -> None:
     set_seed(RANDOM_SEED)
 
     logger.info("==================================================")
-    logger.info("GRIDWISE AI - ML FOUNDATION (DRAFT 1) TRAINING")
+    logger.info("PRVAAH X - ML FOUNDATION (DRAFT 1) TRAINING")
     logger.info("==================================================")
 
     # 1. LOAD RAW DATA
@@ -170,7 +170,7 @@ def run_training_pipeline() -> None:
     forecaster.save(MODELS_DIR)
 
     metadata = {
-        "model_name": "GRIDWISE AI Delhi Electricity Demand Forecaster",
+        "model_name": "PRVAAH X Delhi Electricity Demand Forecaster",
         "model_version": "0.1.0-draft1",
         "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "model_architecture": "Global Multi-Horizon LightGBM Regressor",

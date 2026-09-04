@@ -1,4 +1,4 @@
-# GRIDWISE AI - ML Foundation (Draft 1) Dependencies
+# PRVAAH X - ML Foundation (Draft 1) Dependencies
 # Python 3.10+ compatible
 
 # Core Numerical & Data Processing

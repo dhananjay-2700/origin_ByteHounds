@@ -21,7 +21,7 @@ export const CopilotView: React.FC = () => {
     {
       id: "1",
       sender: "copilot",
-      text: "Hello, I am **GridWise Copilot**—your tool-grounded natural language interface to the Delhi Grid AI backend. How can I assist with grid risk or demand forecasts today?",
+      text: "Hello, I am **PRVAAH X Copilot**—your tool-grounded natural language interface to the Delhi Grid AI backend. How can I assist with grid risk or demand forecasts today?",
     },
   ]);
 
@@ -124,7 +124,7 @@ export const CopilotView: React.FC = () => {
           <Bot className="w-4 h-4" />
           <span>GROUNDED AI ASSISTANT</span>
         </div>
-        <h1 className="text-xl font-bold text-white font-mono">GRIDWISE COPILOT</h1>
+        <h1 className="text-xl font-bold text-white font-mono">PRVAAH X COPILOT</h1>
         <p className="text-xs text-gray-400">Natural-language tool runner grounded directly in backend forecast & risk services</p>
         </div>
       </ScrollReveal>

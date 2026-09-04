@@ -196,5 +196,5 @@ def export_forecast_csv():
     return Response(
         content=csv_content,
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=delhi_gridwise_forecast_24h.csv"},
+        headers={"Content-Disposition": "attachment; filename=delhi_prvaah_x_forecast_24h.csv"},
     )

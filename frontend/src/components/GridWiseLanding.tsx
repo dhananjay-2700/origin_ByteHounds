@@ -38,7 +38,7 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
                 THE GRID KNOWS THE PEAK IS COMING.
               </h1>
               <p className="text-2xl lg:text-4xl font-bold text-[#FF7C1E] tracking-tight">
-                GRIDWISE AI sees it before everyone else does.
+                PRVAAH X sees it before everyone else does.
               </p>
               <p className="text-xl text-gray-400 max-w-2xl leading-relaxed">
                 AI-powered electricity demand forecasting and grid-risk intelligence that predicts demand, identifies critical windows, explains the drivers and lets operators test what happens next.
@@ -111,7 +111,7 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
         </div>
       </section>
 
-      {/* ── 03 THE "GRIDWISE MOMENT" ── */}
+      {/* ── 03 THE "PRVAAH X MOMENT" ── */}
       <section className="bg-[#FF7C1E] text-black py-32 px-6 relative overflow-hidden">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 items-center">
           <div className="flex-1 space-y-8 relative z-10">
@@ -203,7 +203,7 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
             <ArrowRight className="w-12 h-12 text-white transform rotate-90" />
           </div>
           
-          <div className="text-6xl font-black tracking-tighter">GRIDWISE AI</div>
+          <div className="text-6xl font-black tracking-tighter">PRVAAH X</div>
           
           <div className="flex justify-center">
             <ArrowRight className="w-12 h-12 text-white transform rotate-90" />
@@ -308,7 +308,7 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
               KNOW WHEN THE GRID IS UNDER PRESSURE.
             </h2>
             <p className="text-xl text-gray-400 leading-relaxed font-medium">
-              GRIDWISE identifies the exact period where predicted demand, ramp rate, weather stress and uncertainty combine to create elevated grid pressure.
+              PRVAAH X identifies the exact period where predicted demand, ramp rate, weather stress and uncertainty combine to create elevated grid pressure.
             </p>
 
             <button 
@@ -485,13 +485,13 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
               YOU SHOULDN'T HAVE TO READ THE DASHBOARD.
             </h2>
             <p className="text-xl text-gray-400 font-medium">
-              GridWise Copilot provides grounded natural language answers to complex grid queries.
+              PRVAAH X Copilot provides grounded natural language answers to complex grid queries.
             </p>
             <button 
               onClick={() => onViewForecast?.("copilot")}
               className="px-8 py-4 bg-[#FF7C1E] text-black font-black uppercase tracking-widest text-xs rounded-full hover:bg-orange-600 transition flex items-center space-x-3 cursor-pointer shadow-lg"
             >
-              <span>Open GridWise Copilot</span>
+              <span>Open PRVAAH X Copilot</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -502,7 +502,7 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
                 <div className="w-10 h-10 bg-[#FF7C1E] rounded-full flex items-center justify-center">
                   <MessageSquare className="w-5 h-5 text-black" />
                 </div>
-                <div className="font-black text-xl tracking-widest uppercase">GRIDWISE COPILOT</div>
+                <div className="font-black text-xl tracking-widest uppercase">PRVAAH X COPILOT</div>
               </div>
               
               <div className="space-y-4 text-sm">
@@ -526,7 +526,7 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
               AI IS ONLY AS GOOD AS THE DATA BEHIND IT.
             </h2>
             <p className="text-xl text-gray-600 font-medium">
-              GRIDWISE continuously checks the quality of the data feeding its predictions.
+              PRVAAH X continuously checks the quality of the data feeding its predictions.
             </p>
             <button 
               onClick={onOpenDataHealth}
@@ -574,14 +574,14 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
               onClick={() => onViewForecast?.("command-center")} 
               className="w-full sm:w-auto px-12 py-6 bg-[#FF7C1E] text-black font-black uppercase tracking-widest text-sm rounded-full hover:bg-orange-600 transition flex items-center justify-center space-x-3 cursor-pointer shadow-2xl"
             >
-              <span>EXPLORE GRIDWISE AI</span>
+              <span>EXPLORE PRVAAH X</span>
               <ArrowRight className="w-5 h-5" />
             </button>
           </div>
           
           <div className="pt-24 border-t border-gray-900 flex flex-col md:flex-row justify-between items-center gap-8 text-left">
             <div>
-              <div className="text-3xl font-black tracking-widest uppercase mb-4">GRIDWISE AI</div>
+              <div className="text-3xl font-black tracking-widest uppercase mb-4">PRVAAH X</div>
               <p className="text-gray-500 font-medium">Built for smarter grid decisions.</p>
             </div>
           </div>

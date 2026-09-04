@@ -1,5 +1,5 @@
 """
-Feature engineering pipeline for GRIDWISE AI electricity demand forecasting.
+Feature engineering pipeline for PRVAAH X electricity demand forecasting.
 Computes time features, cyclic features, strictly historical demand lags,
 historical rolling features, and multi-horizon tabular matrices.
 """

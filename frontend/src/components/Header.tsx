@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: "grid-risk", label: "Grid Risk", icon: ShieldAlert },
     { id: "geographic", label: "Geographic Intelligence", icon: Map },
     { id: "scenario-lab", label: "Scenario Lab", icon: Sliders },
-    { id: "copilot", label: "GridWise Copilot", icon: Bot },
+    { id: "copilot", label: "PRVAAH X Copilot", icon: Bot },
   ];
 
   return (
@@ -43,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div>
               <div className="flex items-center space-x-2">
                 <h1 className="text-lg font-bold text-white tracking-wider font-mono group-hover:text-amber-300">
-                  GRIDWISE AI
+                  PRVAAH X
                 </h1>
                 <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
                   Delhi Grid ● ONLINE

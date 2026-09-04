@@ -92,7 +92,7 @@ export default function Home() {
                   {activeTab === "grid-risk" && "Grid Risk Intelligence"}
                   {activeTab === "geographic" && "Geographic Intelligence"}
                   {activeTab === "scenario-lab" && "Interactive Scenario Lab"}
-                  {activeTab === "copilot" && "GridWise AI Copilot"}
+                  {activeTab === "copilot" && "PRVAAH X Copilot"}
                 </span>
               </div>
             </div>

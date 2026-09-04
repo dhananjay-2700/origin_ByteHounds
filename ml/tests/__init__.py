@@ -1,1 +1,1 @@
-"""Unit tests package for GRIDWISE AI ML foundation."""
+"""Unit tests package for PRVAAH X ML foundation."""

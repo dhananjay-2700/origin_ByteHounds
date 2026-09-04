@@ -1,5 +1,5 @@
 """
-GRIDWISE AI - Centralized Configuration System
+PRVAAH X - Centralized Configuration System
 Draft 1 ML Foundation
 """
 

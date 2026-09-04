@@ -1,6 +1,6 @@
-# GRIDWISE AI - Project Walkthrough
+# PRVAAH X - Project Walkthrough
 
-Welcome to the **GRIDWISE AI** repository! This project is a state-level electricity demand forecasting system engineered for the National Capital Territory of Delhi, India. 
+Welcome to the **PRVAAH X** repository! This project is a state-level electricity demand forecasting system engineered for the National Capital Territory of Delhi, India. 
 
 Here is a concise walkthrough of what we have built so far across the entire stack:
 
@@ -13,8 +13,8 @@ We established a robust machine learning pipeline designed to forecast the next 
 
 ## 2. Backend Service (`/backend`)
 We developed a scalable backend to serve our electricity demand forecasts to the user interface.
-* **Framework**: Built a REST API using **FastAPI** (`GRIDWISE AI MVP API`).
-* **Database**: Integrated a SQLite database (`gridwise.db`) via **SQLAlchemy** for storing and querying power demand data and model predictions.
+* **Framework**: Built a REST API using **FastAPI** (`PRVAAH X MVP API`).
+* **Database**: Integrated a SQLite database (`prvaah_x.db`) via **SQLAlchemy** for storing and querying power demand data and model predictions.
 * **ML Integration**: Created an `ml_service` module that loads the LightGBM model artifacts to serve real-time inference requests.
 
 ## 3. Frontend Application (`/frontend`)

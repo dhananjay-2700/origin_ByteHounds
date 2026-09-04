@@ -8,7 +8,7 @@ def test_root():
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
-    assert data["platform"] == "GRIDWISE AI"
+    assert data["platform"] == "PRVAAH X"
     assert "credentials_config_file" in data
 
 def test_health():

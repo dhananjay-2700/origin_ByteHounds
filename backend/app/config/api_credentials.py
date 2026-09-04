@@ -1,6 +1,6 @@
 """
 =============================================================================
-GRIDWISE AI — MODEL & SERVICE CONFIGURATION
+PRVAAH X — MODEL & SERVICE CONFIGURATION
 =============================================================================
 
 This file manages your custom in-house trained model endpoints, meteorological
@@ -69,7 +69,7 @@ CUSTOM_ALERT_WEBHOOK_URL: str = os.getenv("CUSTOM_ALERT_WEBHOOK_URL", "")
 # =============================================================================
 # 5. DATABASE CONFIGURATION
 # =============================================================================
-DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./gridwise.db")
+DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./prvaah_x.db")
 
 
 # =============================================================================

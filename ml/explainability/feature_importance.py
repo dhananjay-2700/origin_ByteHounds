@@ -1,5 +1,5 @@
 """
-Explainability module for GRIDWISE AI LightGBM model.
+Explainability module for PRVAAH X LightGBM model.
 Computes gain and split feature importances, saves feature_importance.csv,
 and provides optional SHAP explainability hooks with graceful fallback.
 """

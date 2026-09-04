@@ -1,5 +1,5 @@
 """
-Unit Tests for GRIDWISE AI ML Foundation (Draft 1)
+Unit Tests for PRVAAH X ML Foundation (Draft 1)
 Tests preprocessing, feature transformations, chronological splitting,
 leakage audit, and untrained model interfaces on tiny synthetic data.
 NO MODEL FITTING OR TRAINING IS EXECUTED.

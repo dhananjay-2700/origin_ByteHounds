@@ -1,5 +1,5 @@
 """
-LightGBM Model Architecture for GRIDWISE AI Draft 1.
+LightGBM Model Architecture for PRVAAH X Draft 1.
 Provides model creation factory, serialization interfaces, and inference wrapper.
 NOTE: In Draft 1 architecture foundation, models are created UNTRAINED.
 .fit() is intentionally NOT executed in this step.

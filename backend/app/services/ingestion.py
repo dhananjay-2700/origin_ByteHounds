@@ -11,7 +11,7 @@ from ..db.models import TelemetryLog, GridAlert
 from .sldc_collector import sldc_collector
 from .alert_service import dispatch_webhook_notification
 
-logger = logging.getLogger("gridwise.ingestion")
+logger = logging.getLogger("prvaah_x.ingestion")
 
 class LiveGridState:
     """Singleton maintaining real-time Delhi grid telemetry state."""
@@ -73,7 +73,7 @@ async def start_background_ingestion():
     4. Broadcasts real-time telemetry packets to connected WebSockets every 1 second.
     5. Dispatches alerts if grid safety margins are violated.
     """
-    logger.info("Starting GRIDWISE background telemetry, SLDC & weather worker...")
+    logger.info("Starting PRVAAH X background telemetry, SLDC & weather worker...")
     tick_counter = 0
 
     while True:

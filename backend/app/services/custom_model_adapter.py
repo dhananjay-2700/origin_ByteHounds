@@ -30,7 +30,7 @@ class CustomModelAdapter:
 
         live = get_live_metrics()
         system_context = (
-            f"You are GRIDWISE AI, the custom-trained electricity grid analyst for Delhi NCT. "
+            f"You are PRVAAH X, the custom-trained electricity grid analyst for Delhi NCT. "
             f"Live Context: Current Load={live.currentDemand} MW, Peak Projected={live.nextPeakDemand} MW, "
             f"Frequency={live.gridFrequency} Hz, Temp={live.ambientTemp}°C, Reserve={live.reserveMargin} MW."
         )

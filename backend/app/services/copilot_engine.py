@@ -65,7 +65,7 @@ def local_expert_response(query: str) -> CopilotResponse:
     else:
         text = (
             f"Telemetry analysis confirms the Delhi grid is currently operating at {live.currentDemand:,} MW "
-            f"with system frequency at {live.gridFrequency} Hz. Gridwise AI forecasts peak load to arrive at "
+            f"with system frequency at {live.gridFrequency} Hz. PRVAAH X forecasts peak load to arrive at "
             f"{live.peakTime} IST ({live.nextPeakDemand:,} MW). Active monitoring is deployed across 221 substations."
         )
         metrics = [

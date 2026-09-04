@@ -16,8 +16,8 @@ export const ForecastView: React.FC = () => {
     const fetchData = async () => {
       try {
         const [forecastRes, accuracyRes] = await Promise.all([
-          fetch("http://localhost:8000/api/forecast"),
-          fetch("http://localhost:8000/api/forecast/accuracy")
+          fetch("http://127.0.0.1:8000/api/forecast"),
+          fetch("http://127.0.0.1:8000/api/forecast/accuracy")
         ]);
         const forecastData = await forecastRes.json();
         const accuracyData = await accuracyRes.json();

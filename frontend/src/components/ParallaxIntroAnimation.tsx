@@ -184,7 +184,7 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
               textShadow: "0 0 60px rgba(34,211,238,0.45)",
             }}
           >
-            GRIDWISE AI
+            PRVAAH X
           </h1>
 
           <p className="mt-5 text-lg sm:text-2xl font-medium text-cyan-100 font-mono tracking-wide max-w-2xl mx-auto italic">

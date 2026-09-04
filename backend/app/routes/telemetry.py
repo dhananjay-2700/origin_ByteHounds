@@ -33,7 +33,7 @@ async def telemetry_websocket_stream(websocket: WebSocket):
         # Initial greeting packet
         await websocket.send_json({
             "type": "CONNECTION_ESTABLISHED",
-            "message": "Connected to GRIDWISE AI Live Telemetry Stream",
+            "message": "Connected to PRVAAH X Live Telemetry Stream",
             "initialDemandMW": grid_state.demand_mw,
             "initialFrequencyHz": grid_state.frequency_hz,
         })

@@ -1,7 +1,7 @@
-# GRIDWISE AI ML FOUNDATION — DRAFT 1
+# PRVAAH X ML FOUNDATION — DRAFT 1
 
 ## Overview
-**GRIDWISE AI** is a state-level electricity demand forecasting system engineered for the National Capital Territory of Delhi, India. 
+**PRVAAH X** is a state-level electricity demand forecasting system engineered for the National Capital Territory of Delhi, India. 
 
 This directory contains **Draft 1** of the machine learning system: a clean, lightweight, reproducible, and leakage-safe ML foundation designed to forecast the next **24 hours of electricity demand** in Megawatts (MW) using historical demand, aligned meteorological observations, and calendar patterns.
 

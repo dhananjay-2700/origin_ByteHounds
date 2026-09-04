@@ -67,7 +67,7 @@ app.include_router(system.router, prefix=settings.API_V1_STR)
 @app.get("/", tags=["Root"])
 def root():
     return {
-        "platform": "GRIDWISE AI",
+        "platform": "PRVAAH X",
         "descriptor": "Delhi Grid Intelligence Engine",
         "status": "online",
         "version": settings.VERSION,
@@ -80,7 +80,7 @@ def root():
 
 @app.get("/api/health", tags=["Health"])
 def health_check():
-    return {"status": "ok", "service": "gridwise-production-backend"}
+    return {"status": "ok", "service": "prvaah-x-production-backend"}
 
 @app.get("/api/credentials/status", tags=["Configuration"])
 def get_credentials_status():

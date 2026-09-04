@@ -1,5 +1,5 @@
 """
-Peak demand forecasting evaluation module for GRIDWISE AI.
+Peak demand forecasting evaluation module for PRVAAH X.
 Evaluates daily 24-hour peak demand magnitude and peak timing accuracy.
 """
 

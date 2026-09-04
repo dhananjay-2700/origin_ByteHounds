@@ -1,5 +1,5 @@
 """
-GRIDWISE AI - 24-Hour Electricity Demand Forecasting Inference Interface
+PRVAAH X - 24-Hour Electricity Demand Forecasting Inference Interface
 Draft 1 Foundation
 
 Provides the production inference pipeline for 24-hour ahead multi-horizon demand forecasting.

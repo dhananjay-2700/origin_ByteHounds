@@ -1,5 +1,5 @@
 """
-Data validation and leakage audit module for GRIDWISE AI.
+Data validation and leakage audit module for PRVAAH X.
 Enforces strict chronological checks, gap validations, and data leakage audits.
 """
 

@@ -1,5 +1,5 @@
 """
-Evaluation metrics computation for GRIDWISE AI electricity demand forecasting.
+Evaluation metrics computation for PRVAAH X electricity demand forecasting.
 Calculates MAE, RMSE, WAPE, and MAPE overall and per horizon (1..24).
 """
 
