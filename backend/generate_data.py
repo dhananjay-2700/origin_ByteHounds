@@ -18,7 +18,7 @@ def generate_mock_data():
     end_date = datetime(2026, 9, 4, 23, 0)
     start_date = end_date - timedelta(days=90)
     
-    dates = pd.date_range(start=start_date, end=end_date, freq='H')
+    dates = pd.date_range(start=start_date, end=end_date, freq='h')
     n_samples = len(dates)
     
     areas = ['North', 'South', 'East', 'West']
@@ -114,7 +114,7 @@ def train_model_and_populate_db():
     print("Evaluating model...")
     y_pred = model.predict(X_test)
     mae = mean_absolute_error(y_test, y_pred)
-    rmse = mean_squared_error(y_test, y_pred, squared=False)
+    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
     mape = mean_absolute_percentage_error(y_test, y_pred)
     print(f"MAE: {mae:.2f}, RMSE: {rmse:.2f}, MAPE: {mape:.2f}")
     

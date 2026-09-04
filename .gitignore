@@ -1,0 +1,23 @@
+# ByteCode / Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment
+venv/
+env/
+ENV/
+.env
+
+# Node
+node_modules/
+.next/
+dist/
+out/
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
