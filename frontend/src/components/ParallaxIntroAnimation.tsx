@@ -22,7 +22,7 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
   const [displayProgress, setDisplayProgress] = useState<number>(0);
   const [isSkipped, setIsSkipped] = useState<boolean>(false);
 
-  const TOTAL_FRAMES = 91;
+  const TOTAL_FRAMES = 301;
 
   // ─── Preload all frames ───────────────────────────────────────────────
   useEffect(() => {
@@ -99,11 +99,11 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
       const p = scrollCurrentRef.current;
       setDisplayProgress(p);
 
-      // Photo sequence: progress 0.0 → 0.52 maps to frames 0 → 90
-      const photoP = Math.min(1, p / 0.52);
+      // Photo sequence: progress 0.0 → 0.62 maps to frames 0 → 300
+      const photoP = Math.min(1, p / 0.62);
       const frameIdx = photoP * (TOTAL_FRAMES - 1);
 
-      if (p < 0.56) {
+      if (p < 0.68) {
         drawFrame(frameIdx);
       }
 
@@ -121,22 +121,22 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
 
   if (isSkipped) return null;
 
-  // Canvas opacity: fully visible 0–0.44, fades to 0 by 0.56
-  const canvasOpacity = displayProgress < 0.44
+  // Canvas opacity: fully visible 0–0.56, fades to 0 by 0.68
+  const canvasOpacity = displayProgress < 0.56
     ? 1
-    : Math.max(0, 1 - (displayProgress - 0.44) / 0.12);
+    : Math.max(0, 1 - (displayProgress - 0.56) / 0.12);
 
-  // Title: fades in 0.58–0.78
-  const titleP   = Math.max(0, Math.min(1, (displayProgress - 0.58) / 0.20));
+  // Title: fades in 0.72–0.88
+  const titleP   = Math.max(0, Math.min(1, (displayProgress - 0.72) / 0.16));
   const titleBlur = (1 - titleP) * 14;
 
-  // Parallax exit: 0.86–1.0
-  const exitOffset = displayProgress > 0.86
-    ? ((displayProgress - 0.86) / 0.14) * 100
+  // Parallax exit: 0.92–1.0
+  const exitOffset = displayProgress > 0.92
+    ? ((displayProgress - 0.92) / 0.08) * 100
     : 0;
 
   return (
-    <div ref={containerRef} className="relative w-full h-[950vh] bg-[#090d16]">
+    <div ref={containerRef} className="relative w-full h-[1400vh] bg-[#090d16]">
       <div
         className="sticky top-0 w-full h-screen overflow-hidden bg-[#090d16]"
         style={{
@@ -202,7 +202,7 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
         {/* ── Scroll hint ── */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-2 animate-bounce pointer-events-none">
           <span className="tracking-widest uppercase text-[10px] font-bold font-mono text-cyan-400">
-            {displayProgress < 0.50 ? "Scroll" : displayProgress < 0.82 ? "Keep scrolling" : "Entering…"}
+            {displayProgress < 0.60 ? "Scroll to play" : displayProgress < 0.88 ? "Keep scrolling" : "Entering…"}
           </span>
           <ChevronDown className="w-5 h-5 text-cyan-400" />
         </div>
