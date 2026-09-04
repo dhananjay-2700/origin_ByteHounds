@@ -276,3 +276,15 @@ def run_copilot(req: schemas.CopilotRequest):
     res = ml_service.process_copilot_query(req.query)
     return schemas.CopilotResponse(**res)
 
+@app.post("/api/waitlist", response_model=schemas.WaitlistResponse)
+def join_waitlist(req: schemas.WaitlistCreate, db: Session = Depends(get_db)):
+    db_waitlist = models.Waitlist(email=req.email)
+    db.add(db_waitlist)
+    try:
+        db.commit()
+        db.refresh(db_waitlist)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Email already registered")
+    return db_waitlist
+

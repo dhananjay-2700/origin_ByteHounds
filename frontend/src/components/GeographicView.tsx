@@ -1,89 +1,87 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Map, MapPin, AlertCircle, ChevronRight, Info } from "lucide-react";
+import { ScrollReveal } from "./ScrollLayout";
 
 export const GeographicView: React.FC = () => {
   const [selectedAreaId, setSelectedAreaId] = useState<string>("South Delhi");
 
-  const areas = [
-    {
-      id: "South Delhi",
-      rank: 1,
-      score: 86,
-      status: "CRITICAL",
-      badgeColor: "bg-rose-500 text-white font-bold",
-      borderColor: "border-rose-500",
-      demand: "2,140 MW",
-      capacity: "2,280 MW",
-      utilization: "94.0%",
-      driver: "Extreme Temperature",
-      window: "14:30 – 16:00",
-      feeders: [
-        { id: "SD-Feeder-1", current: "710 MW", forecast: "810 MW", cap: "850 MW", risk: "CRITICAL" },
-        { id: "SD-Feeder-2", current: "650 MW", forecast: "740 MW", cap: "780 MW", risk: "HIGH" },
-        { id: "SD-Feeder-3", current: "520 MW", forecast: "590 MW", cap: "650 MW", risk: "HIGH" },
-      ]
-    },
-    {
-      id: "North Delhi",
-      rank: 2,
-      score: 78,
-      status: "HIGH",
-      badgeColor: "bg-amber-500 text-black font-bold",
-      borderColor: "border-amber-500",
-      demand: "1,720 MW",
-      capacity: "1,950 MW",
-      utilization: "88.2%",
-      driver: "Baseline Ramp",
-      window: "14:15 – 15:45",
-      feeders: [
-        { id: "ND-Feeder-1", current: "810 MW", forecast: "910 MW", cap: "1,000 MW", risk: "HIGH" },
-        { id: "ND-Feeder-2", current: "710 MW", forecast: "810 MW", cap: "950 MW", risk: "WATCH" },
-      ]
-    },
-    {
-      id: "West Delhi",
-      rank: 3,
-      score: 64,
-      status: "HIGH",
-      badgeColor: "bg-yellow-500 text-black font-bold",
-      borderColor: "border-yellow-500",
-      demand: "1,480 MW",
-      capacity: "1,750 MW",
-      utilization: "84.5%",
-      driver: "Diurnal Peak",
-      window: "14:45 – 16:15",
-      feeders: [
-        { id: "WD-Feeder-1", current: "680 MW", forecast: "760 MW", cap: "900 MW", risk: "WATCH" },
-        { id: "WD-Feeder-2", current: "630 MW", forecast: "720 MW", cap: "850 MW", risk: "WATCH" },
-      ]
-    },
-    {
-      id: "East Delhi",
-      rank: 4,
-      score: 51,
-      status: "MODERATE",
-      badgeColor: "bg-emerald-500 text-black font-bold",
-      borderColor: "border-emerald-500",
-      demand: "1,280 MW",
-      capacity: "1,600 MW",
-      utilization: "80.0%",
-      driver: "Humidity Load",
-      window: "15:00 – 16:30",
-      feeders: [
-        { id: "ED-Feeder-1", current: "610 MW", forecast: "660 MW", cap: "800 MW", risk: "NORMAL" },
-        { id: "ED-Feeder-2", current: "570 MW", forecast: "620 MW", cap: "800 MW", risk: "NORMAL" },
-      ]
-    },
-  ];
+  const [areas, setAreas] = useState<any[]>([]);
+  const [activeArea, setActiveArea] = useState<any>(null);
 
-  const activeArea = areas.find((a) => a.id === selectedAreaId) || areas[0];
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/areas");
+        const data = await res.json();
+        const formattedAreas = data.map((a: any, idx: number) => ({
+          id: a.id,
+          name: a.name,
+          rank: idx + 1,
+          score: a.risk_score,
+          status: a.risk_level,
+          badgeColor: a.risk_level === "CRITICAL" ? "bg-white text-black font-bold" : 
+                     a.risk_level === "HIGH" ? "bg-gray-300 text-black font-bold" :
+                     a.risk_level === "MODERATE" ? "bg-gray-500 text-white font-bold" : "bg-gray-700 text-white font-bold",
+          borderColor: a.risk_level === "CRITICAL" ? "border-white" :
+                      a.risk_level === "HIGH" ? "border-gray-300" :
+                      a.risk_level === "MODERATE" ? "border-gray-500" : "border-gray-700",
+          demand: `${a.predicted_load.toLocaleString()} MW`,
+          capacity: `${a.capacity.toLocaleString()} MW`,
+          utilization: `${a.utilization}%`,
+          driver: a.main_driver,
+          window: a.critical_window,
+          feeders: []
+        }));
+        setAreas(formattedAreas);
+        if (formattedAreas.length > 0) {
+          fetchAreaDetail(formattedAreas[0].id);
+        }
+      } catch (err) {
+        console.error("Failed to fetch areas", err);
+      }
+    };
+    fetchAreas();
+  }, []);
+
+  const fetchAreaDetail = async (id: string) => {
+    setSelectedAreaId(id);
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/areas/${id}`);
+      const data = await res.json();
+      setActiveArea({
+        id: data.id,
+        name: data.name,
+        score: data.risk_score,
+        status: data.risk_level,
+        badgeColor: data.risk_level === "CRITICAL" ? "bg-white text-black font-bold" : 
+                   data.risk_level === "HIGH" ? "bg-gray-300 text-black font-bold" :
+                   data.risk_level === "MODERATE" ? "bg-gray-500 text-white font-bold" : "bg-gray-700 text-white font-bold",
+        demand: `${data.predicted_load.toLocaleString()} MW`,
+        capacity: `${data.capacity.toLocaleString()} MW`,
+        utilization: `${data.utilization}%`,
+        driver: data.main_driver,
+        window: data.critical_window,
+        feeders: data.feeders.map((f: any) => ({
+          name: f.name,
+          current: `${f.current_load} MW`,
+          cap: `${f.capacity} MW`,
+          status: f.status,
+          statusColor: f.status === "CRITICAL" ? "text-white font-bold" : 
+                      f.status === "WARNING" ? "text-gray-300" : "text-gray-500"
+        }))
+      });
+    } catch (err) {
+      console.error("Failed to fetch area detail", err);
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* Top Banner with Disclaimer */}
-      <div className="control-card p-6 border border-gray-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <ScrollReveal delay={100} direction="up">
+        <div className="control-card p-6 border border-gray-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-cyan-400 text-xs font-mono font-bold uppercase mb-1">
             <Map className="w-4 h-4" />
@@ -98,10 +96,12 @@ export const GeographicView: React.FC = () => {
           <Info className="w-4 h-4 text-amber-400 shrink-0" />
           <span className="font-semibold">“Modeled / simulated area intelligence”</span>
         </div>
-      </div>
+        </div>
+      </ScrollReveal>
 
       {/* Map & Ranking Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <ScrollReveal delay={200} direction="up">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* DELHI MAP VISUALIZATION (7 cols) */}
         <div className="lg:col-span-7 control-card p-6 border border-gray-800 relative flex flex-col justify-between min-h-[420px]">
@@ -111,46 +111,52 @@ export const GeographicView: React.FC = () => {
           </div>
 
           {/* Interactive SVG Regional Diagram */}
-          <div className="relative w-full h-72 bg-gray-900/60 rounded-xl border border-gray-800 flex items-center justify-center p-4">
-            <svg viewBox="0 0 500 350" className="w-full h-full max-h-72">
-              {/* North Delhi */}
-              <g
-                onClick={() => setSelectedAreaId("North Delhi")}
-                className={`cursor-pointer transition-all ${selectedAreaId === "North Delhi" ? "opacity-100 scale-105" : "opacity-80 hover:opacity-100"}`}
-              >
-                <polygon points="180,30 320,30 360,130 220,130" fill="#f59e0b" fillOpacity="0.25" stroke="#f59e0b" strokeWidth="2" />
-                <text x="260" y="70" fill="#ffffff" fontSize="13" fontWeight="bold" textAnchor="middle">North Delhi</text>
-                <text x="260" y="90" fill="#f59e0b" fontSize="11" fontWeight="bold" textAnchor="middle">78 HIGH</text>
+          <div className="relative w-full h-[350px] bg-black rounded-2xl overflow-hidden border border-gray-800">
+            {/* Real Interactive Map of Delhi with Dark Mode Filter */}
+            <iframe 
+              width="100%" 
+              height="100%" 
+              frameBorder="0" 
+              scrolling="no" 
+              marginHeight={0} 
+              marginWidth={0} 
+              src="https://www.openstreetmap.org/export/embed.html?bbox=76.84,28.40,77.34,28.88&amp;layer=mapnik" 
+              style={{ border: 0, filter: 'invert(100%) hue-rotate(180deg) brightness(85%) contrast(110%) opacity(0.8)' }}
+              className="absolute inset-0 pointer-events-none"
+            ></iframe>
+            
+            {/* Interactive Data Overlay */}
+            <svg viewBox="0 0 800 350" className="absolute inset-0 w-full h-full drop-shadow-2xl z-10">
+              {/* North Delhi Marker */}
+              <g onClick={() => fetchAreaDetail("North Delhi")} className="cursor-pointer group transition-all duration-300">
+                <circle cx="450" cy="80" r="25" className={`transition-colors duration-500 ${selectedAreaId === "North Delhi" ? 'fill-gray-100' : 'fill-gray-900'} hover:fill-white`} />
+                <circle cx="450" cy="80" r="6" className="fill-black" />
+                <text x="450" y="125" fill="white" className="text-sm font-bold font-sans pointer-events-none drop-shadow-md" textAnchor="middle">North Delhi</text>
+                <text x="450" y="140" fill="#ccc" className="text-[10px] font-bold font-mono pointer-events-none drop-shadow-md" textAnchor="middle">78 HIGH</text>
               </g>
 
-              {/* West Delhi */}
-              <g
-                onClick={() => setSelectedAreaId("West Delhi")}
-                className={`cursor-pointer transition-all ${selectedAreaId === "West Delhi" ? "opacity-100 scale-105" : "opacity-80 hover:opacity-100"}`}
-              >
-                <polygon points="50,110 210,130 210,250 80,240" fill="#eab308" fillOpacity="0.2" stroke="#eab308" strokeWidth="2" />
-                <text x="140" y="170" fill="#ffffff" fontSize="13" fontWeight="bold" textAnchor="middle">West Delhi</text>
-                <text x="140" y="190" fill="#eab308" fontSize="11" fontWeight="bold" textAnchor="middle">64 HIGH</text>
+              {/* South Delhi Marker */}
+              <g onClick={() => fetchAreaDetail("South Delhi")} className="cursor-pointer group transition-all duration-300">
+                <circle cx="430" cy="280" r="25" className={`transition-colors duration-500 ${selectedAreaId === "South Delhi" ? 'fill-white' : 'fill-gray-900'} hover:fill-gray-200`} />
+                <circle cx="430" cy="280" r="6" className="fill-black animate-pulse" />
+                <text x="430" y="325" fill="white" className="text-sm font-bold font-sans pointer-events-none drop-shadow-md" textAnchor="middle">South Delhi</text>
+                <text x="430" y="340" fill="#fff" className="text-[10px] font-bold font-mono pointer-events-none drop-shadow-md" textAnchor="middle">86 CRITICAL</text>
               </g>
 
-              {/* East Delhi */}
-              <g
-                onClick={() => setSelectedAreaId("East Delhi")}
-                className={`cursor-pointer transition-all ${selectedAreaId === "East Delhi" ? "opacity-100 scale-105" : "opacity-80 hover:opacity-100"}`}
-              >
-                <polygon points="370,110 460,110 440,230 350,220" fill="#10b981" fillOpacity="0.2" stroke="#10b981" strokeWidth="2" />
-                <text x="405" y="160" fill="#ffffff" fontSize="13" fontWeight="bold" textAnchor="middle">East Delhi</text>
-                <text x="405" y="180" fill="#10b981" fontSize="11" fontWeight="bold" textAnchor="middle">51 MOD</text>
+              {/* East Delhi Marker */}
+              <g onClick={() => fetchAreaDetail("East Delhi")} className="cursor-pointer group transition-all duration-300">
+                <circle cx="600" cy="200" r="25" className={`transition-colors duration-500 ${selectedAreaId === "East Delhi" ? 'fill-gray-100' : 'fill-gray-900'} hover:fill-white`} />
+                <circle cx="600" cy="200" r="6" className="fill-black" />
+                <text x="600" y="245" fill="white" className="text-sm font-bold font-sans pointer-events-none drop-shadow-md" textAnchor="middle">East Delhi</text>
+                <text x="600" y="260" fill="#ccc" className="text-[10px] font-bold font-mono pointer-events-none drop-shadow-md" textAnchor="middle">51 MOD</text>
               </g>
 
-              {/* South Delhi */}
-              <g
-                onClick={() => setSelectedAreaId("South Delhi")}
-                className={`cursor-pointer transition-all ${selectedAreaId === "South Delhi" ? "opacity-100 scale-105" : "opacity-80 hover:opacity-100"}`}
-              >
-                <polygon points="220,145 340,140 340,320 200,310" fill="#f43f5e" fillOpacity="0.3" stroke="#f43f5e" strokeWidth="3" />
-                <text x="270" y="210" fill="#ffffff" fontSize="14" fontWeight="bold" textAnchor="middle">South Delhi</text>
-                <text x="270" y="230" fill="#f43f5e" fontSize="12" fontWeight="bold" textAnchor="middle">🔴 86 CRITICAL</text>
+              {/* West Delhi Marker */}
+              <g onClick={() => fetchAreaDetail("West Delhi")} className="cursor-pointer group transition-all duration-300">
+                <circle cx="280" cy="180" r="25" className={`transition-colors duration-500 ${selectedAreaId === "West Delhi" ? 'fill-gray-100' : 'fill-gray-900'} hover:fill-white`} />
+                <circle cx="280" cy="180" r="6" className="fill-black" />
+                <text x="280" y="225" fill="white" className="text-sm font-bold font-sans pointer-events-none drop-shadow-md" textAnchor="middle">West Delhi</text>
+                <text x="280" y="240" fill="#ccc" className="text-[10px] font-bold font-mono pointer-events-none drop-shadow-md" textAnchor="middle">64 HIGH</text>
               </g>
             </svg>
           </div>
@@ -158,92 +164,94 @@ export const GeographicView: React.FC = () => {
           {/* Area Ranking List */}
           <div className="mt-4 pt-4 border-t border-gray-800">
             <span className="text-xs font-mono text-gray-400 uppercase mb-2 block">AREA RISK RANKING</span>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {areas.map((a) => (
-                <button
-                  key={a.id}
-                  onClick={() => setSelectedAreaId(a.id)}
-                  className={`p-2 rounded-lg border text-left text-xs transition ${
-                    selectedAreaId === a.id
-                      ? "bg-gray-800 border-cyan-400 text-white"
-                      : "bg-gray-900/60 border-gray-800 text-gray-300 hover:bg-gray-800/50"
-                  }`}
-                >
-                  <div className="flex justify-between font-mono">
-                    <span>{a.rank}. {a.id.split(" ")[0]}</span>
-                    <span className="font-bold">{a.score}</span>
-                  </div>
-                  <div className="text-[10px] text-gray-400 mt-0.5">{a.status}</div>
-                </button>
-              ))}
-            </div>
+              <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
+                {areas.map((a) => (
+                  <button
+                    key={a.id}
+                    onClick={() => fetchAreaDetail(a.id)}
+                    className={`shrink-0 snap-start control-card p-4 border w-40 text-left transition-all ${selectedAreaId === a.id ? 'border-white bg-gray-900' : 'border-gray-800 bg-black hover:border-gray-600 hover:bg-gray-900'}`}
+                  >
+                    <div className="flex items-center space-x-2 mb-2 text-xs text-gray-500 font-mono">
+                      <span>{a.rank}.</span>
+                      <span className="truncate">{a.name.split(" ")[0]}</span>
+                    </div>
+                    <div className="text-2xl font-extrabold text-white font-mono">{a.score}</div>
+                    <div className="text-[10px] uppercase text-gray-400 mt-1">{a.status}</div>
+                  </button>
+                ))}
+              </div>
           </div>
         </div>
 
         {/* SELECTED AREA DETAIL DRAWER (5 cols) */}
         <div className="lg:col-span-5 control-card p-6 border border-gray-800 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
-              <div>
-                <h2 className="text-lg font-bold text-white font-mono">{activeArea.id}</h2>
-                <span className="text-xs text-gray-400">Detailed Regional Telemetry</span>
-              </div>
-              <span className={`px-2.5 py-1 rounded text-xs ${activeArea.badgeColor}`}>
-                {activeArea.score} / 100 {activeArea.status}
-              </span>
-            </div>
-
-            <div className="space-y-3 font-mono text-xs mb-6">
-              <div className="flex justify-between p-2.5 bg-gray-900/60 rounded border border-gray-800">
-                <span className="text-gray-400">Forecast Demand:</span>
-                <span className="text-white font-bold">{activeArea.demand}</span>
-              </div>
-              <div className="flex justify-between p-2.5 bg-gray-900/60 rounded border border-gray-800">
-                <span className="text-gray-400">Grid Capacity:</span>
-                <span className="text-gray-300 font-bold">{activeArea.capacity}</span>
-              </div>
-              <div className="flex justify-between p-2.5 bg-gray-900/60 rounded border border-gray-800">
-                <span className="text-gray-400">Utilization Rate:</span>
-                <span className="text-amber-400 font-bold">{activeArea.utilization}</span>
-              </div>
-              <div className="flex justify-between p-2.5 bg-gray-900/60 rounded border border-gray-800">
-                <span className="text-gray-400">Main Risk Driver:</span>
-                <span className="text-cyan-400 font-bold">{activeArea.driver}</span>
-              </div>
-              <div className="flex justify-between p-2.5 bg-gray-900/60 rounded border border-gray-800">
-                <span className="text-gray-400">Critical Window:</span>
-                <span className="text-rose-400 font-bold">{activeArea.window}</span>
-              </div>
-            </div>
-
-            {/* Feeder Breakdown */}
+          {activeArea && (
             <div>
-              <span className="text-xs font-mono text-gray-300 uppercase block mb-2 font-bold">
-                SUB-FEEDER TELEMETRY BREAKDOWN
-              </span>
-              <div className="space-y-2">
-                {activeArea.feeders.map((f) => (
-                  <div key={f.id} className="p-2.5 bg-gray-900/90 rounded border border-gray-800 flex items-center justify-between text-xs font-mono">
-                    <div>
-                      <span className="text-gray-200 font-bold">{f.id}</span>
-                      <div className="text-[10px] text-gray-400">Curr: {f.current} | Cap: {f.cap}</div>
+              <div className="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
+                <div>
+                  <h2 className="text-lg font-bold text-white font-mono">{activeArea.id}</h2>
+                  <span className="text-xs text-gray-400">Detailed Regional Telemetry</span>
+                </div>
+                <span className={`px-2.5 py-1 rounded text-xs ${activeArea.badgeColor}`}>
+                  {activeArea.score} / 100 {activeArea.status}
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between border-b border-gray-800 pb-2">
+                  <span className="text-gray-500 font-mono text-xs">Forecast Demand:</span>
+                  <span className="text-white font-mono text-sm font-bold">{activeArea.demand}</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-800 pb-2">
+                  <span className="text-gray-500 font-mono text-xs">Grid Capacity:</span>
+                  <span className="text-white font-mono text-sm font-bold">{activeArea.capacity}</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-800 pb-2">
+                  <span className="text-gray-500 font-mono text-xs">Utilization Rate:</span>
+                  <span className="text-white font-mono text-sm font-bold">{activeArea.utilization}</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-800 pb-2">
+                  <span className="text-gray-500 font-mono text-xs">Main Risk Driver:</span>
+                  <span className="text-white font-mono text-sm font-bold">{activeArea.driver}</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-800 pb-2">
+                  <span className="text-gray-500 font-mono text-xs">Critical Window:</span>
+                  <span className="text-white font-mono text-sm font-bold">{activeArea.window}</span>
+                </div>
+              </div>
+
+              {/* Feeder Breakdown */}
+              <div className="mt-6">
+                <span className="text-xs font-mono text-gray-300 uppercase block mb-2 font-bold">
+                  SUB-FEEDER TELEMETRY BREAKDOWN
+                </span>
+                <div className="space-y-3">
+                  {activeArea.feeders.map((f: any, i: number) => (
+                    <div key={i} className="flex justify-between items-center p-3 bg-black border border-gray-800 rounded">
+                      <div>
+                        <div className="text-white font-bold font-mono text-sm">{f.name}</div>
+                        <div className="text-[10px] text-gray-500 font-mono mt-0.5">
+                          Curr: {f.current} | Cap: {f.cap}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-white font-bold font-mono text-xs mb-0.5">{f.current}</div>
+                        <div className={`text-[10px] font-bold font-mono uppercase tracking-widest ${f.statusColor}`}>{f.status}</div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className="text-amber-300 font-bold">{f.forecast}</span>
-                      <div className="text-[10px] text-rose-400">{f.risk}</div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="mt-6 pt-3 border-t border-gray-800 text-[11px] text-gray-400 text-center italic font-mono">
             “Modeled / simulated area intelligence”
           </div>
         </div>
 
-      </div>
+        </div>
+      </ScrollReveal>
     </div>
   );
 };

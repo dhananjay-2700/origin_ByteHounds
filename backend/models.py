@@ -64,3 +64,9 @@ class Alert(Base):
     capacity = Column(Float)
     risk_level = Column(String)
 
+class Waitlist(Base):
+    __tablename__ = "waitlist"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+

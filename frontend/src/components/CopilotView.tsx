@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Bot, Send, Terminal, Sparkles, User } from "lucide-react";
+import { ScrollReveal } from "./ScrollLayout";
 
 interface Message {
   id: string;
@@ -117,17 +118,20 @@ export const CopilotView: React.FC = () => {
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header */}
-      <div className="control-card p-6 border border-gray-800">
+      <ScrollReveal delay={100} direction="up">
+        <div className="control-card p-6 border border-gray-800">
         <div className="flex items-center space-x-2 text-cyan-400 text-xs font-mono font-bold uppercase mb-1">
           <Bot className="w-4 h-4" />
           <span>GROUNDED AI ASSISTANT</span>
         </div>
         <h1 className="text-xl font-bold text-white font-mono">GRIDWISE COPILOT</h1>
         <p className="text-xs text-gray-400">Natural-language tool runner grounded directly in backend forecast & risk services</p>
-      </div>
+        </div>
+      </ScrollReveal>
 
       {/* Chat Container */}
-      <div className="control-card p-6 border border-gray-800 flex flex-col h-[520px]">
+      <ScrollReveal delay={200} direction="up">
+        <div className="control-card p-6 border border-gray-800 flex flex-col h-[520px]">
         {/* Messages Scroll Area */}
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">
           {messages.map((m) => (
@@ -196,8 +200,9 @@ export const CopilotView: React.FC = () => {
             <Send className="w-3.5 h-3.5" />
             <span>ASK</span>
           </button>
+          </div>
         </div>
-      </div>
+      </ScrollReveal>
     </div>
   );
 };

@@ -7,6 +7,7 @@ interface HeaderProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onOpenDataHealth: () => void;
+  onBackToHome?: () => void;
   dataHealthScore?: number;
 }
 
@@ -14,6 +15,7 @@ export const Header: React.FC<HeaderProps> = ({
   activeTab,
   setActiveTab,
   onOpenDataHealth,
+  onBackToHome,
   dataHealthScore = 94,
 }) => {
   const tabs = [
@@ -26,25 +28,28 @@ export const Header: React.FC<HeaderProps> = ({
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-[#090d16]/90 backdrop-blur-md border-b border-gray-800/80 px-4 lg:px-8 py-3">
+    <header className="sticky top-0 z-40 bg-black/95 backdrop-blur-md border-b border-gray-800/80 px-4 lg:px-8 py-3">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         
         {/* Brand Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-400">
+          <div 
+            onClick={onBackToHome}
+            className="flex items-center space-x-3 cursor-pointer group hover:opacity-90 transition"
+          >
+            <div className="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-400 group-hover:border-amber-500/60">
               <Zap className="w-5 h-5 fill-amber-400/20" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h1 className="text-lg font-bold text-white tracking-wider font-mono">
+                <h1 className="text-lg font-bold text-white tracking-wider font-mono group-hover:text-amber-300">
                   GRIDWISE AI
                 </h1>
                 <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
                   Delhi Grid ● ONLINE
                 </span>
               </div>
-              <p className="text-xs text-gray-400">AI-powered Demand & Risk Intelligence</p>
+              <p className="text-xs text-gray-400 group-hover:text-gray-200 transition">← Back to Home Landing</p>
             </div>
           </div>
 

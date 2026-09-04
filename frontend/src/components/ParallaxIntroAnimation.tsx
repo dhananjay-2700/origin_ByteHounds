@@ -114,6 +114,13 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // Trigger completion when progress reaches end
+  useEffect(() => {
+    if (displayProgress >= 0.95 && onComplete) {
+      onComplete();
+    }
+  }, [displayProgress, onComplete]);
+
   const handleSkip = () => {
     setIsSkipped(true);
     if (onComplete) onComplete();
@@ -136,9 +143,9 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
     : 0;
 
   return (
-    <div ref={containerRef} className="relative w-full h-[1400vh] bg-[#090d16]">
+    <div ref={containerRef} className="relative w-full h-[1400vh] bg-black">
       <div
-        className="sticky top-0 w-full h-screen overflow-hidden bg-[#090d16]"
+        className="sticky top-0 w-full h-screen overflow-hidden bg-black"
         style={{
           transform: `translateY(-${exitOffset}%)`,
           willChange: "transform",

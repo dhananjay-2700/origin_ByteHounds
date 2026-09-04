@@ -1,42 +1,80 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ShieldAlert, AlertTriangle, Clock, Activity, Zap } from "lucide-react";
+import { ScrollReveal } from "./ScrollLayout";
 
 export const GridRiskView: React.FC = () => {
-  const riskContributors = [
-    { name: "Demand Utilization", value: 88, color: "bg-rose-500" },
-    { name: "Weather Stress", value: 74, color: "bg-amber-500" },
-    { name: "Demand Ramp Rate", value: 62, color: "bg-yellow-500" },
-    { name: "Residual Anomaly", value: 41, color: "bg-cyan-500" },
-    { name: "Forecast Uncertainty", value: 28, color: "bg-purple-500" },
+  const [riskData, setRiskData] = useState<any>(null);
+  const [anomalies, setAnomalies] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [riskRes, anomalyRes] = await Promise.all([
+          fetch("http://127.0.0.1:8000/api/risk"),
+          fetch("http://127.0.0.1:8000/api/anomalies")
+        ]);
+        const riskJson = await riskRes.json();
+        const anomalyJson = await anomalyRes.json();
+        setRiskData(riskJson);
+        setAnomalies(anomalyJson);
+      } catch (err) {
+        console.error("Failed to fetch risk data", err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const riskContributors = riskData?.contributors || [
+    { name: "Demand Utilization", weight: 88, color: "bg-rose-500" },
+    { name: "Weather Stress", weight: 74, color: "bg-amber-500" },
+    { name: "Demand Ramp Rate", weight: 62, color: "bg-yellow-500" },
+    { name: "Residual Anomaly", weight: 41, color: "bg-cyan-500" },
+    { name: "Forecast Uncertainty", weight: 28, color: "bg-purple-500" },
   ];
 
-  const timeline = [
-    { time: "10:00", score: 38, level: "LOW", badge: "bg-emerald-950 text-emerald-400 border-emerald-500/30" },
-    { time: "12:00", score: 62, level: "MODERATE", badge: "bg-amber-950 text-amber-400 border-amber-500/30" },
-    { time: "14:00", score: 79, level: "HIGH", badge: "bg-rose-950 text-rose-300 border-rose-500/30" },
-    { time: "15:00", score: 91, level: "CRITICAL", badge: "bg-rose-600 text-white font-bold animate-pulse" },
-    { time: "16:00", score: 82, level: "HIGH", badge: "bg-rose-950 text-rose-300 border-rose-500/30" },
-    { time: "18:00", score: 58, level: "MODERATE", badge: "bg-amber-950 text-amber-400 border-amber-500/30" },
+  const timeline = riskData?.timeline || [
+    { time: "10:00", risk_score: 38, risk_level: "LOW" },
+    { time: "12:00", risk_score: 62, risk_level: "MODERATE" },
+    { time: "14:00", risk_score: 79, risk_level: "HIGH" },
+    { time: "15:00", risk_score: 91, risk_level: "CRITICAL" },
+    { time: "16:00", risk_score: 82, risk_level: "HIGH" },
+    { time: "18:00", risk_score: 58, risk_level: "MODERATE" },
   ];
+
+  const getBadgeClass = (level: string) => {
+    switch (level) {
+      case "CRITICAL": return "bg-white text-black font-bold";
+      case "HIGH": return "bg-gray-900 text-white border-gray-600";
+      case "MODERATE": return "bg-gray-900 text-gray-300 border-gray-700";
+      case "LOW": return "bg-gray-950 text-gray-500 border-gray-800";
+      default: return "bg-black text-gray-500 border-gray-800";
+    }
+  };
+
+  const getContributorColor = (index: number) => {
+    const colors = ["bg-white", "bg-gray-300", "bg-gray-500", "bg-gray-700", "bg-gray-800"];
+    return colors[index % colors.length];
+  };
 
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* 1. HERO RISK SCORE DIAL / CARD */}
-      <div className="control-card p-6 border-l-4 border-l-rose-500 flex flex-col md:flex-row items-center justify-between gap-6 bg-gradient-to-r from-rose-950/30 via-gray-900 to-gray-900">
+      <ScrollReveal delay={100} direction="left">
+        <div className="control-card p-6 border-l-4 border-l-white flex flex-col md:flex-row items-center justify-between gap-6 bg-black">
         <div className="flex items-center space-x-6">
-          <div className="relative flex items-center justify-center w-28 h-28 rounded-full border-4 border-rose-500/40 bg-rose-950/50 glow-critical">
+          <div className="relative flex items-center justify-center w-28 h-28 rounded-full border-4 border-gray-800 bg-black">
             <div className="text-center">
-              <span className="text-4xl font-extrabold text-white font-mono">82</span>
-              <div className="text-[10px] text-gray-400 font-mono">/ 100</div>
+              <span className="text-4xl font-extrabold text-white font-mono">{riskData?.risk_score || 82}</span>
+              <div className="text-[10px] text-gray-500 font-mono">/ 100</div>
             </div>
           </div>
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="text-2xl font-bold text-white font-mono">GRID RISK SCORE</h1>
-              <span className="px-3 py-1 rounded bg-rose-500 text-white font-bold text-xs tracking-wider">
-                HIGH RISK
+              <span className={`px-3 py-1 rounded text-black font-bold text-xs tracking-wider bg-white`}>
+                {riskData?.risk_level || "HIGH RISK"}
               </span>
             </div>
             <p className="text-xs text-gray-300 mt-1 max-w-md">
@@ -45,103 +83,110 @@ export const GridRiskView: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-4 bg-gray-900/80 rounded-xl border border-gray-800 text-xs space-y-2 font-mono">
+        <div className="p-4 bg-black rounded-xl border border-gray-800 text-xs space-y-2 font-mono">
           <div className="flex justify-between space-x-4">
-            <span className="text-gray-400">Target Grid Capacity:</span>
+            <span className="text-gray-500">Target Grid Capacity:</span>
             <span className="text-white font-bold">9,800 MW</span>
           </div>
           <div className="flex justify-between space-x-4">
-            <span className="text-gray-400">Peak Demand Load:</span>
-            <span className="text-rose-400 font-bold">8,620 MW (88% Util)</span>
+            <span className="text-gray-500">Peak Demand Load:</span>
+            <span className="text-white font-bold">8,620 MW (88% Util)</span>
           </div>
           <div className="flex justify-between space-x-4">
-            <span className="text-gray-400">System Stress Trigger:</span>
-            <span className="text-amber-300 font-bold">41.2°C Temperature</span>
+            <span className="text-gray-500">System Stress Trigger:</span>
+            <span className="text-white font-bold">41.2°C Temperature</span>
           </div>
         </div>
-      </div>
+        </div>
+      </ScrollReveal>
 
       {/* 2. RISK CONTRIBUTORS & FUTURE TIMELINE */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <ScrollReveal delay={200} direction="up">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Risk Contributors */}
-        <div className="control-card p-6 border border-gray-800">
+        <div className="control-card p-6 border border-gray-800 bg-black">
           <h2 className="text-sm font-bold text-white font-mono uppercase tracking-wider mb-4 flex items-center">
-            <ShieldAlert className="w-4 h-4 mr-2 text-rose-400" />
+            <ShieldAlert className="w-4 h-4 mr-2 text-white" />
             RISK CONTRIBUTORS BREAKDOWN
           </h2>
 
           <div className="space-y-4">
-            {riskContributors.map((c, i) => (
+            {riskContributors.map((c: any, i: number) => {
+              const weight = c.weight || c.value;
+              return (
               <div key={i}>
                 <div className="flex justify-between text-xs mb-1 font-mono">
                   <span className="text-gray-300">{c.name}</span>
-                  <span className="text-white font-bold">{c.value}%</span>
+                  <span className="text-white font-bold">{weight}%</span>
                 </div>
                 <div className="w-full bg-gray-800 h-2.5 rounded-full overflow-hidden">
-                  <div className={`${c.color} h-full rounded-full`} style={{ width: `${c.value}%` }} />
+                  <div className={`${getContributorColor(i)} h-full rounded-full`} style={{ width: `${weight}%` }} />
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
 
         {/* Future Risk Timeline */}
-        <div className="control-card p-6 border border-gray-800">
+        <div className="control-card p-6 border border-gray-800 bg-black">
           <h2 className="text-sm font-bold text-white font-mono uppercase tracking-wider mb-4 flex items-center">
-            <Clock className="w-4 h-4 mr-2 text-amber-400" />
+            <Clock className="w-4 h-4 mr-2 text-white" />
             FUTURE RISK TIMELINE (TOMORROW)
           </h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {timeline.map((t, i) => (
+            {timeline.map((t: any, i: number) => (
               <div
                 key={i}
-                className="p-3 bg-gray-900/60 rounded-lg border border-gray-800 flex flex-col items-center justify-between space-y-2 text-center"
+                className="p-3 bg-black rounded-lg border border-gray-800 flex flex-col items-center justify-between space-y-2 text-center"
               >
-                <span className="text-xs text-gray-400 font-mono">{t.time}</span>
-                <span className="text-xl font-bold text-white font-mono">{t.score}</span>
-                <span className={`text-[10px] px-2 py-0.5 rounded border ${t.badge}`}>
-                  {t.level}
+                <span className="text-xs text-gray-500 font-mono">{t.time}</span>
+                <span className="text-xl font-bold text-white font-mono">{t.score || t.risk_score}</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded border ${t.badge || getBadgeClass(t.level || t.risk_level)}`}>
+                  {t.level || t.risk_level}
                 </span>
               </div>
             ))}
           </div>
         </div>
 
-      </div>
+        </div>
+      </ScrollReveal>
 
       {/* 3. ANOMALY DETECTION SECTION */}
-      <div className="control-card p-6 border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-950/20 to-transparent">
-        <div className="flex items-center space-x-2 text-amber-400 text-xs font-mono font-bold uppercase mb-2">
-          <AlertTriangle className="w-4 h-4" />
+      <ScrollReveal delay={300} direction="up">
+        <div className="control-card p-6 border-l-4 border-l-white bg-black mt-6">
+        <div className="flex items-center space-x-2 text-white text-xs font-mono font-bold uppercase mb-2">
+          <Activity className="w-4 h-4" />
           <span>ANOMALY DETECTED (STATISTICAL RESIDUAL ENGINE)</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-4 font-mono">
-          <div className="p-3 bg-gray-900/70 rounded-lg border border-gray-800">
-            <span className="text-[10px] text-gray-400 uppercase">Detection Time</span>
-            <div className="text-lg font-bold text-white mt-1">14:15 Tomorrow</div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+          <div className="p-4 bg-black rounded-xl border border-gray-800">
+            <div className="text-[10px] text-gray-500 font-mono mb-1 uppercase">Detection Time</div>
+            <div className="text-lg font-bold text-white font-mono">14:15 <span className="text-xs text-gray-400 font-sans">Tomorrow</span></div>
           </div>
-          <div className="p-3 bg-gray-900/70 rounded-lg border border-gray-800">
-            <span className="text-[10px] text-gray-400 uppercase">Expected Load</span>
-            <div className="text-lg font-bold text-gray-300 mt-1">7,820 MW</div>
+          <div className="p-4 bg-black rounded-xl border border-gray-800">
+            <div className="text-[10px] text-gray-500 font-mono mb-1 uppercase">Expected Load</div>
+            <div className="text-lg font-bold text-white font-mono">7,820 MW</div>
           </div>
-          <div className="p-3 bg-gray-900/70 rounded-lg border border-gray-800">
-            <span className="text-[10px] text-gray-400 uppercase">Observed Load</span>
-            <div className="text-lg font-bold text-amber-400 mt-1">8,430 MW</div>
+          <div className="p-4 bg-black rounded-xl border border-gray-800">
+            <div className="text-[10px] text-gray-500 font-mono mb-1 uppercase">Observed Load</div>
+            <div className="text-lg font-bold text-white font-mono">8,430 MW</div>
           </div>
-          <div className="p-3 bg-gray-900/70 rounded-lg border border-gray-800">
-            <span className="text-[10px] text-gray-400 uppercase">Residual Deviation</span>
-            <div className="text-lg font-bold text-rose-400 mt-1">+610 MW (HIGH)</div>
+          <div className="p-4 bg-black rounded-xl border border-gray-800">
+            <div className="text-[10px] text-gray-500 font-mono mb-1 uppercase">Residual Deviation</div>
+            <div className="text-lg font-bold text-white font-mono">+610 MW (HIGH)</div>
           </div>
         </div>
 
-        <div className="p-3 bg-gray-900/90 rounded-lg border border-gray-800 text-xs text-gray-300">
-          <span className="font-bold text-amber-400">Why? </span>
-          Demand is significantly above the model's expected statistical residual range due to rapid localized HVAC cooling spikes.
+        <div className="mt-4 p-3 bg-black border border-gray-800 rounded flex text-xs text-gray-300">
+          <span className="text-white font-bold mr-2">Why?</span> 
+          Demand is significantly above the model's expected statistical residual range due to rapid localized HVAC ramp.
         </div>
-      </div>
+        </div>
+      </ScrollReveal>
     </div>
   );
 };

@@ -1,35 +1,53 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Activity, CheckCircle2, Cpu, BarChart2 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceArea } from "recharts";
+import { ScrollReveal } from "./ScrollLayout";
 
 export const ForecastView: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState<"all" | "xgb" | "baseline" | "lgb">("all");
 
-  const forecastSeries = [
-    { time: "00:00", actual: 7100, xgboost: 7050, baseline: 7000, lightgbm: 7030 },
-    { time: "02:00", actual: 6800, xgboost: 6780, baseline: 6700, lightgbm: 6760 },
-    { time: "04:00", actual: 6650, xgboost: 6620, baseline: 6500, lightgbm: 6600 },
-    { time: "06:00", actual: 6900, xgboost: 6920, baseline: 6800, lightgbm: 6900 },
-    { time: "08:00", actual: 7400, xgboost: 7410, baseline: 7300, lightgbm: 7390 },
-    { time: "10:00", actual: 7840, xgboost: 7840, baseline: 7700, lightgbm: 7820 },
-    { time: "12:00", actual: null, xgboost: 8150, baseline: 8000, lightgbm: 8120 },
-    { time: "14:00", actual: null, xgboost: 8510, baseline: 8300, lightgbm: 8490 },
-    { time: "15:15", actual: null, xgboost: 8620, baseline: 8420, lightgbm: 8590 },
-    { time: "16:00", actual: null, xgboost: 8580, baseline: 8380, lightgbm: 8550 },
-    { time: "18:00", actual: null, xgboost: 8250, baseline: 8100, lightgbm: 8220 },
-    { time: "20:00", actual: null, xgboost: 7920, baseline: 7800, lightgbm: 7900 },
-    { time: "22:00", actual: null, xgboost: 7550, baseline: 7450, lightgbm: 7530 },
-    { time: "24:00", actual: null, xgboost: 7200, baseline: 7100, lightgbm: 7180 },
-  ];
+  const [forecastSeries, setForecastSeries] = useState<any[]>([]);
+  const [metrics, setMetrics] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [forecastRes, accuracyRes] = await Promise.all([
+          fetch("http://localhost:8000/api/forecast"),
+          fetch("http://localhost:8000/api/forecast/accuracy")
+        ]);
+        const forecastData = await forecastRes.json();
+        const accuracyData = await accuracyRes.json();
+        
+        const series = forecastData.series.map((item: any) => ({
+          time: item.timestamp,
+          actual: item.actual_load,
+          xgboost: item.predicted_load,
+          baseline: item.baseline_load,
+          lightgbm: item.lightgbm_load
+        }));
+        
+        setForecastSeries(series);
+        setMetrics(accuracyData);
+      } catch (err) {
+        console.error("Failed to fetch forecast data", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header Banner */}
-      <div className="control-card p-6 border border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <ScrollReveal delay={100}>
+        <div className="control-card p-6 border border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-amber-400 text-xs font-mono font-bold uppercase mb-1">
+          <div className="flex items-center space-x-2 text-white text-xs font-mono font-bold uppercase mb-1">
             <Activity className="w-4 h-4" />
             <span>MACHINE LEARNING DEMAND PIPELINE</span>
           </div>
@@ -72,77 +90,111 @@ export const ForecastView: React.FC = () => {
             Baseline
           </button>
         </div>
-      </div>
+        </div>
+      </ScrollReveal>
 
       {/* Main Interactive Forecast Chart */}
-      <div className="control-card p-6 border border-gray-800">
+      <ScrollReveal delay={200}>
+        <div className="control-card p-6 border border-gray-800">
         <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={forecastSeries} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
-              <XAxis dataKey="time" stroke="#9ca3af" fontSize={11} />
-              <YAxis stroke="#9ca3af" fontSize={11} domain={[6000, 9000]} />
-              <Tooltip contentStyle={{ backgroundColor: "#111827", borderColor: "#374151", borderRadius: "0.5rem" }} />
-              <Legend wrapperStyle={{ paddingTop: "10px", fontSize: "12px" }} />
-              
-              <ReferenceArea x1="14:15" x2="16:00" y1={6000} y2={9000} fill="#f43f5e" fillOpacity={0.12} />
-
-              <Line type="monotone" dataKey="actual" stroke="#22d3ee" strokeWidth={3} dot={{ r: 4 }} name="Actual Load (MW)" />
-              
-              {(selectedModel === "all" || selectedModel === "xgb") && (
-                <Line type="monotone" dataKey="xgboost" stroke="#fbbf24" strokeWidth={3} dot={false} name="XGBoost Main (MW)" />
-              )}
-              
-              {(selectedModel === "all" || selectedModel === "lgb") && (
-                <Line type="monotone" dataKey="lightgbm" stroke="#c084fc" strokeWidth={2} strokeDasharray="4 4" dot={false} name="LightGBM Challenger (MW)" />
-              )}
-
-              {(selectedModel === "all" || selectedModel === "baseline") && (
-                <Line type="monotone" dataKey="baseline" stroke="#9ca3af" strokeWidth={1.5} strokeDasharray="3 3" dot={false} name="Seasonal Naive Baseline (MW)" />
-              )}
+            <defs>
+              <linearGradient id="colorXgb" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#ffffff" stopOpacity={0.2}/>
+                <stop offset="95%" stopColor="#ffffff" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
+            <XAxis dataKey="time" stroke="#666" tick={{fill: '#666', fontSize: 10}} tickMargin={10} />
+            <YAxis domain={[6000, 9000]} stroke="#666" tick={{fill: '#666', fontSize: 10}} tickMargin={10} />
+            <Tooltip
+              contentStyle={{ backgroundColor: '#000', border: '1px solid #333', color: '#fff', fontSize: '12px' }}
+              itemStyle={{ color: '#ccc' }}
+            />
+            
+            <ReferenceArea x1="10:00" x2="16:00" fill="#222" fillOpacity={0.5} />
+            <ReferenceArea x1="16:00" x2="18:00" fill="#111" fillOpacity={0.5} />
+            
+            <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
+            
+            <Line type="monotone" dataKey="actual" name="Actual Load (MW)" stroke="#999" strokeWidth={2} dot={{r: 3, fill: '#999', strokeWidth: 0}} />
+            <Line type="monotone" dataKey="lightgbm" name="LightGBM Challenger (MW)" stroke="#555" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+            
+            {(selectedModel === "all" || selectedModel === "xgb") && (
+              <Line 
+                type="monotone" 
+                dataKey="xgboost" 
+                name="XGBoost Main (MW)" 
+                stroke="#fff" 
+                strokeWidth={3} 
+                dot={{r: 4, fill: '#fff', strokeWidth: 0}} 
+                activeDot={{r: 6, fill: '#fff'}}
+                fillOpacity={1} fill="url(#colorXgb)"
+              />
+            )}
+            
+            {(selectedModel === "all" || selectedModel === "baseline") && (
+                <Line type="monotone" dataKey="baseline" stroke="#444" strokeWidth={1} strokeDasharray="3 3" dot={false} name="Seasonal Naive Baseline (MW)" />
+            )}
             </LineChart>
           </ResponsiveContainer>
         </div>
-      </div>
+        </div>
+      </ScrollReveal>
 
       {/* Accuracy & Model Evaluation Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="control-card p-4 border border-gray-800">
-          <div className="flex items-center space-x-2 text-xs text-gray-400 mb-1">
-            <Cpu className="w-4 h-4 text-cyan-400" />
-            <span>Mean Absolute Error (MAE)</span>
+      <ScrollReveal delay={300}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="control-card p-4 border border-gray-800 bg-black flex flex-col justify-center">
+            <div className="text-gray-500 font-mono text-[10px] uppercase flex items-center gap-1 mb-1">
+              <Cpu className="w-3 h-3" /> Mean Absolute Error (MAE)
+            </div>
+            <div className="text-2xl font-bold text-white font-mono flex items-baseline gap-1">
+              {metrics?.mae || "48.5"} <span className="text-xs text-gray-500">MW</span>
+            </div>
+            <div className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" /> High Precision
+            </div>
           </div>
-          <div className="text-2xl font-bold text-white font-mono">48.5 <span className="text-xs text-cyan-400">MW</span></div>
-          <div className="text-[11px] text-emerald-400 mt-1 font-semibold">✓ High Precision</div>
-        </div>
 
-        <div className="control-card p-4 border border-gray-800">
-          <div className="flex items-center space-x-2 text-xs text-gray-400 mb-1">
-            <BarChart2 className="w-4 h-4 text-amber-400" />
-            <span>MAPE / WAPE</span>
+          <div className="control-card p-4 border border-gray-800 bg-black flex flex-col justify-center">
+            <div className="text-gray-500 font-mono text-[10px] uppercase flex items-center gap-1 mb-1">
+              <BarChart2 className="w-3 h-3" /> MAPE / WAPE
+            </div>
+            <div className="text-2xl font-bold text-white font-mono">
+              {metrics?.mape || "1.42"}%
+            </div>
+            <div className="text-xs text-gray-400 mt-1">
+              Standard Threshold &lt; 3.5%
+            </div>
           </div>
-          <div className="text-2xl font-bold text-white font-mono">1.42%</div>
-          <div className="text-[11px] text-amber-400 mt-1 font-semibold">Standard Threshold &lt; 3.5%</div>
-        </div>
 
-        <div className="control-card p-4 border border-gray-800">
-          <div className="flex items-center space-x-2 text-xs text-gray-400 mb-1">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>Peak Demand Error</span>
+          <div className="control-card p-4 border border-gray-800 bg-black flex flex-col justify-center">
+            <div className="text-gray-500 font-mono text-[10px] uppercase flex items-center gap-1 mb-1">
+              <CheckCircle2 className="w-3 h-3" /> Peak Demand Error
+            </div>
+            <div className="text-2xl font-bold text-white font-mono">
+              0.85%
+            </div>
+            <div className="text-xs text-gray-400 mt-1">
+              Timing Error: 0 mins
+            </div>
           </div>
-          <div className="text-2xl font-bold text-emerald-400 font-mono">0.85%</div>
-          <div className="text-[11px] text-emerald-300 mt-1 font-semibold">Timing Error: 0 mins</div>
-        </div>
 
-        <div className="control-card p-4 border border-gray-800">
-          <div className="flex items-center space-x-2 text-xs text-gray-400 mb-1">
-            <Activity className="w-4 h-4 text-purple-400" />
-            <span>Selected Model</span>
+          <div className="control-card p-4 border border-gray-800 bg-black flex flex-col justify-center">
+            <div className="text-gray-500 font-mono text-[10px] uppercase flex items-center gap-1 mb-1">
+              <Activity className="w-3 h-3" /> Selected Model
+            </div>
+            <div className="text-lg font-bold text-white font-mono">
+              XGBoost (Main)
+            </div>
+            <div className="text-xs text-gray-400 mt-1">
+              Evaluated against 90-day history
+            </div>
           </div>
-          <div className="text-base font-bold text-purple-300 font-mono">XGBoost (Main)</div>
-          <div className="text-[11px] text-gray-400 mt-1">Evaluated against 90-day history</div>
         </div>
-      </div>
+      </ScrollReveal>
     </div>
   );
 };

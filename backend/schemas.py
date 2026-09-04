@@ -140,6 +140,17 @@ class SimulationRequest(BaseModel):
     solar_contribution: float = 10.0
     demand_growth: float = 0.0
 
+class WaitlistCreate(BaseModel):
+    email: str
+
+class WaitlistResponse(BaseModel):
+    id: int
+    email: str
+    timestamp: datetime
+
+    class Config:
+        from_attributes = True
+
 class SimulationResponse(BaseModel):
     base_peak: float
     scenario_peak: float

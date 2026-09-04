@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Sliders, Play, AlertTriangle, RefreshCw, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { ScrollReveal } from "./ScrollLayout";
 
 export const ScenarioLabView: React.FC = () => {
   const [temperature, setTemperature] = useState<number>(41.2);
@@ -83,19 +84,22 @@ export const ScenarioLabView: React.FC = () => {
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header Banner */}
-      <div className="control-card p-6 border border-gray-800">
+      <ScrollReveal delay={100} direction="up">
+        <div className="control-card p-6 border border-gray-800">
         <div className="flex items-center space-x-2 text-purple-400 text-xs font-mono font-bold uppercase mb-1">
           <Sliders className="w-4 h-4" />
           <span>PREDICTIVE SCENARIO SIMULATOR</span>
         </div>
         <h1 className="text-xl font-bold text-white font-mono">"What happens if tomorrow gets hotter?"</h1>
         <p className="text-xs text-gray-400">Stress test the Delhi Grid by adjusting environmental and operational variables</p>
-      </div>
+        </div>
+      </ScrollReveal>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* CONTROLS PANEL (6 cols) */}
-        <div className="lg:col-span-6 control-card p-6 border border-gray-800 space-y-6">
+        <ScrollReveal delay={200} direction="left" className="lg:col-span-6">
+          <div className="control-card p-6 border border-gray-800 space-y-6 h-full">
           <h2 className="text-xs font-mono text-gray-300 uppercase font-bold tracking-wider border-b border-gray-800 pb-3">
             SIMULATION PARAMETERS
           </h2>
@@ -206,10 +210,12 @@ export const ScenarioLabView: React.FC = () => {
               </>
             )}
           </button>
-        </div>
+          </div>
+        </ScrollReveal>
 
         {/* RESULTS COMPARISON PANEL (6 cols) */}
-        <div className="lg:col-span-6 space-y-6">
+        <ScrollReveal delay={300} direction="right" className="lg:col-span-6">
+          <div className="space-y-6">
           
           {/* Side-by-Side Cards */}
           <div className="grid grid-cols-2 gap-4 font-mono">
@@ -264,9 +270,10 @@ export const ScenarioLabView: React.FC = () => {
             <p className="text-rose-200 leading-relaxed font-mono">
               {alertMessage}
             </p>
-          </div>
+            </div>
 
-        </div>
+          </div>
+        </ScrollReveal>
 
       </div>
     </div>
