@@ -14,14 +14,13 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const targetFrameRef = useRef<number>(0);
   const currentFrameRef = useRef<number>(0);
-  const lastDrawnFrameRef = useRef<number>(-1);
   
   const [scrollProgress, setScrollProgress] = useState<number>(0);
   const [isSkipped, setIsSkipped] = useState<boolean>(false);
 
   const totalFrames = 91;
 
-  // Preload user's exact 91 PNG frame photos
+  // Preload user's exact 91 PNG frame photos into memory
   useEffect(() => {
     const loadedImages: HTMLImageElement[] = [];
 
@@ -34,45 +33,71 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
     imagesRef.current = loadedImages;
   }, []);
 
-  // Canvas render function
-  const renderFrame = (frameIndex: number) => {
+  // Sub-frame dual-canvas render function with alpha cross-blending for silky-smooth motion
+  const renderSubFrame = (floatIndex: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const imgList = imagesRef.current;
-    const idx = Math.max(0, Math.min(totalFrames - 1, Math.round(frameIndex)));
-    const img = imgList[idx];
+    if (imgList.length === 0) return;
 
-    if (img && img.complete && img.naturalWidth > 0) {
-      if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
+    // Ensure canvas dimensions match viewport
+    if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
 
-      const imgRatio = img.naturalWidth / img.naturalHeight;
-      const canvasRatio = canvas.width / canvas.height;
-      let drawWidth = canvas.width;
-      let drawHeight = canvas.height;
-      let offsetX = 0;
-      let offsetY = 0;
+    const maxIndex = totalFrames - 1;
+    const clampedIndex = Math.max(0, Math.min(maxIndex, floatIndex));
+    
+    const baseIdx = Math.floor(clampedIndex);
+    const nextIdx = Math.min(maxIndex, baseIdx + 1);
+    const fraction = clampedIndex - baseIdx; // 0.0 to 1.0 sub-frame fractional offset
 
-      if (canvasRatio > imgRatio) {
-        drawHeight = canvas.width / imgRatio;
-        offsetY = (canvas.height - drawHeight) / 2;
-      } else {
-        drawWidth = canvas.height * imgRatio;
-        offsetX = (canvas.width - drawWidth) / 2;
-      }
+    const imgBase = imgList[baseIdx];
+    const imgNext = imgList[nextIdx];
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-      lastDrawnFrameRef.current = idx;
+    if (!imgBase || !imgBase.complete || imgBase.naturalWidth === 0) return;
+
+    // Draw base frame image
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawCoverImage(ctx, canvas, imgBase, 1.0);
+
+    // If there is a sub-frame fraction and next image is ready, cross-blend for continuous motion
+    if (fraction > 0.01 && imgNext && imgNext.complete && imgNext.naturalWidth > 0 && baseIdx !== nextIdx) {
+      drawCoverImage(ctx, canvas, imgNext, fraction);
     }
   };
 
-  // Scroll listener -> updates target frame smoothly
+  const drawCoverImage = (
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    img: HTMLImageElement,
+    opacity: number
+  ) => {
+    const imgRatio = img.naturalWidth / img.naturalHeight;
+    const canvasRatio = canvas.width / canvas.height;
+    let drawWidth = canvas.width;
+    let drawHeight = canvas.height;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (canvasRatio > imgRatio) {
+      drawHeight = canvas.width / imgRatio;
+      offsetY = (canvas.height - drawHeight) / 2;
+    } else {
+      drawWidth = canvas.height * imgRatio;
+      offsetX = (canvas.width - drawWidth) / 2;
+    }
+
+    ctx.globalAlpha = opacity;
+    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+    ctx.globalAlpha = 1.0;
+  };
+
+  // Scroll position listener -> updates target frame with extended 1200vh track height
   useEffect(() => {
     const handleScroll = () => {
       if (!containerRef.current || isSkipped) return;
@@ -85,8 +110,8 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
       const progress = Math.min(1, Math.max(0, scrollTop / containerHeight));
       setScrollProgress(progress);
 
-      // Target frame based on scroll progress (0.0 to 0.85)
-      const animProgress = Math.min(1, progress / 0.85);
+      // Map scroll progress across 0.0 to 0.88 of the long scroll space
+      const animProgress = Math.min(1, progress / 0.88);
       targetFrameRef.current = animProgress * (totalFrames - 1);
     };
 
@@ -98,19 +123,16 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
     };
   }, [isSkipped]);
 
-  // RequestAnimationFrame 60FPS LERP Smoothing Loop
+  // Heavy Physics Inertia LERP Loop (0.05 damping)
   useEffect(() => {
     let animId: number;
 
     const tick = () => {
-      // LERP (Linear Interpolation) for buttery smooth frame transitions
+      // Heavy 0.05 LERP factor for heavy, smooth cinematic weight
       const diff = targetFrameRef.current - currentFrameRef.current;
-      currentFrameRef.current += diff * 0.14; // smooth lerp interpolation factor
+      currentFrameRef.current += diff * 0.05;
 
-      const roundedFrame = Math.round(currentFrameRef.current);
-      if (roundedFrame !== lastDrawnFrameRef.current) {
-        renderFrame(roundedFrame);
-      }
+      renderSubFrame(currentFrameRef.current);
 
       animId = requestAnimationFrame(tick);
     };
@@ -129,26 +151,26 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
 
   if (isSkipped) return null;
 
-  // Title opacity (fades in smoothly over crisp frames)
-  const titleOpacity = Math.min(1, Math.max(0, (scrollProgress - 0.2) * 2.5));
+  // Title opacity (fades in smoothly)
+  const titleOpacity = Math.min(1, Math.max(0, (scrollProgress - 0.25) * 2.2));
   
-  // Parallax upward translation at the end of scroll track (0.85 to 1.0)
-  const parallaxOffset = scrollProgress > 0.85 ? (scrollProgress - 0.85) * 6.66 * 100 : 0;
+  // Parallax upward translation at the end of scroll track (0.88 to 1.0)
+  const parallaxOffset = scrollProgress > 0.88 ? (scrollProgress - 0.88) * 8.33 * 100 : 0;
 
   return (
-    <div ref={containerRef} className="relative w-full h-[600vh] bg-[#090d16]">
+    <div ref={containerRef} className="relative w-full h-[1200vh] bg-[#090d16]">
       {/* Sticky Parallax Viewport */}
       <div
-        className="sticky top-0 w-full h-screen overflow-hidden z-30 transition-transform duration-75 ease-out"
+        className="sticky top-0 w-full h-screen overflow-hidden z-30 transition-transform duration-100 ease-out"
         style={{ transform: `translateY(-${parallaxOffset}%)` }}
       >
-        {/* Canvas rendering crisp frame photos with 60FPS LERP smoothing and NO blur */}
+        {/* Canvas rendering crisp frame photos with Sub-Frame Alpha Cross-Blending and heavy inertia */}
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full object-cover"
         />
 
-        {/* Subtle vignette gradient for text contrast */}
+        {/* Subtle vignette gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#090d16]/90 via-[#090d16]/30 to-[#090d16]/10 pointer-events-none" />
 
         {/* Skip Intro Button */}
@@ -162,10 +184,10 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
         {/* Center Overlay: Bold Italics Site Name */}
         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-30 pointer-events-none">
           <div
-            className="transition-all duration-500 transform"
+            className="transition-all duration-700 transform"
             style={{
               opacity: titleOpacity,
-              transform: `scale(${0.9 + titleOpacity * 0.1}) translateY(${(1 - titleOpacity) * 20}px)`,
+              transform: `scale(${0.9 + titleOpacity * 0.1}) translateY(${(1 - titleOpacity) * 25}px)`,
             }}
           >
             {/* Badge */}
@@ -200,7 +222,7 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
 
         {/* Scroll Prompt */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-2 text-xs font-mono text-cyan-400 z-30 animate-bounce pointer-events-none">
-          <span className="tracking-widest uppercase text-[10px] font-bold font-mono">Scroll Down To Play Smooth Sequence</span>
+          <span className="tracking-widest uppercase text-[10px] font-bold font-mono">Scroll Down To Experience Heavy Parallax Sequence</span>
           <ChevronDown className="w-5 h-5 text-cyan-400" />
         </div>
       </div>
