@@ -156,7 +156,7 @@ def get_analytics_summary():
         all_time_peak_mw=8656,
         all_time_peak_date="June 19, 2024 at 15:05 IST",
         current_day_peak_mw=telemetry.nextPeakDemand,
-        forecast_next_peak_mw=8740,
+        forecast_next_peak_mw=telemetry.nextPeakDemand,
         cooling_load_share_percent=52.4,
         cooling_degree_days=18.4,
         rooftop_solar_installed_mw=450,

@@ -1,18 +1,18 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from ..models.schemas import GridMetricsResponse
 from ..services.ingestion import grid_state
-from ..services.simulation import get_live_metrics
+from ml_service import ml_service
 
 router = APIRouter(prefix="/telemetry", tags=["Telemetry"])
 
 @router.get("/live", response_model=GridMetricsResponse)
 def get_live_grid_telemetry():
     """Returns real-time Delhi grid concurrency metrics and frequency."""
-    # Incorporate live state values from background ingestion worker
+    dash = ml_service.get_dashboard_metrics()
     return GridMetricsResponse(
-        currentDemand=grid_state.demand_mw,
-        nextPeakDemand=8740,
-        peakTime="17:45",
+        currentDemand=int(dash["current_load"]),
+        nextPeakDemand=int(dash["peak_24h"]),
+        peakTime=dash["peak_time"],
         gridRisk=grid_state.grid_risk,
         gridFrequency=grid_state.frequency_hz,
         reserveMargin=grid_state.reserve_margin_mw,

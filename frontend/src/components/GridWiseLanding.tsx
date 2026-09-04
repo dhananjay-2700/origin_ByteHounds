@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowRight, AlertTriangle, Zap, Activity, Map, MessageSquare, Database, CheckCircle, BrainCircuit, LineChart, Target } from "lucide-react";
 import { GridReveal } from "./GridReveal";
 
@@ -10,11 +10,36 @@ interface GridWiseLandingProps {
 }
 
 export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast, onOpenDataHealth }) => {
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [accuracyData, setAccuracyData] = useState<any>(null);
   const [temperature, setTemperature] = useState(38);
-  
-  // Calculate simulated values based on temperature slider
-  const baseDemand = 8420;
-  const simulatedDemand = baseDemand + (temperature - 30) * 53;
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/dashboard")
+      .then(res => res.json())
+      .then(data => setDashboardData(data))
+      .catch(err => console.error("Error fetching landing dashboard metrics:", err));
+
+    fetch("http://localhost:8000/api/forecast/accuracy")
+      .then(res => res.json())
+      .then(data => setAccuracyData(data))
+      .catch(err => console.error("Error fetching landing accuracy metrics:", err));
+  }, []);
+
+  const peakVal = dashboardData ? Math.round(dashboardData.peak_24h).toLocaleString() : "3,911";
+  const currentLoadVal = dashboardData ? Math.round(dashboardData.current_load).toLocaleString() : "2,050";
+  const peakTimeVal = dashboardData ? dashboardData.peak_time : "10:00 IST";
+  const riskScoreVal = dashboardData ? Math.round(dashboardData.grid_risk_score) : 42;
+  const tempVal = dashboardData ? dashboardData.weather_temp.toFixed(1) : "14.8";
+  const windowVal = dashboardData ? dashboardData.critical_window : "09:00 - 11:00 IST";
+
+  const maeVal = accuracyData ? `${Math.round(accuracyData.mae)} MW` : "371 MW";
+  const rmseVal = accuracyData ? `${Math.round(accuracyData.rmse)} MW` : "472 MW";
+  const mapeVal = accuracyData ? `${accuracyData.mape.toFixed(1)}%` : "7.9%";
+
+  // Scenario simulation based on dataset current load
+  const baseDemand = dashboardData ? Math.round(dashboardData.current_load) : 2050;
+  const simulatedDemand = Math.round(baseDemand + (temperature - 30) * 35);
   const isCritical = temperature >= 40;
 
   return (
@@ -58,17 +83,17 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
             <div className="flex-1 w-full relative h-[600px] flex items-center justify-center pointer-events-none">
               {/* Floating Metric Display */}
               <div className="absolute top-10 left-0 bg-black/90 backdrop-blur-md border border-gray-800 p-6 rounded-2xl shadow-2xl text-left">
-                <div className="text-4xl font-black text-white">8,620 MW</div>
+                <div className="text-4xl font-black text-white">{peakVal} MW</div>
                 <div className="text-[#FF7C1E] font-bold text-sm tracking-widest uppercase mt-1">PEAK DEMAND ↑</div>
               </div>
 
               <div className="absolute top-1/3 right-0 bg-black/90 backdrop-blur-md border border-gray-800 p-6 rounded-2xl shadow-2xl text-left">
-                <div className="text-4xl font-black text-white">41.2°C</div>
-                <div className="text-gray-400 font-bold text-sm tracking-widest uppercase mt-1">EXTREME HEAT</div>
+                <div className="text-4xl font-black text-white">{tempVal}°C</div>
+                <div className="text-gray-400 font-bold text-sm tracking-widest uppercase mt-1">AMBIENT TEMP</div>
               </div>
 
               <div className="absolute bottom-1/4 left-10 bg-[#FF7C1E]/20 backdrop-blur-md border border-[#FF7C1E]/50 p-6 rounded-2xl shadow-2xl text-left">
-                <div className="text-4xl font-black text-[#FF7C1E]">14:15 — 16:00</div>
+                <div className="text-3xl font-black text-[#FF7C1E]">{windowVal}</div>
                 <div className="text-white font-bold text-sm tracking-widest uppercase mt-1">CRITICAL WINDOW</div>
               </div>
             </div>
@@ -86,21 +111,21 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 border-t-4 border-black pt-12">
             <div className="space-y-4">
               <div className="text-sm font-bold uppercase tracking-widest text-gray-500">TODAY</div>
-              <div className="text-6xl font-black tracking-tighter">7,840 MW</div>
+              <div className="text-6xl font-black tracking-tighter">{currentLoadVal} MW</div>
               <div className="text-xl font-bold text-gray-400 uppercase">CURRENT DEMAND</div>
             </div>
             
             <div className="space-y-4 relative">
               <div className="absolute -left-10 top-8 hidden md:block"><ArrowRight className="w-8 h-8 text-gray-300"/></div>
               <div className="text-sm font-bold uppercase tracking-widest text-[#FF7C1E]">TOMORROW</div>
-              <div className="text-6xl font-black tracking-tighter">8,620 MW</div>
+              <div className="text-6xl font-black tracking-tighter">{peakVal} MW</div>
               <div className="text-xl font-bold text-black uppercase">PREDICTED PEAK</div>
             </div>
             
             <div className="space-y-4 relative">
               <div className="absolute -left-10 top-8 hidden md:block"><ArrowRight className="w-8 h-8 text-[#FF7C1E]"/></div>
               <div className="text-sm font-bold uppercase tracking-widest text-red-600">DANGER</div>
-              <div className="text-6xl font-black tracking-tighter text-red-600">14:15<span className="text-4xl text-black"> - 16:00</span></div>
+              <div className="text-5xl font-black tracking-tighter text-red-600">{windowVal}</div>
               <div className="text-xl font-bold text-black uppercase">HIGH-RISK WINDOW</div>
             </div>
           </div>
@@ -143,9 +168,10 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
               </div>
               
               <div className="mb-8">
-                <div className="text-6xl font-black tracking-tighter">8,620 MW</div>
-                <div className="text-[#FF7C1E] font-medium text-lg mt-1">Expected at 15:15</div>
+                <div className="text-6xl font-black tracking-tighter">{peakVal} MW</div>
+                <div className="text-[#FF7C1E] font-medium text-lg mt-1">Expected at {peakTimeVal}</div>
               </div>
+
               
               <div className="border-t border-gray-800 pt-6 space-y-6">
                 <div className="flex justify-between items-center">
@@ -242,18 +268,18 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
             <div className="pt-8 border-t-2 border-black grid grid-cols-3 gap-4">
               <div>
                 <div className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-widest">MAE</div>
-                <div className="text-3xl font-black tracking-tighter">142 MW</div>
+                <div className="text-3xl font-black tracking-tighter">{maeVal}</div>
               </div>
               <div>
                 <div className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-widest">RMSE</div>
-                <div className="text-3xl font-black tracking-tighter">198 MW</div>
+                <div className="text-3xl font-black tracking-tighter">{rmseVal}</div>
               </div>
               <div>
                 <div className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-widest">MAPE</div>
-                <div className="text-3xl font-black tracking-tighter text-[#FF7C1E]">2.7%</div>
+                <div className="text-3xl font-black tracking-tighter text-[#FF7C1E]">{mapeVal}</div>
               </div>
             </div>
-            <p className="text-sm font-bold uppercase text-gray-400 tracking-widest">MODEL PERFORMANCE</p>
+            <p className="text-sm font-bold uppercase text-gray-400 tracking-widest">REAL MODEL TEST SET PERFORMANCE (LIGHTGBM)</p>
 
             <button 
               onClick={() => onViewForecast?.("forecast")}
@@ -271,12 +297,12 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
                 <circle cx="80" cy="10" r="4" fill="#FF7C1E" />
               </svg>
               <div className="absolute top-0 right-10 text-right">
-                <div className="text-5xl font-black tracking-tighter">8,620 MW</div>
-                <div className="text-sm font-bold text-gray-500 uppercase tracking-widest mt-1">Predicted peak · 15:15</div>
+                <div className="text-5xl font-black tracking-tighter">{peakVal} MW</div>
+                <div className="text-sm font-bold text-gray-500 uppercase tracking-widest mt-1">Predicted peak · {peakTimeVal}</div>
               </div>
             </div>
             <div className="flex justify-between mt-4 text-xs font-bold text-gray-400">
-              <span>10:00</span><span>12:00</span><span>14:00</span><span>16:00</span><span>18:00</span>
+              <span>08:00</span><span>10:00</span><span>12:00</span><span>14:00</span><span>16:00</span>
             </div>
           </div>
         </div>
@@ -288,17 +314,17 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
           <div className="flex-1 w-full space-y-8">
              <div className="text-sm font-bold uppercase tracking-widest text-[#FF7C1E]">TOMORROW</div>
              <div className="flex justify-between text-xs font-bold text-gray-600 tracking-widest border-b border-gray-800 pb-4">
-                <span>12:00</span><span>14:15</span><span>16:00</span><span>18:00</span>
+                <span>08:00</span><span>09:00</span><span>10:00</span><span>11:00</span>
              </div>
              <div className="relative h-12 w-full flex items-center">
                 <div className="absolute left-0 w-full h-2 bg-gray-800"></div>
-                <div className="absolute left-[35%] w-[35%] h-6 bg-[#FF7C1E]"></div>
+                <div className="absolute left-[25%] w-[40%] h-6 bg-[#FF7C1E]"></div>
              </div>
-             <div className="text-center font-black tracking-widest text-[#FF7C1E] uppercase mt-2">CRITICAL WINDOW</div>
+             <div className="text-center font-black tracking-widest text-[#FF7C1E] uppercase mt-2">CRITICAL WINDOW ({windowVal})</div>
              
              <div className="mt-12 bg-white text-black p-8 rounded-3xl inline-block w-full sm:w-auto">
-               <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">HIGH RISK</div>
-               <div className="text-6xl font-black tracking-tighter">82 <span className="text-2xl text-gray-400">/ 100</span></div>
+               <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">GRID RISK INDEX</div>
+               <div className="text-6xl font-black tracking-tighter">{riskScoreVal} <span className="text-2xl text-gray-400">/ 100</span></div>
              </div>
           </div>
           
@@ -354,18 +380,18 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
                 onClick={() => onViewForecast?.("command-center")}
                 className="px-8 py-4 bg-emerald-500 text-black font-black uppercase tracking-widest text-xs rounded-full hover:bg-emerald-400 transition flex items-center space-x-3 cursor-pointer shadow-lg"
               >
-                <span>View SHAP Drivers</span>
+                <span>View Feature Importance</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
             
             <div className="flex-1 space-y-8 flex flex-col justify-center">
               <p className="text-3xl font-medium leading-relaxed text-gray-300">
-                High temperature is the strongest contributor to tomorrow's predicted demand increase, followed by elevated recent load and the afternoon consumption pattern.
+                High ambient temperature is the strongest contributor to predicted demand increase, followed by recent load lag profiles and diurnal afternoon consumption cycles.
               </p>
               <div className="inline-flex items-center gap-2 bg-emerald-900/30 text-emerald-400 border border-emerald-900/50 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest">
                 <BrainCircuit className="w-4 h-4" />
-                Powered by Explainable AI
+                Powered by LightGBM & SHAP Drivers
               </div>
             </div>
           </div>
@@ -381,14 +407,16 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
               RISK ISN'T EVERYWHERE.
             </h2>
             <div className="bg-black border border-gray-800 p-8 rounded-3xl mt-12 inline-block space-y-6">
-              <div className="text-sm font-bold uppercase tracking-widest text-[#FF7C1E]">HIGHEST MODELED RISK</div>
+              <div className="inline-block px-3 py-1 bg-[#FF7C1E]/20 text-[#FF7C1E] border border-[#FF7C1E]/40 text-xs font-bold uppercase tracking-widest rounded-full">
+                SIMULATED SPATIAL ALLOCATION
+              </div>
               <div className="text-4xl font-black tracking-tighter">South Delhi</div>
               <div className="flex gap-12">
                 <div>
-                  <div className="text-3xl font-black">86<span className="text-xl text-gray-500">/100</span></div>
+                  <div className="text-3xl font-black">58<span className="text-xl text-gray-500">/100</span></div>
                 </div>
                 <div>
-                  <div className="text-3xl font-black">2,140 MW</div>
+                  <div className="text-3xl font-black">1,280 MW</div>
                   <div className="text-xs font-bold uppercase text-gray-500 mt-1">Forecast Demand</div>
                 </div>
               </div>
@@ -420,6 +448,9 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-24">
             <div className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6">05 — SIMULATE</div>
+            <div className="inline-block mb-4 px-4 py-1.5 bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs uppercase tracking-widest rounded-full">
+              SIMULATED / MODELED SCENARIO TOOL
+            </div>
             <h2 className="text-5xl lg:text-7xl font-black tracking-tighter uppercase leading-[1.05]">
               WHAT IF TOMORROW IS HOTTER?
             </h2>
@@ -446,20 +477,20 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
               <div className="p-8 border-t-4 border-gray-200">
-                <div className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">BASE (+0°C)</div>
-                <div className="text-4xl font-black tracking-tighter mb-2">8,420 MW</div>
-                <div className="inline-block bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-xs font-bold uppercase">NORMAL</div>
+                <div className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">BASE TELEMETRY</div>
+                <div className="text-4xl font-black tracking-tighter mb-2">{baseDemand.toLocaleString()} MW</div>
+                <div className="inline-block bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-xs font-bold uppercase">LIVE BASE</div>
               </div>
               <div className={`p-8 border-t-4 transition-colors ${temperature > 32 ? 'border-orange-500' : 'border-gray-200'}`}>
-                <div className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">CURRENT SIMULATION</div>
-                <div className="text-5xl font-black tracking-tighter mb-2">{simulatedDemand} MW</div>
+                <div className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">MODELED SCENARIO</div>
+                <div className="text-5xl font-black tracking-tighter mb-2">{simulatedDemand.toLocaleString()} MW</div>
                 <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase ${isCritical ? 'bg-red-600 text-white' : 'bg-orange-500 text-white'}`}>
                   {isCritical ? 'CRITICAL' : 'HIGH RISK'}
                 </div>
               </div>
               <div className="p-8 border-t-4 border-red-600">
-                <div className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">EXTREME (+10°C)</div>
-                <div className="text-4xl font-black tracking-tighter mb-2">8,950 MW</div>
+                <div className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">EXTREME (+10°C MODELED)</div>
+                <div className="text-4xl font-black tracking-tighter mb-2">{Math.round(baseDemand * 1.25).toLocaleString()} MW</div>
                 <div className="inline-block bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase">CRITICAL</div>
               </div>
             </div>
@@ -510,7 +541,7 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
                   "What should I know about tomorrow's peak?"
                 </div>
                 <div className="bg-gray-800/50 border border-gray-700 p-4 rounded-xl space-y-2 text-gray-300">
-                  <p>Peak is expected at <strong>15:15</strong> with <strong>8,620 MW</strong> of demand.</p>
+                  <p>Peak is expected at <strong>{peakTimeVal}</strong> with <strong>{peakVal} MW</strong> of demand.</p>
                 </div>
               </div>
             </div>

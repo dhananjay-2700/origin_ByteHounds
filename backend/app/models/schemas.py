@@ -22,10 +22,10 @@ class ForecastPoint(BaseModel):
 
 class ForecastResponse(BaseModel):
     horizonHours: int = 24
-    accuracyMape: float = 94.8
-    modelConfidence: str = "High (Ensemble v4.2)"
-    peakExpectedMW: int = 8740
-    peakWindow: str = "17:00 - 18:30 IST"
+    accuracyMape: float = 92.1
+    modelConfidence: str = "High (LightGBM multi-horizon)"
+    peakExpectedMW: int = 3911
+    peakWindow: str = "09:00 - 11:00 IST"
     points: List[ForecastPoint]
 
 class RiskStage(BaseModel):

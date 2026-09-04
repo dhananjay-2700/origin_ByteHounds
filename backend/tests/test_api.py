@@ -1,7 +1,8 @@
-import pytest
 from fastapi.testclient import TestClient
 from app.main import app
+from app.db.session import init_db
 
+init_db()
 client = TestClient(app)
 
 def test_root():
@@ -29,7 +30,7 @@ def test_live_telemetry():
     response = client.get("/api/telemetry/live")
     assert response.status_code == 200
     data = response.json()
-    assert 4000 < data["currentDemand"] < 12000
+    assert 1000 < data["currentDemand"] < 12000
     assert 48.0 < data["gridFrequency"] < 52.0
     assert data["gridRisk"] in ["STABLE", "RISING", "ELEVATED", "HIGH", "CRITICAL"]
 
@@ -66,10 +67,10 @@ def test_delhi_areas():
     response = client.get("/api/areas")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) >= 5
+    assert len(data) >= 4
     area_ids = [a["id"] for a in data]
-    assert "dwarka" in area_ids
-    assert "rohini" in area_ids
+    assert "south_delhi" in area_ids
+    assert "north_delhi" in area_ids
 
 def test_scenario_simulate():
     payload = {

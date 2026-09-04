@@ -1,0 +1,2 @@
+total_evaluated_24h_windows,mean_actual_peak_mw,mean_predicted_peak_mw,mean_peak_magnitude_error_mw,mae_peak_demand_mw,mean_absolute_peak_timing_error_hours,exact_peak_hour_match_pct,within_1h_peak_match_pct
+1319,5926.235730548471,5365.112838063097,-561.1228924853757,634.8079381142303,3.949203942380591,46.626231993934795,65.73161485974222

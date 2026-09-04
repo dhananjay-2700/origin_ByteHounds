@@ -77,28 +77,28 @@ export const CopilotView: React.FC = () => {
 
   const fallbackResponse = (q: string) => {
     const lower = q.toLowerCase();
-    let ans = "The Delhi Grid is operating ONLINE. Tomorrow's peak is projected at 8,620 MW at 15:15.";
+    let ans = "The PRVAAH X system is monitoring live Delhi Grid telemetry and ML model predictions.";
     let intent = "GENERAL_GRID_QUERY";
     let apis = ["GET /api/dashboard"];
 
     if (lower.includes("peak") || lower.includes("when")) {
-      ans = "Tomorrow's demand is expected to peak at **8,620 MW at 15:15**, during the critical window between **14:15 and 16:00**.";
+      ans = "The LightGBM model forecasts tomorrow's demand peak based on historical demand momentum and ambient temperature curves.";
       intent = "FORECAST_PEAK_LOOKUP";
       apis = ["GET /api/forecast/peak"];
     } else if (lower.includes("why") || lower.includes("risk")) {
-      ans = "Risk is rated **82 / 100 (HIGH)** primarily due to **extreme forecasted temperatures (41.2°C)** driving cooling demand (+38% SHAP impact), combined with elevated baseline load (+27%).";
+      ans = "Grid risk is computed dynamically from peak demand utilization against sub-station transformer thermal capacities and weather stress.";
       intent = "EXPLAINABILITY_ANALYSIS";
       apis = ["GET /api/explanation"];
     } else if (lower.includes("area") || lower.includes("where")) {
-      ans = "**South Delhi** holds the highest modeled risk score at **86 / 100 (CRITICAL)** with projected peak demand of 2,140 MW.";
+      ans = "Regional grid distribution intelligence assigns sub-station risk levels across South, North, West, and East Delhi sectors.";
       intent = "GEOGRAPHIC_RISK_QUERY";
       apis = ["GET /api/areas"];
-    } else if (lower.includes("3°c") || lower.includes("what if") || lower.includes("temp")) {
-      ans = "If temperature rises by +3.0°C (to 44.2°C), peak demand increases from **8,620 MW to 9,355 MW** (+735 MW), escalating grid risk from **82 (HIGH)** to **94 (CRITICAL)**.";
+    } else if (lower.includes("what if") || lower.includes("temp") || lower.includes("scenario")) {
+      ans = "[Simulated Scenario] Counterfactual temperature increase models exponential thermal cooling load escalation.";
       intent = "SIMULATION_EXECUTION";
       apis = ["POST /api/simulation"];
     } else if (lower.includes("anomaly")) {
-      ans = "An anomaly was detected at **14:15** with an observed load of **8,430 MW** exceeding expected 7,820 MW by **+610 MW (HIGH severity)** due to unseasonal cooling spikes.";
+      ans = "Anomaly detection monitors residual deviation between observed telemetry load and expected model confidence bands.";
       intent = "ANOMALY_DETECTION_QUERY";
       apis = ["GET /api/anomalies"];
     }
@@ -109,7 +109,7 @@ export const CopilotView: React.FC = () => {
         id: (Date.now() + 1).toString(),
         sender: "copilot",
         text: ans,
-        intent,
+        intent: intent,
         apiCalls: apis,
       },
     ]);

@@ -48,11 +48,11 @@ export const ForecastView: React.FC = () => {
         <div className="control-card p-6 border border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-white text-xs font-mono font-bold uppercase mb-1">
-            <Activity className="w-4 h-4" />
+            <Activity className="w-4 h-4 text-cyan-400" />
             <span>MACHINE LEARNING DEMAND PIPELINE</span>
           </div>
           <h1 className="text-xl font-bold text-white font-mono">24-Hour Electricity Demand Forecast</h1>
-          <p className="text-xs text-gray-400">Comparing Seasonal Naive, XGBoost (Main), and LightGBM models</p>
+          <p className="text-xs text-gray-400">Comparing Previous Day Baseline and Trained LightGBM Model</p>
         </div>
 
         {/* Model Selector Buttons */}
@@ -64,14 +64,6 @@ export const ForecastView: React.FC = () => {
             }`}
           >
             All Models
-          </button>
-          <button
-            onClick={() => setSelectedModel("xgb")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              selectedModel === "xgb" ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "text-gray-400 hover:text-white"
-            }`}
-          >
-            XGBoost (Main)
           </button>
           <button
             onClick={() => setSelectedModel("lgb")}
@@ -97,48 +89,38 @@ export const ForecastView: React.FC = () => {
       <ScrollReveal delay={200}>
         <div className="control-card p-6 border border-gray-800">
         <div className="h-80 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={forecastSeries} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-            <defs>
-              <linearGradient id="colorXgb" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#ffffff" stopOpacity={0.2}/>
-                <stop offset="95%" stopColor="#ffffff" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-            <XAxis dataKey="time" stroke="#666" tick={{fill: '#666', fontSize: 10}} tickMargin={10} />
-            <YAxis domain={[6000, 9000]} stroke="#666" tick={{fill: '#666', fontSize: 10}} tickMargin={10} />
-            <Tooltip
-              contentStyle={{ backgroundColor: '#000', border: '1px solid #333', color: '#fff', fontSize: '12px' }}
-              itemStyle={{ color: '#ccc' }}
-            />
-            
-            <ReferenceArea x1="10:00" x2="16:00" fill="#222" fillOpacity={0.5} />
-            <ReferenceArea x1="16:00" x2="18:00" fill="#111" fillOpacity={0.5} />
-            
-            <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-            
-            <Line type="monotone" dataKey="actual" name="Actual Load (MW)" stroke="#999" strokeWidth={2} dot={{r: 3, fill: '#999', strokeWidth: 0}} />
-            <Line type="monotone" dataKey="lightgbm" name="LightGBM Challenger (MW)" stroke="#555" strokeWidth={2} strokeDasharray="5 5" dot={false} />
-            
-            {(selectedModel === "all" || selectedModel === "xgb") && (
-              <Line 
-                type="monotone" 
-                dataKey="xgboost" 
-                name="XGBoost Main (MW)" 
-                stroke="#fff" 
-                strokeWidth={3} 
-                dot={{r: 4, fill: '#fff', strokeWidth: 0}} 
-                activeDot={{r: 6, fill: '#fff'}}
-                fillOpacity={1} fill="url(#colorXgb)"
+          {forecastSeries.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={forecastSeries} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
+              <defs>
+                <linearGradient id="colorXgb" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ffffff" stopOpacity={0.2}/>
+                  <stop offset="95%" stopColor="#ffffff" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
+              <XAxis dataKey="time" stroke="#666" tick={{fill: '#666', fontSize: 10}} tickMargin={10} />
+              <YAxis domain={['auto', 'auto']} stroke="#666" tick={{fill: '#666', fontSize: 10}} tickMargin={10} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#000', border: '1px solid #333', color: '#fff', fontSize: '12px' }}
+                itemStyle={{ color: '#ccc' }}
               />
-            )}
-            
-            {(selectedModel === "all" || selectedModel === "baseline") && (
-                <Line type="monotone" dataKey="baseline" stroke="#444" strokeWidth={1} strokeDasharray="3 3" dot={false} name="Seasonal Naive Baseline (MW)" />
-            )}
-            </LineChart>
-          </ResponsiveContainer>
+              
+              <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
+              
+              <Line type="monotone" dataKey="actual" name="Actual Load (MW)" stroke="#22d3ee" strokeWidth={2.5} dot={{r: 3, fill: '#22d3ee', strokeWidth: 0}} />
+              <Line type="monotone" dataKey="lightgbm" name="LightGBM Model (MW)" stroke="#fbbf24" strokeWidth={3} dot={{r: 4, fill: '#fbbf24', strokeWidth: 0}} />
+              
+              {(selectedModel === "all" || selectedModel === "baseline") && (
+                  <Line type="monotone" dataKey="baseline" stroke="#9ca3af" strokeWidth={1.5} strokeDasharray="3 3" dot={false} name="Previous Day Baseline (MW)" />
+              )}
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex items-center justify-center text-sm font-mono text-gray-500">
+              Loading Live Forecast Series...
+            </div>
+          )}
         </div>
         </div>
       </ScrollReveal>
@@ -151,22 +133,22 @@ export const ForecastView: React.FC = () => {
               <Cpu className="w-3 h-3" /> Mean Absolute Error (MAE)
             </div>
             <div className="text-2xl font-bold text-white font-mono flex items-baseline gap-1">
-              {metrics?.mae || "48.5"} <span className="text-xs text-gray-500">MW</span>
+              {metrics?.mae ?? "--"} <span className="text-xs text-gray-500">MW</span>
             </div>
             <div className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3" /> High Precision
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" /> High Precision
             </div>
           </div>
 
           <div className="control-card p-4 border border-gray-800 bg-black flex flex-col justify-center">
             <div className="text-gray-500 font-mono text-[10px] uppercase flex items-center gap-1 mb-1">
-              <BarChart2 className="w-3 h-3" /> MAPE / WAPE
+              <BarChart2 className="w-3 h-3" /> MAPE / WAPE Error
             </div>
             <div className="text-2xl font-bold text-white font-mono">
-              {metrics?.mape || "1.42"}%
+              {metrics?.mape ? (metrics.mape * 100).toFixed(2) : (metrics?.mape ?? "--")}%
             </div>
             <div className="text-xs text-gray-400 mt-1">
-              Standard Threshold &lt; 3.5%
+              Test Set Validation Performance
             </div>
           </div>
 
@@ -175,22 +157,22 @@ export const ForecastView: React.FC = () => {
               <CheckCircle2 className="w-3 h-3" /> Peak Demand Error
             </div>
             <div className="text-2xl font-bold text-white font-mono">
-              0.85%
+              {metrics?.peak_error ? `${metrics.peak_error}%` : "--"}
             </div>
             <div className="text-xs text-gray-400 mt-1">
-              Timing Error: 0 mins
+              Timing Error: {metrics?.peak_timing_error || "0 mins"}
             </div>
           </div>
 
           <div className="control-card p-4 border border-gray-800 bg-black flex flex-col justify-center">
             <div className="text-gray-500 font-mono text-[10px] uppercase flex items-center gap-1 mb-1">
-              <Activity className="w-3 h-3" /> Selected Model
+              <Activity className="w-3 h-3" /> Active Production Model
             </div>
             <div className="text-lg font-bold text-white font-mono">
-              XGBoost (Main)
+              {metrics?.best_model || "LightGBM Multi-Horizon"}
             </div>
             <div className="text-xs text-gray-400 mt-1">
-              Evaluated against 90-day history
+              Trained on 393,440 Delhi Records
             </div>
           </div>
         </div>
@@ -198,3 +180,4 @@ export const ForecastView: React.FC = () => {
     </div>
   );
 };
+

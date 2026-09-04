@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Sliders, Play, AlertTriangle, RefreshCw, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Sliders, Play, AlertTriangle, RefreshCw, ArrowUpRight, ArrowDownRight, Info } from "lucide-react";
 import { ScrollReveal } from "./ScrollLayout";
 
 export const ScenarioLabView: React.FC = () => {
@@ -11,18 +11,36 @@ export const ScenarioLabView: React.FC = () => {
   const [demandGrowth, setDemandGrowth] = useState<number>(0.0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Default base case
-  const basePeak = 8620;
-  const baseRiskScore = 82;
-  const baseRiskLevel = "HIGH";
+  // Dynamic baseline case loaded from LightGBM model API
+  const [basePeak, setBasePeak] = useState<number>(3910);
+  const [baseRiskScore, setBaseRiskScore] = useState<number>(39);
+  const [baseRiskLevel, setBaseRiskLevel] = useState<string>("MODERATE");
 
   // Simulated state
-  const [simulatedPeak, setSimulatedPeak] = useState<number>(9010);
-  const [simulatedRiskScore, setSimulatedRiskScore] = useState<number>(91);
-  const [simulatedRiskLevel, setSimulatedRiskLevel] = useState<string>("CRITICAL");
+  const [simulatedPeak, setSimulatedPeak] = useState<number>(4150);
+  const [simulatedRiskScore, setSimulatedRiskScore] = useState<number>(45);
+  const [simulatedRiskLevel, setSimulatedRiskLevel] = useState<string>("MODERATE");
   const [alertMessage, setAlertMessage] = useState<string>(
-    "A +2.0°C temperature increase could push projected demand above the configured grid risk threshold."
+    "[Simulated / Modeled Scenario] Stress test simulation mode active."
   );
+
+  useEffect(() => {
+    const fetchBaseline = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/dashboard");
+        if (res.ok) {
+          const data = await res.json();
+          setBasePeak(Math.round(data.tomorrow_peak));
+          setBaseRiskScore(data.grid_risk_score);
+          setBaseRiskLevel(data.grid_risk_level);
+          setSimulatedPeak(Math.round(data.tomorrow_peak * 1.05));
+        }
+      } catch (err) {
+        console.error("Error fetching simulation baseline:", err);
+      }
+    };
+    fetchBaseline();
+  }, []);
 
   const handleRunSimulation = async () => {
     setIsLoading(true);
@@ -46,7 +64,6 @@ export const ScenarioLabView: React.FC = () => {
         setSimulatedRiskLevel(data.scenario_risk_level);
         setAlertMessage(data.alert_message);
       } else {
-        // Fallback simulation calculation
         computeFallback();
       }
     } catch (e) {
@@ -75,7 +92,7 @@ export const ScenarioLabView: React.FC = () => {
     else setSimulatedRiskLevel("LOW");
 
     setAlertMessage(
-      `A ${tempDelta >= 0 ? "+" : ""}${tempDelta.toFixed(1)}°C temperature shift projects peak demand at ${newPeak.toLocaleString()} MW (${newRisk}/100 Risk).`
+      `[Simulated / Modeled Scenario] A ${tempDelta >= 0 ? "+" : ""}${tempDelta.toFixed(1)}°C shift projects peak demand at ${newPeak.toLocaleString()} MW (${newRisk}/100 Risk).`
     );
   };
 
@@ -85,13 +102,21 @@ export const ScenarioLabView: React.FC = () => {
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header Banner */}
       <ScrollReveal delay={100} direction="up">
-        <div className="control-card p-6 border border-gray-800">
-        <div className="flex items-center space-x-2 text-purple-400 text-xs font-mono font-bold uppercase mb-1">
-          <Sliders className="w-4 h-4" />
-          <span>PREDICTIVE SCENARIO SIMULATOR</span>
-        </div>
-        <h1 className="text-xl font-bold text-white font-mono">"What happens if tomorrow gets hotter?"</h1>
-        <p className="text-xs text-gray-400">Stress test the Delhi Grid by adjusting environmental and operational variables</p>
+        <div className="control-card p-6 border border-gray-800 relative">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-2 text-purple-400 text-xs font-mono font-bold uppercase">
+              <Sliders className="w-4 h-4" />
+              <span>PREDICTIVE SCENARIO LAB</span>
+            </div>
+            <span className="px-2.5 py-1 rounded-full bg-purple-950/60 border border-purple-500/40 text-purple-300 text-[11px] font-mono font-bold flex items-center">
+              <Info className="w-3 h-3 mr-1 text-purple-400" />
+              Simulated / Modeled Scenario Tool
+            </span>
+          </div>
+          <h1 className="text-xl font-bold text-white font-mono">"What happens if tomorrow gets hotter?"</h1>
+          <p className="text-xs text-gray-400 mt-1">
+            Hypothetical counterfactual testing tool. Adjust variables below to run modeled what-if simulations against live ML baseline forecasts.
+          </p>
         </div>
       </ScrollReveal>
 
@@ -201,12 +226,12 @@ export const ScenarioLabView: React.FC = () => {
             {isLoading ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>RUNNING WHAT-IF MODEL...</span>
+                <span>COMPUTING SCENARIO MODEL...</span>
               </>
             ) : (
               <>
                 <Play className="w-4 h-4 fill-white" />
-                <span>RUN SIMULATION</span>
+                <span>RUN WHAT-IF SIMULATION</span>
               </>
             )}
           </button>
@@ -221,27 +246,29 @@ export const ScenarioLabView: React.FC = () => {
           <div className="grid grid-cols-2 gap-4 font-mono">
             {/* BASE CASE */}
             <div className="control-card p-5 border-l-4 border-l-gray-500">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">BASE CASE</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">ML BASELINE</span>
               <div className="text-xs text-gray-400">Peak Demand</div>
-              <div className="text-2xl font-extrabold text-white mt-1">8,620 <span className="text-xs font-normal">MW</span></div>
+              <div className="text-2xl font-extrabold text-white mt-1">
+                {basePeak.toLocaleString()} <span className="text-xs font-normal">MW</span>
+              </div>
               
               <div className="mt-4 pt-3 border-t border-gray-800">
-                <div className="text-[10px] text-gray-400">Grid Risk</div>
-                <div className="text-sm font-bold text-amber-400">82 (HIGH)</div>
+                <div className="text-[10px] text-gray-400">Model Risk Score</div>
+                <div className="text-sm font-bold text-amber-400">{baseRiskScore} ({baseRiskLevel})</div>
               </div>
             </div>
 
             {/* SIMULATED CASE */}
-            <div className="control-card p-5 border-l-4 border-l-rose-500 glow-high bg-rose-950/20">
-              <span className="text-[10px] font-bold text-rose-300 uppercase tracking-wider block mb-1">SIMULATED CASE</span>
-              <div className="text-xs text-rose-300">Projected Peak</div>
-              <div className="text-2xl font-extrabold text-rose-400 mt-1">
+            <div className="control-card p-5 border-l-4 border-l-purple-500 glow-high bg-purple-950/20">
+              <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider block mb-1">MODELED SCENARIO</span>
+              <div className="text-xs text-purple-300">Projected Peak</div>
+              <div className="text-2xl font-extrabold text-purple-300 mt-1">
                 {simulatedPeak.toLocaleString()} <span className="text-xs font-normal">MW</span>
               </div>
               
               <div className="mt-4 pt-3 border-t border-gray-800/80">
-                <div className="text-[10px] text-rose-300/80">Simulated Risk</div>
-                <div className="text-sm font-bold text-rose-300">
+                <div className="text-[10px] text-purple-300/80">Scenario Risk</div>
+                <div className="text-sm font-bold text-purple-300">
                   {simulatedRiskScore} ({simulatedRiskLevel})
                 </div>
               </div>
@@ -251,7 +278,7 @@ export const ScenarioLabView: React.FC = () => {
           {/* PEAK CHANGE INDICATOR */}
           <div className="control-card p-5 border border-gray-800 flex items-center justify-between font-mono">
             <div>
-              <span className="text-xs text-gray-400 uppercase">PEAK DEMAND DELTA</span>
+              <span className="text-xs text-gray-400 uppercase">SIMULATED PEAK DELTA</span>
               <div className="text-xl font-extrabold text-white mt-0.5">
                 {peakChange >= 0 ? `+${peakChange.toLocaleString()}` : peakChange.toLocaleString()} MW
               </div>
@@ -262,15 +289,15 @@ export const ScenarioLabView: React.FC = () => {
           </div>
 
           {/* SCENARIO ALERT BANNER */}
-          <div className="control-card p-5 border-l-4 border-l-rose-500 bg-rose-950/40 text-xs">
-            <div className="flex items-center space-x-2 text-rose-300 font-bold uppercase mb-2">
-              <AlertTriangle className="w-4 h-4 text-rose-400" />
-              <span>⚠ SCENARIO ALERT</span>
+          <div className="control-card p-5 border-l-4 border-l-purple-500 bg-purple-950/40 text-xs">
+            <div className="flex items-center space-x-2 text-purple-300 font-bold uppercase mb-2">
+              <AlertTriangle className="w-4 h-4 text-purple-400" />
+              <span>MODELED WHAT-IF OUTCOME</span>
             </div>
-            <p className="text-rose-200 leading-relaxed font-mono">
+            <p className="text-purple-200 leading-relaxed font-mono">
               {alertMessage}
             </p>
-            </div>
+          </div>
 
           </div>
         </ScrollReveal>
