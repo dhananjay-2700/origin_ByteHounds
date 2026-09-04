@@ -10,46 +10,47 @@ interface ParallaxIntroProps {
 export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplete }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [images, setImages] = useState<HTMLImageElement[]>([]);
-  const [currentFrameIndex, setCurrentFrameIndex] = useState<number>(0);
+  
+  const imagesRef = useRef<HTMLImageElement[]>([]);
+  const targetFrameRef = useRef<number>(0);
+  const currentFrameRef = useRef<number>(0);
+  const lastDrawnFrameRef = useRef<number>(-1);
+  
   const [scrollProgress, setScrollProgress] = useState<number>(0);
   const [isSkipped, setIsSkipped] = useState<boolean>(false);
 
   const totalFrames = 91;
 
-  // Preload user's exact 91 frame photos
+  // Preload user's exact 91 PNG frame photos
   useEffect(() => {
     const loadedImages: HTMLImageElement[] = [];
-    let loadedCount = 0;
 
     for (let i = 1; i <= totalFrames; i++) {
       const img = new Image();
       const frameNum = String(i).padStart(3, "0");
       img.src = `/animation/frame_${frameNum}.png`;
-
-      img.onload = () => {
-        loadedCount++;
-        if (loadedCount === 1) {
-          renderFrame(0, loadedImages);
-        }
-      };
       loadedImages.push(img);
     }
-    setImages(loadedImages);
+    imagesRef.current = loadedImages;
   }, []);
 
-  const renderFrame = (index: number, imgList = images) => {
+  // Canvas render function
+  const renderFrame = (frameIndex: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const img = imgList[index];
-    if (img && img.complete && img.naturalWidth > 0) {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+    const imgList = imagesRef.current;
+    const idx = Math.max(0, Math.min(totalFrames - 1, Math.round(frameIndex)));
+    const img = imgList[idx];
 
-      // Cover scaling math to maintain crisp ratio without distortion
+    if (img && img.complete && img.naturalWidth > 0) {
+      if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
       const imgRatio = img.naturalWidth / img.naturalHeight;
       const canvasRatio = canvas.width / canvas.height;
       let drawWidth = canvas.width;
@@ -67,9 +68,11 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+      lastDrawnFrameRef.current = idx;
     }
   };
 
+  // Scroll listener -> updates target frame smoothly
   useEffect(() => {
     const handleScroll = () => {
       if (!containerRef.current || isSkipped) return;
@@ -82,26 +85,42 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
       const progress = Math.min(1, Math.max(0, scrollTop / containerHeight));
       setScrollProgress(progress);
 
-      // Map ALL 91 frames across 0.0 to 0.85 of total scroll distance
+      // Target frame based on scroll progress (0.0 to 0.85)
       const animProgress = Math.min(1, progress / 0.85);
-      const frameIdx = Math.min(totalFrames - 1, Math.floor(animProgress * (totalFrames - 1)));
-
-      setCurrentFrameIndex(frameIdx);
-
-      if (images.length > 0) {
-        renderFrame(frameIdx);
-      }
+      targetFrameRef.current = animProgress * (totalFrames - 1);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", () => renderFrame(currentFrameIndex), { passive: true });
     handleScroll();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", () => renderFrame(currentFrameIndex));
     };
-  }, [images, currentFrameIndex, isSkipped]);
+  }, [isSkipped]);
+
+  // RequestAnimationFrame 60FPS LERP Smoothing Loop
+  useEffect(() => {
+    let animId: number;
+
+    const tick = () => {
+      // LERP (Linear Interpolation) for buttery smooth frame transitions
+      const diff = targetFrameRef.current - currentFrameRef.current;
+      currentFrameRef.current += diff * 0.14; // smooth lerp interpolation factor
+
+      const roundedFrame = Math.round(currentFrameRef.current);
+      if (roundedFrame !== lastDrawnFrameRef.current) {
+        renderFrame(roundedFrame);
+      }
+
+      animId = requestAnimationFrame(tick);
+    };
+
+    tick();
+
+    return () => {
+      cancelAnimationFrame(animId);
+    };
+  }, []);
 
   const handleSkip = () => {
     setIsSkipped(true);
@@ -117,19 +136,19 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
   const parallaxOffset = scrollProgress > 0.85 ? (scrollProgress - 0.85) * 6.66 * 100 : 0;
 
   return (
-    <div ref={containerRef} className="relative w-full h-[650vh] bg-[#090d16]">
+    <div ref={containerRef} className="relative w-full h-[600vh] bg-[#090d16]">
       {/* Sticky Parallax Viewport */}
       <div
         className="sticky top-0 w-full h-screen overflow-hidden z-30 transition-transform duration-75 ease-out"
         style={{ transform: `translateY(-${parallaxOffset}%)` }}
       >
-        {/* Canvas rendering crisp frame photos with NO blur */}
+        {/* Canvas rendering crisp frame photos with 60FPS LERP smoothing and NO blur */}
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full object-cover"
         />
 
-        {/* Subtle vignette gradient for text readability without blurring images */}
+        {/* Subtle vignette gradient for text contrast */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#090d16]/90 via-[#090d16]/30 to-[#090d16]/10 pointer-events-none" />
 
         {/* Skip Intro Button */}
@@ -181,7 +200,7 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
 
         {/* Scroll Prompt */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-2 text-xs font-mono text-cyan-400 z-30 animate-bounce pointer-events-none">
-          <span className="tracking-widest uppercase text-[10px] font-bold">Scroll Down To Play Frame Sequence</span>
+          <span className="tracking-widest uppercase text-[10px] font-bold font-mono">Scroll Down To Play Smooth Sequence</span>
           <ChevronDown className="w-5 h-5 text-cyan-400" />
         </div>
       </div>
