@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Zap, ChevronDown, Eye } from "lucide-react";
+import { Zap, ChevronDown } from "lucide-react";
 
 interface ParallaxIntroProps {
   onComplete?: () => void;
@@ -15,9 +15,9 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
   const [scrollProgress, setScrollProgress] = useState<number>(0);
   const [isSkipped, setIsSkipped] = useState<boolean>(false);
 
-  const totalFrames = 94;
+  const totalFrames = 91;
 
-  // Preload frame photos from /animation/frame_001.jpg to /animation/frame_094.jpg
+  // Preload user's exact frame photos from /animation/frame_001.png to /animation/frame_091.png
   useEffect(() => {
     const loadedImages: HTMLImageElement[] = [];
     let loadedCount = 0;
@@ -25,12 +25,11 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
     for (let i = 1; i <= totalFrames; i++) {
       const img = new Image();
       const frameNum = String(i).padStart(3, "0");
-      img.src = `/animation/frame_${frameNum}.jpg`;
+      img.src = `/animation/frame_${frameNum}.png`;
 
       img.onload = () => {
         loadedCount++;
         if (loadedCount === 1) {
-          // Render initial frame to canvas as soon as 1st frame loads
           renderFrame(0, loadedImages);
         }
       };
@@ -50,7 +49,7 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
 
-      // Cover scaling math
+      // Cover scaling math to maintain ratio
       const imgRatio = img.naturalWidth / img.naturalHeight;
       const canvasRatio = canvas.width / canvas.height;
       let drawWidth = canvas.width;
@@ -71,20 +70,20 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
     }
   };
 
-  // Track window scroll for frame playback, blur, and sticky parallax translation
+  // Track window scroll position for sequence playback, blur, and sticky parallax shift
   useEffect(() => {
     const handleScroll = () => {
       if (!containerRef.current || isSkipped) return;
       const rect = containerRef.current.getBoundingClientRect();
       const containerHeight = containerRef.current.offsetHeight - window.innerHeight;
-      
+
       if (containerHeight <= 0) return;
 
       const scrollTop = Math.max(0, -rect.top);
       const progress = Math.min(1, Math.max(0, scrollTop / containerHeight));
       setScrollProgress(progress);
 
-      // Frame selection based on scroll progress (0.0 to 0.65)
+      // Map scroll progress to frame index (0.0 to 0.65)
       const frameProgress = Math.min(1, progress / 0.65);
       const frameIdx = Math.min(totalFrames - 1, Math.floor(frameProgress * (totalFrames - 1)));
       setCurrentFrameIndex(frameIdx);
@@ -111,11 +110,11 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
 
   if (isSkipped) return null;
 
-  // Calculate blur intensity as user scrolls (0px at start -> 12px at peak scroll)
+  // Calculate backdrop blur intensity as user scrolls (0px to 16px)
   const blurPx = Math.min(16, scrollProgress * 24);
-  // Calculate title opacity & scale (fades in as photos scroll & blurs)
+  // Title opacity & scale transition
   const titleOpacity = Math.min(1, Math.max(0, (scrollProgress - 0.15) * 2.5));
-  // Sticky Parallax translateY shift
+  // Sticky Parallax upward translation
   const parallaxOffset = scrollProgress > 0.7 ? (scrollProgress - 0.7) * 3.33 * 100 : 0;
 
   return (
@@ -125,14 +124,14 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
         className="sticky top-0 w-full h-screen overflow-hidden z-30 transition-transform duration-75 ease-out"
         style={{ transform: `translateY(-${parallaxOffset}%)` }}
       >
-        {/* Canvas Background rendering scroll photos */}
+        {/* Canvas rendering user's exact PNG animation frame photos */}
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full object-cover transition-all duration-300"
           style={{ filter: `blur(${blurPx}px) brightness(${1 - scrollProgress * 0.4})` }}
         />
 
-        {/* Dark Vignette Overlay */}
+        {/* Dark Overlay Vignette */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#090d16] via-[#090d16]/50 to-[#090d16]/30" />
 
         {/* Skip Intro Button */}
@@ -143,7 +142,7 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
           Skip Intro →
         </button>
 
-        {/* Center Content: Bold Italics Site Name & Tagline */}
+        {/* Center Overlay: Bold Italics Site Name */}
         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-30">
           <div
             className="transition-all duration-500 transform"
@@ -152,18 +151,18 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
               transform: `scale(${0.9 + titleOpacity * 0.1}) translateY(${(1 - titleOpacity) * 20}px)`,
             }}
           >
-            {/* Site Icon Badge */}
+            {/* Badge */}
             <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono font-bold mb-4 backdrop-blur-md">
               <Zap className="w-4 h-4 fill-amber-400/20" />
               <span>DELHI GRID DEMAND & RISK INTELLIGENCE</span>
             </div>
 
-            {/* BOLD ITALIC FONT NAME OF SITE */}
+            {/* BOLD ITALIC FONT SITE NAME */}
             <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black italic tracking-wider font-mono text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-amber-300 drop-shadow-[0_0_35px_rgba(34,211,238,0.4)]">
               GRIDWISE AI
             </h1>
 
-            {/* Product Tagline */}
+            {/* Tagline */}
             <p className="mt-4 text-base sm:text-xl font-medium text-cyan-100 font-mono tracking-wide max-w-2xl mx-auto italic drop-shadow-md">
               “Don’t just predict the peak. Prepare for it.”
             </p>
@@ -182,7 +181,7 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
           </div>
         </div>
 
-        {/* Bottom Scroll Prompt */}
+        {/* Scroll Prompt */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-2 text-xs font-mono text-cyan-400 z-30 animate-bounce">
           <span className="tracking-widest uppercase text-[10px] font-bold">Scroll Down To Enter Command Center</span>
           <ChevronDown className="w-5 h-5 text-cyan-400" />
