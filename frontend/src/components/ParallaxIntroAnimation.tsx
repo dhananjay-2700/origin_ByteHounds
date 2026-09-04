@@ -1,0 +1,193 @@
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import { Zap, ChevronDown, Eye } from "lucide-react";
+
+interface ParallaxIntroProps {
+  onComplete?: () => void;
+}
+
+export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplete }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [images, setImages] = useState<HTMLImageElement[]>([]);
+  const [currentFrameIndex, setCurrentFrameIndex] = useState<number>(0);
+  const [scrollProgress, setScrollProgress] = useState<number>(0);
+  const [isSkipped, setIsSkipped] = useState<boolean>(false);
+
+  const totalFrames = 94;
+
+  // Preload frame photos from /animation/frame_001.jpg to /animation/frame_094.jpg
+  useEffect(() => {
+    const loadedImages: HTMLImageElement[] = [];
+    let loadedCount = 0;
+
+    for (let i = 1; i <= totalFrames; i++) {
+      const img = new Image();
+      const frameNum = String(i).padStart(3, "0");
+      img.src = `/animation/frame_${frameNum}.jpg`;
+
+      img.onload = () => {
+        loadedCount++;
+        if (loadedCount === 1) {
+          // Render initial frame to canvas as soon as 1st frame loads
+          renderFrame(0, loadedImages);
+        }
+      };
+      loadedImages.push(img);
+    }
+    setImages(loadedImages);
+  }, []);
+
+  const renderFrame = (index: number, imgList = images) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = imgList[index];
+    if (img && img.complete && img.naturalWidth > 0) {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // Cover scaling math
+      const imgRatio = img.naturalWidth / img.naturalHeight;
+      const canvasRatio = canvas.width / canvas.height;
+      let drawWidth = canvas.width;
+      let drawHeight = canvas.height;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      if (canvasRatio > imgRatio) {
+        drawHeight = canvas.width / imgRatio;
+        offsetY = (canvas.height - drawHeight) / 2;
+      } else {
+        drawWidth = canvas.height * imgRatio;
+        offsetX = (canvas.width - drawWidth) / 2;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+    }
+  };
+
+  // Track window scroll for frame playback, blur, and sticky parallax translation
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!containerRef.current || isSkipped) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const containerHeight = containerRef.current.offsetHeight - window.innerHeight;
+      
+      if (containerHeight <= 0) return;
+
+      const scrollTop = Math.max(0, -rect.top);
+      const progress = Math.min(1, Math.max(0, scrollTop / containerHeight));
+      setScrollProgress(progress);
+
+      // Frame selection based on scroll progress (0.0 to 0.65)
+      const frameProgress = Math.min(1, progress / 0.65);
+      const frameIdx = Math.min(totalFrames - 1, Math.floor(frameProgress * (totalFrames - 1)));
+      setCurrentFrameIndex(frameIdx);
+
+      if (images.length > 0) {
+        renderFrame(frameIdx);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", () => renderFrame(currentFrameIndex), { passive: true });
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", () => renderFrame(currentFrameIndex));
+    };
+  }, [images, currentFrameIndex, isSkipped]);
+
+  const handleSkip = () => {
+    setIsSkipped(true);
+    if (onComplete) onComplete();
+  };
+
+  if (isSkipped) return null;
+
+  // Calculate blur intensity as user scrolls (0px at start -> 12px at peak scroll)
+  const blurPx = Math.min(16, scrollProgress * 24);
+  // Calculate title opacity & scale (fades in as photos scroll & blurs)
+  const titleOpacity = Math.min(1, Math.max(0, (scrollProgress - 0.15) * 2.5));
+  // Sticky Parallax translateY shift
+  const parallaxOffset = scrollProgress > 0.7 ? (scrollProgress - 0.7) * 3.33 * 100 : 0;
+
+  return (
+    <div ref={containerRef} className="relative w-full h-[280vh] bg-[#090d16]">
+      {/* Sticky Parallax Viewport */}
+      <div
+        className="sticky top-0 w-full h-screen overflow-hidden z-30 transition-transform duration-75 ease-out"
+        style={{ transform: `translateY(-${parallaxOffset}%)` }}
+      >
+        {/* Canvas Background rendering scroll photos */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full object-cover transition-all duration-300"
+          style={{ filter: `blur(${blurPx}px) brightness(${1 - scrollProgress * 0.4})` }}
+        />
+
+        {/* Dark Vignette Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#090d16] via-[#090d16]/50 to-[#090d16]/30" />
+
+        {/* Skip Intro Button */}
+        <button
+          onClick={handleSkip}
+          className="absolute top-6 right-6 z-40 px-3.5 py-1.5 rounded-full bg-gray-900/80 border border-gray-700/80 text-gray-300 hover:text-white text-xs font-mono font-semibold backdrop-blur-md shadow-lg transition"
+        >
+          Skip Intro →
+        </button>
+
+        {/* Center Content: Bold Italics Site Name & Tagline */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-30">
+          <div
+            className="transition-all duration-500 transform"
+            style={{
+              opacity: titleOpacity,
+              transform: `scale(${0.9 + titleOpacity * 0.1}) translateY(${(1 - titleOpacity) * 20}px)`,
+            }}
+          >
+            {/* Site Icon Badge */}
+            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono font-bold mb-4 backdrop-blur-md">
+              <Zap className="w-4 h-4 fill-amber-400/20" />
+              <span>DELHI GRID DEMAND & RISK INTELLIGENCE</span>
+            </div>
+
+            {/* BOLD ITALIC FONT NAME OF SITE */}
+            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black italic tracking-wider font-mono text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-amber-300 drop-shadow-[0_0_35px_rgba(34,211,238,0.4)]">
+              GRIDWISE AI
+            </h1>
+
+            {/* Product Tagline */}
+            <p className="mt-4 text-base sm:text-xl font-medium text-cyan-100 font-mono tracking-wide max-w-2xl mx-auto italic drop-shadow-md">
+              “Don’t just predict the peak. Prepare for it.”
+            </p>
+
+            <div className="mt-6 flex flex-wrap justify-center gap-3 text-xs font-mono text-gray-300">
+              <span className="px-3 py-1 rounded-md bg-gray-900/80 border border-gray-800 backdrop-blur-sm">
+                ● 24h Demand Forecasting
+              </span>
+              <span className="px-3 py-1 rounded-md bg-gray-900/80 border border-gray-800 backdrop-blur-sm">
+                ● SHAP Driver Attribution
+              </span>
+              <span className="px-3 py-1 rounded-md bg-gray-900/80 border border-gray-800 backdrop-blur-sm">
+                ● Interactive What-If Scenario Lab
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Scroll Prompt */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-2 text-xs font-mono text-cyan-400 z-30 animate-bounce">
+          <span className="tracking-widest uppercase text-[10px] font-bold">Scroll Down To Enter Command Center</span>
+          <ChevronDown className="w-5 h-5 text-cyan-400" />
+        </div>
+      </div>
+    </div>
+  );
+};
