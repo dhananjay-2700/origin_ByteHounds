@@ -1,4 +1,5 @@
 import math
+<<<<<<< Updated upstream
 import sys
 from pathlib import Path
 from typing import List, Dict, Tuple
@@ -10,6 +11,9 @@ if str(backend_dir) not in sys.path:
 
 from ml_service import ml_service
 
+=======
+from typing import List, Dict, Tuple, Optional
+>>>>>>> Stashed changes
 from ..models.schemas import (
     GridMetricsResponse,
     ForecastPoint,
@@ -205,6 +209,13 @@ def get_delhi_areas() -> List[DelhiArea]:
             )
         )
     return result
+
+def get_area_by_id(area_id: str) -> Optional[DelhiArea]:
+    clean_id = area_id.lower().replace("-", "_").replace(" ", "_")
+    for a in get_delhi_areas():
+        if a.id.lower() == clean_id or a.id.lower() == area_id.lower() or a.name.lower().startswith(area_id.lower()):
+            return a
+    return None
 
 def simulate_scenario(req: ScenarioRequest) -> ScenarioResponse:
     res = ml_service.run_simulation(

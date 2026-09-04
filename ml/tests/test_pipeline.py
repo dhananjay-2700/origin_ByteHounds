@@ -18,7 +18,12 @@ sys.path.insert(0, str(current_dir.parent.parent))
 from ml.data.preprocessing import aggregate_5min_to_hourly, handle_missing_hourly_gaps
 from ml.data.splitting import split_chronological
 from ml.data.validation import audit_data_and_splits, audit_raw_data
-from ml.features.engineering import create_hourly_base_features, build_multi_horizon_samples
+from ml.data.windowing import build_timeseries_windows
+from ml.features.engineering import (
+    create_hourly_base_features,
+    build_multi_horizon_samples,
+    compute_peak_sample_weights
+)
 from ml.models.baselines import predict_previous_hour, predict_previous_day, predict_previous_week
 from ml.models.lightgbm_model import create_model, LightGBMForecaster
 from ml.inference.predict import predict_next_24_hours
@@ -151,7 +156,8 @@ class TestMLPipeline(unittest.TestCase):
             "cloud_cover": np.full(250, 20.0),
             "wind_speed": np.full(250, 5.0),
             "temperature_squared": np.full(250, 400.0),
-            "temp_humidity_interaction": np.full(250, 1000.0)
+            "temp_humidity_interaction": np.full(250, 1000.0),
+            "cooling_degree_hours": np.full(250, 5.0)
         })
         df_feats = create_hourly_base_features(df_base)
 
@@ -239,6 +245,112 @@ class TestMLPipeline(unittest.TestCase):
         forecaster = LightGBMForecaster()
         with self.assertRaises(RuntimeError):
             forecaster.get_feature_importances()
+
+    def test_peak_and_base_features(self):
+        """Verifies rolling max, min, peak ratio, and demand std ratio feature calculations."""
+        ts = pd.date_range("2024-01-01 00:00", periods=50, freq="h")
+        demands = np.arange(100, 150, dtype=float)
+        df = pd.DataFrame({
+            "timestamp": ts,
+            "demand_interpolated": demands
+        })
+        feats = create_hourly_base_features(df)
+        
+        # At row 30 (value = 130):
+        # 24h window values are 107..130 -> max = 130.0, min = 107.0
+        self.assertEqual(feats.loc[30, "rolling_max_24h"], 130.0)
+        self.assertEqual(feats.loc[30, "rolling_min_24h"], 107.0)
+        # peak_ratio_24h = lag_1h (130) / (rolling_max_24h (130) + 1e-5) = 1.0
+        self.assertAlmostEqual(feats.loc[30, "peak_ratio_24h"], 1.0, places=4)
+
+    def test_peak_sample_weighting(self):
+        """
+        Verifies peak-focused sample weight generation (Experiment 4):
+          1. Tail/extreme-demand samples receive strictly higher weights.
+          2. Thresholds (q75, q90, q95) are derived ONLY from training partition.
+          3. No validation/test data influences threshold calculation.
+        """
+        # Synthetic train: 1,000 to 5,000 MW
+        y_train = pd.Series(np.linspace(1000, 5000, 100))
+        weights_train, train_thresholds = compute_peak_sample_weights(y_train, train_thresholds=None)
+
+        # 1. Weights generated correctly
+        self.assertEqual(len(weights_train), 100)
+        # 2. Extreme/tail demand (top values near 5000 MW) receives higher weight than low demand (near 1000 MW)
+        self.assertGreater(weights_train[-1], weights_train[0])
+        self.assertAlmostEqual(weights_train[0], 1.0)  # low demand should be baseline weight 1.0
+
+        # 3. Thresholds derived ONLY from training data
+        expected_q75 = float(np.percentile(y_train, 75))
+        expected_q90 = float(np.percentile(y_train, 90))
+        expected_q95 = float(np.percentile(y_train, 95))
+        self.assertAlmostEqual(train_thresholds["q_high"], expected_q75)
+        self.assertAlmostEqual(train_thresholds["q_extreme"], expected_q90)
+        self.assertAlmostEqual(train_thresholds["q_tail"], expected_q95)
+
+        # 4. Compute weights on validation using TRAIN thresholds
+        # Synthetic val: 2,000 to 8,000 MW (different distribution)
+        y_val = pd.Series(np.linspace(2000, 8000, 50))
+        weights_val, used_thresholds = compute_peak_sample_weights(y_val, train_thresholds=train_thresholds)
+
+        # Confirm validation used train_thresholds without modifying them
+        self.assertEqual(used_thresholds["q_high"], expected_q75)
+        self.assertEqual(used_thresholds["q_extreme"], expected_q90)
+        self.assertEqual(used_thresholds["q_tail"], expected_q95)
+
+    def test_timeseries_windowing(self):
+        """Verifies 168h context -> 24h forecast window dataset construction."""
+        ts = pd.date_range("2024-01-01 00:00", periods=300, freq="h")
+        df_base = pd.DataFrame({
+            "timestamp": ts,
+            "demand_mean": np.arange(1, 301, dtype=float),
+            "demand_interpolated": np.arange(1, 301, dtype=float)
+        })
+        origins = pd.Series([ts[200], ts[220]])
+
+        windows = build_timeseries_windows(
+            df_aligned=df_base,
+            origins=origins,
+            context_len=168,
+            prediction_len=24,
+            require_target=True
+        )
+
+        self.assertEqual(windows["num_windows"], 2)
+        self.assertEqual(windows["x_context"].shape, (2, 168))
+        self.assertEqual(windows["y_target"].shape, (2, 24))
+
+        # Origin 1 (ts[200]): context should end at value 201 (index 200)
+        self.assertEqual(windows["x_context"][0, -1], 201.0)
+        # Target for h=1 should be value 202 (index 201)
+        self.assertEqual(windows["y_target"][0, 0], 202.0)
+        # Target for h=24 should be value 225 (index 224)
+        self.assertEqual(windows["y_target"][0, -1], 225.0)
+
+    def test_timesfm_architecture_validation(self):
+        """Verifies that validate_timesfm_architecture rejects models with <150M parameters."""
+        from ml.data.validation import validate_timesfm_architecture
+
+        class MockTinyForecaster:
+            model = object()
+            model_id = "google/timesfm-2.5-200m-transformers"
+            total_params_count = 124952  # TINY UNPRETRAINED FALLBACK MODEL
+            trainable_params_count = 9728
+            is_pretrained = False
+
+        # Must raise ValueError because parameter count is far below 150M threshold
+        with self.assertRaises(ValueError):
+            validate_timesfm_architecture(MockTinyForecaster())
+
+        class MockGenuineForecaster:
+            model = object()
+            model_id = "google/timesfm-2.5-200m-transformers"
+            total_params_count = 231084480  # GENUINE 200M TIMESFM MODEL
+            trainable_params_count = 2457600
+            is_pretrained = True
+
+        # Must pass cleanly
+        validate_timesfm_architecture(MockGenuineForecaster())
 
 
 if __name__ == "__main__":

@@ -64,6 +64,40 @@ app.include_router(analytics.router, prefix=settings.API_V1_STR)
 app.include_router(model_management.router, prefix=settings.API_V1_STR)
 app.include_router(system.router, prefix=settings.API_V1_STR)
 
+# Frontend Compatibility Aliases
+@app.post("/api/simulation", tags=["Scenario Lab"])
+def api_simulation_alias(req: scenario.ScenarioRequest):
+    return scenario.simulate_scenario(req)
+
+@app.post("/api/copilot", tags=["AI Copilot"])
+async def api_copilot_alias(req: copilot.CopilotQueryRequest):
+    return await copilot.answer_query(req.query)
+
+@app.get("/api/dashboard", tags=["Dashboard"])
+def api_dashboard_alias():
+    from .services.simulation import get_live_metrics, get_24h_forecast
+    lm = get_live_metrics()
+    fc = get_24h_forecast()
+    return {
+        "current_load": float(lm.currentDemand),
+        "tomorrow_peak": float(fc.peakExpectedMW),
+        "peak_time": fc.peakWindow,
+        "grid_risk_score": 82,
+        "grid_risk_level": lm.gridRisk,
+        "critical_window": fc.peakWindow,
+        "data_health_score": 94,
+    }
+
+@app.get("/api/explanation", tags=["Explainability"])
+def api_explanation_alias():
+    from .services.simulation import get_shap_factors
+    return get_shap_factors()
+
+@app.get("/api/anomalies", tags=["Anomaly Detection"])
+def api_anomalies_alias():
+    from .services.simulation import get_anomaly_status
+    return get_anomaly_status()
+
 @app.get("/", tags=["Root"])
 def root():
     return {

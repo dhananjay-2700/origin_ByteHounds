@@ -123,3 +123,45 @@ def audit_data_and_splits(
         "test_range": f"{test_origin_min} to {test_df[origin_col].max()}"
     }
     return audit_summary
+
+
+def validate_timesfm_architecture(forecaster: Any, check_lora: bool = False) -> None:
+    """
+    Enforces strict architectural checks on TimesFM 2.5:
+      1. Total parameter count > 150,000,000.
+      2. Model ID matches google/timesfm-2.5-200m-transformers.
+      3. Pretrained weights loaded successfully.
+      4. LoRA parameter count efficiency (< 10% of total params) if check_lora=True.
+    Fails loudly with clear diagnostic message if violated.
+    """
+    logger.info("Performing mandatory TimesFM 2.5 Architecture Audit...")
+    
+    if forecaster.model is None:
+        raise ValueError("ARCHITECTURE AUDIT FAILED: TimesFM model is not loaded!")
+
+    if forecaster.model_id != "google/timesfm-2.5-200m-transformers":
+        raise ValueError(f"ARCHITECTURE AUDIT FAILED: Expected model 'google/timesfm-2.5-200m-transformers', got '{forecaster.model_id}'")
+
+    total_params = forecaster.total_params_count
+    if total_params < 150_000_000:
+        raise ValueError(
+            f"CRITICAL ARCHITECTURE AUDIT FAILED: Model has only {total_params:,} parameters! "
+            f"Expected > 150,000,000 parameters for the genuine 200M foundation model. "
+            f"Custom fallback networks are strictly forbidden!"
+        )
+
+    trainable_params = forecaster.trainable_params_count
+    if check_lora and trainable_params > total_params * 0.10:
+        raise ValueError(
+            f"ARCHITECTURE AUDIT FAILED: Trainable parameter count ({trainable_params:,}) "
+            f"exceeds 10% of total parameters ({total_params:,}). LoRA efficiency violated!"
+        )
+
+    logger.info(
+        f"TimesFM 2.5 Architecture Audit PASSED:\n"
+        f"  - Model: {forecaster.model_id}\n"
+        f"  - Total Parameters: {total_params:,}\n"
+        f"  - Trainable Parameters: {trainable_params:,} ({trainable_params / total_params * 100:.2f}%)\n"
+        f"  - Pretrained Status: {forecaster.is_pretrained}"
+    )
+

@@ -1,2 +1,6 @@
 total_evaluated_24h_windows,mean_actual_peak_mw,mean_predicted_peak_mw,mean_peak_magnitude_error_mw,mae_peak_demand_mw,mean_absolute_peak_timing_error_hours,exact_peak_hour_match_pct,within_1h_peak_match_pct
+<<<<<<< Updated upstream
 1319,5926.235730548471,5365.112838063097,-561.1228924853757,634.8079381142303,3.949203942380591,46.626231993934795,65.73161485974222
+=======
+1319,5926.235730548471,5195.531602976627,-730.7041275718442,799.7934521570455,7.081880212282032,7.808946171341925,18.27141774071266
+>>>>>>> Stashed changes

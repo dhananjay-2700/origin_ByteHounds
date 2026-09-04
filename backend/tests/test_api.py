@@ -1,6 +1,12 @@
 from fastapi.testclient import TestClient
 from app.main import app
 from app.db.session import init_db
+<<<<<<< Updated upstream
+=======
+
+# Initialize database schema and seeds for test suite
+init_db()
+>>>>>>> Stashed changes
 
 init_db()
 client = TestClient(app)

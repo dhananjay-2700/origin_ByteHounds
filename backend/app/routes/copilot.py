@@ -4,6 +4,7 @@ from ..services.copilot_engine import answer_query
 
 router = APIRouter(prefix="/copilot", tags=["AI Copilot"])
 
+@router.post("", response_model=CopilotResponse)
 @router.post("/chat", response_model=CopilotResponse)
 async def ask_prvaah_x_copilot(req: CopilotQueryRequest):
     """Processes natural language questions about Delhi power grid operations and risks."""
