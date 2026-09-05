@@ -57,18 +57,13 @@ export const CopilotView: React.FC = () => {
 
       if (res.ok) {
         const data = await res.json();
-        const textReply = data.answer || data.reply || "No response generated.";
-        const intentVal = data.intent || "GRID_INTELLIGENCE_QUERY";
-        const calls = data.api_calls || ["GET /api/dashboard"];
-        const structData = data.structured_result || data.metrics;
-
         const copilotMsg: Message = {
           id: (Date.now() + 1).toString(),
           sender: "copilot",
-          text: textReply,
-          intent: intentVal,
-          apiCalls: calls,
-          structuredData: structData,
+          text: data.answer,
+          intent: data.intent,
+          apiCalls: data.api_calls,
+          structuredData: data.structured_result,
         };
         setMessages((prev) => [...prev, copilotMsg]);
       } else {
@@ -125,38 +120,49 @@ export const CopilotView: React.FC = () => {
     <div className="space-y-8 animate-fadeIn pb-16">
       {/* Header */}
       <ScrollReveal delay={100} direction="up">
-        <div className="control-card p-6 border border-gray-100 bg-white">
-          <div className="flex items-center space-x-2 text-blue-600 text-xs font-semibold uppercase tracking-wider mb-1">
-            <Bot className="w-4 h-4 text-blue-600" />
-            <span>GROUNDED AI ASSISTANT</span>
+        <div className="control-card p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <div className="flex items-center space-x-2 text-[#FF7C1E] text-xs font-black uppercase tracking-widest mb-2">
+              <Bot className="w-4 h-4" />
+              <span>GROUNDED AI ASSISTANT</span>
+            </div>
+            <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">PravaahX COPILOT</h1>
+            <p className="text-xs md:text-sm text-gray-400 mt-1 font-normal">
+              Natural-language tool runner grounded directly in backend forecast & risk services
+            </p>
           </div>
-          <h1 className="text-xl font-bold text-gray-900 font-sans">PRVAAH X COPILOT</h1>
-          <p className="text-xs text-gray-500 font-medium">Natural-language tool runner grounded directly in backend forecast & risk services</p>
+
+          <div className="flex items-center space-x-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gray-300 text-xs font-medium">
+            <Sparkles className="w-4 h-4 text-[#FF7C1E]" />
+            <span>Real-Time Model Context</span>
+          </div>
         </div>
       </ScrollReveal>
 
       {/* Chat Container */}
       <ScrollReveal delay={200} direction="up">
-        <div className="control-card p-6 border border-gray-100 bg-white flex flex-col h-[520px]">
+        <div className="control-card p-8 flex flex-col h-[560px] justify-between">
           {/* Messages Scroll Area */}
-          <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+          <div className="flex-1 overflow-y-auto space-y-4 pr-3 custom-scrollbar">
             {messages.map((m) => (
               <div
                 key={m.id}
                 className={`flex ${m.sender === "user" ? "justify-end" : "justify-start"}`}
               >
-                <div className={`max-w-2xl p-4 rounded-2xl text-xs leading-relaxed ${
-                  m.sender === "user"
-                    ? "bg-blue-600 text-white font-sans font-medium shadow-sm"
-                    : "bg-slate-50 border border-slate-200 text-slate-800 font-sans shadow-xs"
-                }`}>
+                <div
+                  className={`max-w-2xl p-5 rounded-2xl text-xs md:text-sm leading-relaxed ${
+                    m.sender === "user"
+                      ? "bg-[#FF7C1E] text-black font-semibold shadow-lg shadow-[#FF7C1E]/20"
+                      : "bg-white/[0.04] border border-white/10 text-gray-200"
+                  }`}
+                >
                   {/* Tool call indicator badge */}
                   {m.sender === "copilot" && m.intent && (
-                    <div className="mb-2.5 p-2.5 bg-blue-50/80 rounded-xl border border-blue-200 font-sans text-[11px] text-blue-900 flex items-center space-x-2 font-semibold">
-                      <Terminal className="w-3.5 h-3.5 text-blue-600" />
-                      <span>Intent: {m.intent}</span>
-                      <span className="text-blue-300">|</span>
-                      <span className="text-blue-700">Tool: {m.apiCalls?.join(", ")}</span>
+                    <div className="mb-3 px-3 py-1.5 bg-black/60 rounded-full border border-white/10 text-[10px] text-gray-300 flex items-center space-x-2">
+                      <Terminal className="w-3.5 h-3.5 text-[#FF7C1E]" />
+                      <span className="font-bold text-[#FF7C1E]">{m.intent}</span>
+                      <span className="text-gray-500">·</span>
+                      <span className="text-gray-400">{m.apiCalls?.join(", ")}</span>
                     </div>
                   )}
                   
@@ -167,45 +173,47 @@ export const CopilotView: React.FC = () => {
 
             {isProcessing && (
               <div className="flex justify-start">
-                <div className="p-3 bg-blue-50 rounded-xl text-xs text-blue-700 font-semibold flex items-center space-x-2 border border-blue-200">
-                  <Sparkles className="w-4 h-4 animate-spin text-blue-600" />
+                <div className="p-4 bg-white/[0.04] rounded-2xl text-xs text-[#FF7C1E] font-medium flex items-center space-x-2.5 border border-white/10">
+                  <Sparkles className="w-4 h-4 animate-spin text-[#FF7C1E]" />
                   <span>Executing Grounded Backend Tool Call...</span>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Preset Query Chips */}
-          <div className="my-3 pt-3 border-t border-gray-100 flex items-center space-x-2 overflow-x-auto no-scrollbar">
-            {presetQueries.map((q, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSend(q)}
-                className="px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-slate-700 hover:text-blue-700 text-xs whitespace-nowrap font-medium transition cursor-pointer"
-              >
-                &gt; {q}
-              </button>
-            ))}
-          </div>
+          <div className="pt-4 border-t border-white/10 mt-4">
+            {/* Preset Query Chips */}
+            <div className="mb-4 flex items-center space-x-2 overflow-x-auto pb-1">
+              {presetQueries.map((q, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSend(q)}
+                  className="px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-[#FF7C1E] text-gray-300 hover:text-white text-xs whitespace-nowrap font-medium transition duration-200"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
 
-          {/* Query Input Bar */}
-          <div className="flex items-center space-x-2 pt-2">
-            <input
-              type="text"
-              value={inputQuery}
-              onChange={(e) => setInputQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Ask anything about the forecast, risk drivers, or scenario simulations..."
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 font-sans"
-            />
-            <button
-              onClick={() => handleSend()}
-              disabled={!inputQuery.trim() || isProcessing}
-              className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition text-xs font-bold font-sans flex items-center space-x-1.5 disabled:opacity-50 cursor-pointer shadow-sm"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>ASK</span>
-            </button>
+            {/* Query Input Bar */}
+            <div className="flex items-center space-x-3">
+              <input
+                type="text"
+                value={inputQuery}
+                onChange={(e) => setInputQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                placeholder="Ask anything about the forecast, risk drivers, or scenario simulations..."
+                className="flex-1 bg-white/5 border border-white/10 rounded-full px-6 py-3.5 text-xs md:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF7C1E] transition"
+              />
+              <button
+                onClick={() => handleSend()}
+                disabled={!inputQuery.trim() || isProcessing}
+                className="px-6 py-3.5 rounded-full bg-[#FF7C1E] hover:bg-white text-black transition-all duration-300 text-xs font-black uppercase tracking-wider flex items-center space-x-1.5 shadow-lg shadow-[#FF7C1E]/20 disabled:opacity-50"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>ASK</span>
+              </button>
+            </div>
           </div>
         </div>
       </ScrollReveal>

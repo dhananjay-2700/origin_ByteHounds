@@ -8,19 +8,19 @@
 ───────────────────────────────────────────────── */
 
 :root {
-  /* Authenticom Clean Light Theme Palette */
-  --space-black:    #f8fafc;
-  --deep-navy:      #ffffff;
-  --navy:           #f1f5f9;
-  --navy-card:      #ffffff;
+  /* Core monochrome palette */
+  --space-black:    #000000;
+  --deep-navy:      #0a0a0a;
+  --navy:           #111111;
+  --navy-card:      #1a1a1a;
   
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --border:     #e2e8f0;
+  --background: var(--space-black);
+  --foreground: #f4f4f5;
+  --border:     rgba(255,255,255,0.1);
 
   /* Semantic Risk Colors */
-  --risk-normal:    #64748b; /* Slate */
-  --risk-watch:     #f59e0b; /* Amber */
+  --risk-normal:    #a1a1aa; /* Gray */
+  --risk-watch:     #fbbf24; /* Amber */
   --risk-high:      #f97316; /* Orange */
   --risk-critical:  #ef4444; /* Red */
 }
@@ -39,39 +39,38 @@ body {
 }
 
 /* ── Custom Scrollbar ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f8fafc; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--space-black); }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 6px;
+  background: var(--navy-card);
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #3f3f46;
 }
 
-/* ── Premium Cards (Authenticom style: crisp rounded 2xl, subtle borders, ambient shadow) ── */
+/* ── Premium Cards (Matching Editorial Reference) ── */
 .control-card {
-  background: #ffffff;
-  border: 1px solid #f1f5f9;
+  background: #12141a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 1.25rem;
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .control-card:hover {
-  border-color: #e2e8f0;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+  border-color: rgba(255, 124, 30, 0.3);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.6);
 }
 
 /* ── Risk Accent cards ── */
 .card-normal { border-left: 4px solid var(--risk-normal); }
 .card-watch { border-left: 4px solid var(--risk-watch); }
-.card-high { border-left: 4px solid var(--risk-high); }
+.card-high { border-left: 4px solid #FF7C1E; }
 .card-critical { border-left: 4px solid var(--risk-critical); }
 
-/* ── Glow effects ── */
-.glow-critical { box-shadow: 0 8px 30px rgba(239,68,68,0.12); }
-.glow-high    { box-shadow: 0 8px 30px rgba(249,115,22,0.12); }
+/* ── Glow effects (Restrained) ── */
+.glow-critical { box-shadow: 0 0 40px rgba(239,68,68,0.15); }
+.glow-high    { box-shadow: 0 0 30px rgba(249,115,22,0.15); }
 
 /* ── Background texture ── */
 .bg-space {

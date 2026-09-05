@@ -40,34 +40,38 @@ export const DataHealthModal: React.FC<DataHealthModalProps> = ({ isOpen, onClos
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-lg control-card border border-emerald-200 p-6 shadow-2xl bg-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-lg control-card border border-white/15 p-8 shadow-2xl rounded-3xl bg-[#12141a]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-600">
+        <div className="flex items-center justify-between border-b border-white/10 pb-5 mb-5">
+          <div className="flex items-center space-x-3.5">
+            <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-400">
               <Database className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900 font-sans">DATA HEALTH INTELLIGENCE</h2>
-              <p className="text-xs text-gray-500">Global Data Pipeline Validation</p>
+              <h2 className="text-xl font-black text-white tracking-tight">DATA HEALTH INTELLIGENCE</h2>
+              <p className="text-xs text-gray-400 font-normal">Global Telemetry Pipeline Validation</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-900 rounded-xl hover:bg-gray-100 transition cursor-pointer"
+            className="p-2 text-gray-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Score Banner */}
-        <div className="flex items-center justify-between p-5 mb-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200">
+        <div className="flex items-center justify-between p-5 mb-6 bg-gradient-to-r from-emerald-950/60 to-emerald-900/20 rounded-2xl border border-emerald-500/30">
           <div>
-            <div className="text-3xl font-extrabold text-emerald-700 font-sans">{healthData?.overall_score || 94} / 100</div>
-            <div className="text-xs font-bold text-emerald-800 tracking-wider mt-0.5">{healthData?.status_label || "EXCELLENT"} PIPELINE HEALTH</div>
+            <div className="text-4xl font-black text-white tracking-tighter">
+              {healthData?.overall_score || 94} <span className="text-emerald-400 text-lg">/ 100</span>
+            </div>
+            <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider mt-0.5">
+              {healthData?.status_label || "EXCELLENT"} PIPELINE HEALTH
+            </div>
           </div>
-          <ShieldCheck className="w-10 h-10 text-emerald-600" />
+          <ShieldCheck className="w-10 h-10 text-emerald-400" />
         </div>
 
         {/* Sub-Metrics Grid */}
@@ -75,26 +79,26 @@ export const DataHealthModal: React.FC<DataHealthModalProps> = ({ isOpen, onClos
           {metrics.map((m: { name: string; score: number; status: string }, i: number) => (
             <div
               key={i}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100"
+              className="flex items-center justify-between p-3 bg-white/[0.03] rounded-2xl border border-white/10 hover:border-white/20 transition"
             >
-              <div className="flex items-center space-x-2.5">
-                <CheckCircle className="w-4 h-4 text-emerald-600" />
-                <span className="text-xs font-semibold text-gray-800">{m.name}</span>
+              <div className="flex items-center space-x-3">
+                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className="text-xs font-semibold text-gray-200">{m.name}</span>
               </div>
               <div className="flex items-center space-x-3">
-                <span className="text-xs text-emerald-700 font-semibold bg-emerald-100/80 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                <span className="text-xs font-black text-emerald-400 bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
                   {m.score}%
                 </span>
-                <span className="text-[10px] text-gray-500 font-semibold uppercase">{m.status}</span>
+                <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">{m.status}</span>
               </div>
             </div>
           ))}
         </div>
 
         {/* Footer info */}
-        <div className="flex items-center justify-between text-xs text-gray-500 border-t border-gray-100 pt-3">
-          <span>Last validated:</span>
-          <span className="font-medium text-gray-700">04 Sep 2026 · 18:42</span>
+        <div className="flex items-center justify-between text-xs text-gray-400 border-t border-white/10 pt-4">
+          <span>Telemetry sync:</span>
+          <span className="text-gray-300 font-medium">04 Sep 2026 · 18:42 IST</span>
         </div>
       </div>
     </div>
