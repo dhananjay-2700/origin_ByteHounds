@@ -386,3 +386,4 @@ docker-compose up --build -d
 Engineered with pride by **ByteHounds**:
 - **Dhananjay** ([@dhananjay-2700](https://github.com/dhananjay-2700))
 - **Naivedya Singh** ([@Naivedya777](https://github.com/Naivedya777))
+- **Shashwat Mishra** ([@dexnova20](https://github.com/dexnova20))
