@@ -21,29 +21,63 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
 
   const [displayProgress, setDisplayProgress] = useState<number>(0);
   const [isSkipped, setIsSkipped] = useState<boolean>(false);
+  const [firstFrameLoaded, setFirstFrameLoaded] = useState<boolean>(false);
 
   const TOTAL_FRAMES = 301;
 
-  // ─── Preload all frames ───────────────────────────────────────────────
+  // ─── Preload all frames with instant Priority for Frame 1 ────────────
   useEffect(() => {
     const imgs: HTMLImageElement[] = new Array(TOTAL_FRAMES);
-    for (let i = 1; i <= TOTAL_FRAMES; i++) {
+
+    // Frame 1 with high priority
+    const firstImg = new Image();
+    firstImg.src = `/animation/frame_001.webp`;
+    firstImg.onload = () => {
+      loadedCountRef.current++;
+      setFirstFrameLoaded(true);
+      drawFrame(0);
+    };
+    imgs[0] = firstImg;
+
+    // Load remaining frames
+    for (let i = 2; i <= TOTAL_FRAMES; i++) {
       const img = new Image();
-      img.src = `/animation/frame_${String(i).padStart(3, "0")}.png`;
-      img.onload = () => { loadedCountRef.current++; };
+      img.src = `/animation/frame_${String(i).padStart(3, "0")}.webp`;
+      img.onload = () => {
+        loadedCountRef.current++;
+      };
       imgs[i - 1] = img;
     }
     imagesRef.current = imgs;
   }, []);
 
-  // ─── Draw one frame exactly — no blending, clean like video ──────────
+  // ─── Draw one frame cleanly with fallback to closest loaded frame ─────
   const drawFrame = (frameIdx: number) => {
     const canvas = canvasRef.current;
     const imgs = imagesRef.current;
     if (!canvas || imgs.length === 0) return;
 
     const idx = Math.max(0, Math.min(TOTAL_FRAMES - 1, Math.round(frameIdx)));
-    const img = imgs[idx];
+    let img = imgs[idx];
+
+    // If target frame is still downloading, find nearest loaded frame
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      for (let f = idx - 1; f >= 0; f--) {
+        if (imgs[f]?.complete && imgs[f].naturalWidth > 0) {
+          img = imgs[f];
+          break;
+        }
+      }
+      if (!img || !img.complete || img.naturalWidth === 0) {
+        for (let f = idx + 1; f < TOTAL_FRAMES; f++) {
+          if (imgs[f]?.complete && imgs[f].naturalWidth > 0) {
+            img = imgs[f];
+            break;
+          }
+        }
+      }
+    }
+
     if (!img || !img.complete || img.naturalWidth === 0) return;
 
     const ctx = canvas.getContext("2d");
@@ -114,6 +148,16 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // Window resize handler
+  useEffect(() => {
+    const handleResize = () => {
+      const idx = Math.min(1, scrollCurrentRef.current / 0.62) * (TOTAL_FRAMES - 1);
+      drawFrame(idx);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // Trigger completion when progress reaches end (full exit)
   useEffect(() => {
     if (displayProgress >= 0.99 && onComplete) {
@@ -167,6 +211,16 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
             imageRendering: "auto",
           }}
         />
+
+        {/* ── Initial sequence loader ── */}
+        {!firstFrameLoaded && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black z-20 pointer-events-none">
+            <div className="flex items-center space-x-3 text-cyan-400 font-mono text-xs tracking-widest uppercase animate-pulse">
+              <span className="w-2 h-2 rounded-full bg-cyan-400" />
+              <span>INITIALIZING PRAVAAH AI GRID TELEMETRY...</span>
+            </div>
+          </div>
+        )}
 
         {/* ── Title Phase ── */}
         <div

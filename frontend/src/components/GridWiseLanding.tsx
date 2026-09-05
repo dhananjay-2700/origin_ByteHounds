@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ArrowRight, AlertTriangle, Zap, Activity, Map, MessageSquare, Database, CheckCircle, BrainCircuit, LineChart, Target } from "lucide-react";
+import { ArrowRight, AlertTriangle, Zap, Activity, Map, MessageSquare, Database, CheckCircle, BrainCircuit, LineChart, Target, Play } from "lucide-react";
 import { GridReveal } from "./GridReveal";
 
 import { API_ENDPOINTS } from "../lib/api";
@@ -9,9 +9,10 @@ import { API_ENDPOINTS } from "../lib/api";
 interface GridWiseLandingProps {
   onViewForecast?: (targetSection?: string) => void;
   onOpenDataHealth?: () => void;
+  onReplayIntro?: () => void;
 }
 
-export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast, onOpenDataHealth }) => {
+export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast, onOpenDataHealth, onReplayIntro }) => {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [accuracyData, setAccuracyData] = useState<any>(null);
   const [temperature, setTemperature] = useState(38);
@@ -79,6 +80,16 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
                   <span>Explore Grid Intelligence</span>
                   <ArrowRight className="w-5 h-5" />
                 </button>
+
+                {onReplayIntro && (
+                  <button
+                    onClick={onReplayIntro}
+                    className="w-full sm:w-auto px-8 py-5 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white font-black uppercase tracking-widest text-sm rounded-full border border-white/10 transition flex items-center justify-center space-x-2.5 cursor-pointer shadow-lg"
+                  >
+                    <Play className="w-4 h-4 text-[#FF7C1E] fill-[#FF7C1E]" />
+                    <span>Replay Intro Story</span>
+                  </button>
+                )}
               </div>
             </div>
 

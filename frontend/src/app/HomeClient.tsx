@@ -27,21 +27,14 @@ export function HomeClient({ initialIntroCompleted = false }: HomeClientProps) {
   const savedScrollY = useRef<number>(0);
   const returningToHomeRef = useRef<boolean>(false);
 
-  // Sync client-side sessionStorage / cookie on mount without causing hydration mismatch
+  // Ensure scroll restoration is manual and clear any legacy cookie that permanently blocked the intro
   useEffect(() => {
     if (typeof window !== "undefined") {
       if ("scrollRestoration" in window.history) {
         window.history.scrollRestoration = "manual";
       }
-
-      const sessionFlag = sessionStorage.getItem("intro_completed") === "true";
-      const cookieFlag = document.cookie.includes("intro_completed=true");
-      if (sessionFlag || cookieFlag) {
-        setIntroCompleted(true);
-        if (!cookieFlag) {
-          document.cookie = "intro_completed=true; path=/; max-age=31536000; SameSite=Lax";
-        }
-      }
+      // Purge legacy cookie so returning visitors can see the intro animation
+      document.cookie = "intro_completed=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     }
   }, []);
 
@@ -49,7 +42,15 @@ export function HomeClient({ initialIntroCompleted = false }: HomeClientProps) {
     setIntroCompleted(true);
     if (typeof window !== "undefined") {
       sessionStorage.setItem("intro_completed", "true");
-      document.cookie = "intro_completed=true; path=/; max-age=31536000; SameSite=Lax";
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+  };
+
+  const handleReplayIntro = () => {
+    setShowForecast(false);
+    setIntroCompleted(false);
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("intro_completed");
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }
   };
@@ -159,6 +160,7 @@ export function HomeClient({ initialIntroCompleted = false }: HomeClientProps) {
             <GridWiseLanding 
               onViewForecast={(sec) => handleOpenFeature(sec)} 
               onOpenDataHealth={() => setIsDataHealthOpen(true)}
+              onReplayIntro={handleReplayIntro}
             />
           </div>
         </>
