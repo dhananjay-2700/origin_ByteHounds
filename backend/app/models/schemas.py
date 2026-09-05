@@ -27,6 +27,7 @@ class ForecastResponse(BaseModel):
     peakExpectedMW: int = 3911
     peakWindow: str = "09:00 - 11:00 IST"
     points: List[ForecastPoint]
+    series: Optional[List[Dict[str, Any]]] = None
 
 class RiskStage(BaseModel):
     time: str
@@ -93,14 +94,31 @@ class DelhiArea(BaseModel):
     hotspotIssue: str
     coordinates: Dict[str, int]
 
+    # Compatibility fields for legacy/alternative frontend schema expectations
+    predicted_load: Optional[int] = None
+    capacity: Optional[int] = None
+    utilization: Optional[float] = None
+    risk_level: Optional[str] = None
+    risk_score: Optional[int] = None
+    main_driver: Optional[str] = None
+    critical_window: Optional[str] = None
+
     class Config:
         populate_by_name = True
 
 class ScenarioRequest(BaseModel):
-    temperature_delta: float = Field(0.0, ge=-5.0, le=10.0, description="Temperature change in °C")
-    demand_growth_percent: float = Field(0.0, ge=-20.0, le=30.0, description="Demand growth rate %")
-    renewable_delta_percent: float = Field(0.0, ge=-50.0, le=50.0, description="Solar generation change %")
-    industrial_delta_percent: float = Field(0.0, ge=-30.0, le=50.0, description="Industrial load change %")
+    temperature_delta: Optional[float] = Field(None, description="Temperature change in °C relative to baseline 41.2°C")
+    demand_growth_percent: Optional[float] = Field(None, description="Demand growth rate %")
+    renewable_delta_percent: Optional[float] = Field(None, description="Solar generation change %")
+    industrial_delta_percent: Optional[float] = Field(None, description="Industrial load change %")
+
+    temperature: Optional[float] = Field(None, description="Absolute ambient temperature in °C")
+    humidity: Optional[float] = Field(None, description="Ambient humidity %")
+    solar_contribution: Optional[float] = Field(None, description="Rooftop solar contribution %")
+    demand_growth: Optional[float] = Field(None, description="Demand growth %")
+
+    class Config:
+        extra = "allow"
 
 class ScenarioPoint(BaseModel):
     time: str
@@ -117,6 +135,12 @@ class ScenarioResponse(BaseModel):
     thermalStressDeltaPercent: float
     points: List[ScenarioPoint]
 
+    # Compatibility fields for legacy frontend expectations
+    scenario_peak: Optional[int] = None
+    scenario_risk: Optional[int] = None
+    scenario_risk_level: Optional[str] = None
+    alert_message: Optional[str] = None
+
 class CopilotQueryRequest(BaseModel):
     query: str = Field(..., min_length=1)
 
@@ -128,6 +152,12 @@ class CopilotResponse(BaseModel):
     reply: str
     timestamp: str
     metrics: Optional[List[CopilotMetric]] = None
+
+    # Compatibility fields for legacy/alternative frontend schema expectations
+    answer: Optional[str] = None
+    intent: Optional[str] = None
+    api_calls: Optional[List[str]] = None
+    structured_result: Optional[Dict[str, Any]] = None
 
 class DiscomStatus(BaseModel):
     name: str

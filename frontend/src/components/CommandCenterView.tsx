@@ -31,10 +31,11 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({ onNavigateTab 
         const weatherData = await weatherRes.json();
 
         setDashboard(dashData);
-        setForecast(forecastData.series.map((item: any) => ({
-          time: item.timestamp,
-          actual: item.actual_load,
-          forecast: item.predicted_load
+        const rawSeries = forecastData?.points || forecastData?.series || (Array.isArray(forecastData) ? forecastData : []);
+        setForecast(rawSeries.map((item: any) => ({
+          time: item.time || item.timestamp,
+          actual: item.historical ?? item.actual_load,
+          forecast: item.predicted ?? item.predicted_load
         })));
         setExplanation(expData);
         setWeather(weatherData);

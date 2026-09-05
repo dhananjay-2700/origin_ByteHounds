@@ -1,5 +1,4 @@
 {
-<<<<<<< Updated upstream
   "model_name": "PRVAAH X Delhi Electricity Demand Forecaster",
   "model_version": "0.1.0-draft1",
   "timestamp_utc": "2026-09-04T23:20:20Z",
@@ -47,53 +46,6 @@
       "day_of_year_cos",
       "forecast_horizon"
     ]
-=======
-  "model_name": "GRIDWISE AI Delhi Electricity Demand Forecaster (TimesFM 2.5 Primary)",
-  "model_version": "2.5.0-lora",
-  "primary_architecture": "google/timesfm-2.5-200m-transformers",
-  "timestamp_utc": "2026-09-04T22:02:44Z",
-  "context_length_hours": 168,
-  "forecast_horizon_hours": 24,
-  "lora_parameters": {
-    "r": 8,
-    "lora_alpha": 16,
-    "lora_dropout": 0.05,
-    "bias": "none",
-    "task_type": "FEATURE_EXTRACTION"
-  },
-  "training_summary": {
-    "device": "mps",
-    "trainable_parameters": 9728,
-    "total_parameters": 124952,
-    "train_samples": 12097,
-    "val_samples": 1566,
-    "epochs": 5,
-    "best_val_mse": 623156.1875,
-    "history": {
-      "train_loss": [
-        3706900.9270299454,
-        759682.57696123,
-        665088.5887100108,
-        607612.8253053443,
-        559764.1975179797
-      ],
-      "val_loss": [
-        1002049.875,
-        782783.75,
-        701694.25,
-        655743.0,
-        623156.1875
-      ],
-      "epoch_times": [
-        3.627419948577881,
-        0.6896789073944092,
-        0.6665070056915283,
-        0.6619789600372314,
-        0.6675271987915039
-      ]
-    },
-    "training_time_seconds": 7.995386123657227
->>>>>>> Stashed changes
   },
   "splits": {
     "train": {
@@ -112,7 +64,6 @@
       "end": "2024-12-12 00:00:00"
     }
   },
-<<<<<<< Updated upstream
   "hyperparameters": {
     "n_estimators": 500,
     "learning_rate": 0.05,
@@ -127,129 +78,51 @@
   "metrics_overall": [
     {
       "model": "Previous Hour",
-      "mae": 780.0200915509215,
-      "rmse": 1018.8273485115222,
-      "wape": 17.078849989765743,
-      "mape": 20.154755641151027
+      "mae": 780.02,
+      "rmse": 1018.82,
+      "wape": 17.07,
+      "mape": 20.15
     },
     {
       "model": "Previous Day",
-      "mae": 530.8658164550917,
-      "rmse": 789.2911136469847,
-      "wape": 11.615868142839142,
-      "mape": 12.725024113398984
+      "mae": 530.86,
+      "rmse": 789.29,
+      "wape": 11.61,
+      "mape": 12.72
     },
     {
       "model": "Previous Week",
-      "mae": 930.4339294559553,
-      "rmse": 1347.6570700001082,
-      "wape": 20.360214939210742,
-      "mape": 23.454900233474586
+      "mae": 930.43,
+      "rmse": 1347.65,
+      "wape": 20.36,
+      "mape": 23.45
     },
     {
       "model": "LightGBM",
-      "mae": 371.32177549849604,
-      "rmse": 497.85274487976466,
-      "wape": 8.130237887927896,
-      "mape": 7.892530902743538
-=======
-  "metrics_overall": [
-    {
-      "model": "Previous Hour",
-      "mae": 791.152805984431,
-      "rmse": 1033.271039923608,
-      "wape": 16.261597598316037,
-      "mape": 19.002925183913238,
-      "r2": 0.3652685130497708,
-      "mean_bias": -15.95337874446019
-    },
-    {
-      "model": "Previous Day",
-      "mae": 572.9882129576234,
-      "rmse": 852.1014109160091,
-      "wape": 11.762705600955593,
-      "mape": 12.71671324100786,
-      "r2": 0.5611827556245983,
-      "mean_bias": -24.074825635710653
-    },
-    {
-      "model": "Previous Week",
-      "mae": 1093.6826198490155,
-      "rmse": 1542.6131993963618,
-      "wape": 22.433034418943354,
-      "mape": 25.458717918821595,
-      "r2": -0.44292266423959537,
-      "mean_bias": -249.6887266647983
-    },
-    {
-      "model": "LightGBM",
-      "mae": 411.991054143672,
-      "rmse": 547.0416105537412,
-      "wape": 8.468190576982256,
-      "mape": 8.438490811961733,
-      "r2": 0.8220892247098092,
-      "mean_bias": -217.32795106648422
-    },
-    {
-      "model": "TimesFM Zero-Shot",
-      "mae": 5264.155196495551,
-      "rmse": 5706.099732173962,
-      "wape": 108.20106160652298,
-      "mape": 109.05890429283949,
-      "r2": -18.357097796183428,
-      "mean_bias": -5249.0278246036205
-    },
-    {
-      "model": "TimesFM LoRA (Primary)",
-      "mae": 653.8577484883375,
-      "rmse": 882.9022821873845,
-      "wape": 13.439592847336149,
-      "mape": 14.984373433782268,
-      "r2": 0.5365671587235149,
-      "mean_bias": -260.0303989663815
->>>>>>> Stashed changes
+      "mae": 371.32,
+      "rmse": 497.85,
+      "wape": 8.13,
+      "mape": 7.89
     }
   ],
   "peak_metrics": {
     "total_evaluated_24h_windows": 1319,
-    "mean_actual_peak_mw": 5926.235730548471,
-<<<<<<< Updated upstream
-    "mean_predicted_peak_mw": 5365.112838063097,
-    "mean_peak_magnitude_error_mw": -561.1228924853757,
-    "mae_peak_demand_mw": 634.8079381142303,
-    "mean_absolute_peak_timing_error_hours": 3.949203942380591,
-    "exact_peak_hour_match_pct": 46.626231993934795,
-    "within_1h_peak_match_pct": 65.73161485974222
-=======
-    "mean_predicted_peak_mw": 5195.531602976627,
-    "mean_peak_magnitude_error_mw": -730.7041275718442,
-    "mae_peak_demand_mw": 799.7934521570455,
-    "mean_absolute_peak_timing_error_hours": 7.081880212282032,
-    "exact_peak_hour_match_pct": 7.808946171341925,
-    "within_1h_peak_match_pct": 18.27141774071266
->>>>>>> Stashed changes
+    "mean_actual_peak_mw": 5926.23,
+    "mean_predicted_peak_mw": 5365.11,
+    "mean_peak_magnitude_error_mw": -561.12,
+    "mae_peak_demand_mw": 634.80,
+    "mean_absolute_peak_timing_error_hours": 3.94,
+    "exact_peak_hour_match_pct": 46.62,
+    "within_1h_peak_match_pct": 65.73
   },
   "leakage_audit": {
     "status": "PASSED",
     "train_samples": 329319,
     "val_samples": 68787,
     "test_samples": 70110,
-<<<<<<< Updated upstream
     "feature_count": 38,
     "train_range": "2021-01-07 23:00:00 to 2023-12-20 20:00:00",
     "val_range": "2023-12-20 21:00:00 to 2024-07-18 22:00:00",
     "test_range": "2024-07-18 23:00:00 to 2024-12-11 23:00:00"
-=======
-    "feature_count": 44,
-    "train_range": "2021-01-07 23:00:00 to 2023-12-20 20:00:00",
-    "val_range": "2023-12-20 21:00:00 to 2024-07-18 22:00:00",
-    "test_range": "2024-07-18 23:00:00 to 2024-12-11 23:00:00"
-  },
-  "plot_artifacts": {
-    "actual_vs_predicted": "/Users/dhananjay/Documents/GitHub/origin_ByteHounds/ml/artifacts/plots/actual_vs_predicted.png",
-    "forecast_24h_samples": "/Users/dhananjay/Documents/GitHub/origin_ByteHounds/ml/artifacts/plots/forecast_24h_samples.png",
-    "peak_day_analysis": "/Users/dhananjay/Documents/GitHub/origin_ByteHounds/ml/artifacts/plots/peak_day_analysis.png",
-    "error_by_horizon": "/Users/dhananjay/Documents/GitHub/origin_ByteHounds/ml/artifacts/plots/error_by_horizon.png"
->>>>>>> Stashed changes
   }
 }

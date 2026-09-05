@@ -74,7 +74,27 @@ def local_expert_response(query: str) -> CopilotResponse:
             CopilotMetric(label="Reserve Margin", value=f"{live.reserveMargin} MW"),
         ]
 
-    return CopilotResponse(reply=text, timestamp=now_str, metrics=metrics)
+    intent_str = "GRID_INTELLIGENCE_QUERY"
+    api_calls = ["GET /api/dashboard"]
+    if "17:45" in lower or "peak" in lower:
+        intent_str = "FORECAST_PEAK_LOOKUP"
+        api_calls = ["GET /api/forecast/peak"]
+    elif "risk" in lower or "area" in lower:
+        intent_str = "EXPLAINABILITY_ANALYSIS"
+        api_calls = ["GET /api/explanation", "GET /api/areas"]
+    elif "temperature" in lower or "heat" in lower:
+        intent_str = "SIMULATION_EXECUTION"
+        api_calls = ["POST /api/simulation"]
+
+    return CopilotResponse(
+        reply=text,
+        timestamp=now_str,
+        metrics=metrics,
+        answer=text,
+        intent=intent_str,
+        api_calls=api_calls,
+        structured_result={"metrics": [m.dict() for m in metrics]}
+    )
 
 async def answer_query(query: str) -> CopilotResponse:
     """
@@ -92,9 +112,13 @@ async def answer_query(query: str) -> CopilotResponse:
             reply=custom_reply,
             timestamp=now_str,
             metrics=[
-                {"label": "Engine", "value": "Custom Trained Model"},
-                {"label": "Inference", "value": "Local Engine"},
+                CopilotMetric(label="Engine", value="Custom Trained Model"),
+                CopilotMetric(label="Inference", value="Local Engine"),
             ],
+            answer=custom_reply,
+            intent="CUSTOM_MODEL_INFERENCE",
+            api_calls=["POST /api/credentials/status"],
+            structured_result={"source": "custom_inhouse_model"}
         )
         _log_chat(query, res.reply, "custom_inhouse_model")
         return res

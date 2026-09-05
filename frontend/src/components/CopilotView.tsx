@@ -56,13 +56,18 @@ export const CopilotView: React.FC = () => {
 
       if (res.ok) {
         const data = await res.json();
+        const textReply = data.answer || data.reply || "No response generated.";
+        const intentVal = data.intent || "GRID_INTELLIGENCE_QUERY";
+        const calls = data.api_calls || ["GET /api/dashboard"];
+        const structData = data.structured_result || data.metrics;
+
         const copilotMsg: Message = {
           id: (Date.now() + 1).toString(),
           sender: "copilot",
-          text: data.answer,
-          intent: data.intent,
-          apiCalls: data.api_calls,
-          structuredData: data.structured_result,
+          text: textReply,
+          intent: intentVal,
+          apiCalls: calls,
+          structuredData: structData,
         };
         setMessages((prev) => [...prev, copilotMsg]);
       } else {

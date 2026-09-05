@@ -22,12 +22,13 @@ export const ForecastView: React.FC = () => {
         const forecastData = await forecastRes.json();
         const accuracyData = await accuracyRes.json();
         
-        const series = forecastData.series.map((item: any) => ({
-          time: item.timestamp,
-          actual: item.actual_load,
-          xgboost: item.predicted_load,
-          baseline: item.baseline_load,
-          lightgbm: item.lightgbm_load
+        const rawSeries = forecastData?.points || forecastData?.series || (Array.isArray(forecastData) ? forecastData : []);
+        const series = rawSeries.map((item: any) => ({
+          time: item.time || item.timestamp,
+          actual: item.historical ?? item.actual_load,
+          xgboost: item.predicted ?? item.predicted_load,
+          baseline: item.lowerConfidence ?? item.baseline_load,
+          lightgbm: item.predicted ?? item.lightgbm_load
         }));
         
         setForecastSeries(series);

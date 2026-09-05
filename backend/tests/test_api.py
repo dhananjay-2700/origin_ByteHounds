@@ -1,15 +1,17 @@
+import sys
+from pathlib import Path
+backend_dir = Path(__file__).resolve().parent.parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
+
 from fastapi.testclient import TestClient
 from app.main import app
 from app.db.session import init_db
-<<<<<<< Updated upstream
-=======
 
 # Initialize database schema and seeds for test suite
 init_db()
->>>>>>> Stashed changes
-
-init_db()
 client = TestClient(app)
+
 
 def test_root():
     response = client.get("/")

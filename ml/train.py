@@ -1,9 +1,5 @@
 """
-<<<<<<< Updated upstream
-PRVAAH X - ML FOUNDATION (DRAFT 1)
-=======
-GRIDWISE AI - TIMESFM 2.5 PRIMARY FORECASTING ENGINE
->>>>>>> Stashed changes
+PRVAAH X - ML FOUNDATION
 Master Training Entry Point
 
 Refactored architecture replacing tabular LightGBM as primary model with:
@@ -92,11 +88,7 @@ def run_training_pipeline() -> None:
     set_seed(RANDOM_SEED)
 
     logger.info("==================================================")
-<<<<<<< Updated upstream
-    logger.info("PRVAAH X - ML FOUNDATION (DRAFT 1) TRAINING")
-=======
-    logger.info("GRIDWISE AI - TIMESFM 2.5 PRIMARY FORECASTING ENGINE")
->>>>>>> Stashed changes
+    logger.info("PRVAAH X - ML FOUNDATION TRAINING")
     logger.info("==================================================")
 
     # 1. LOAD RAW DATA
@@ -222,14 +214,9 @@ def run_training_pipeline() -> None:
     timesfm.save(MODELS_DIR)
 
     metadata = {
-<<<<<<< Updated upstream
         "model_name": "PRVAAH X Delhi Electricity Demand Forecaster",
-        "model_version": "0.1.0-draft1",
-=======
-        "model_name": "GRIDWISE AI Delhi Electricity Demand Forecaster (TimesFM 2.5 Primary)",
         "model_version": "2.5.0-lora",
         "primary_architecture": "google/timesfm-2.5-200m-transformers",
->>>>>>> Stashed changes
         "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "context_length_hours": CONTEXT_LENGTH,
         "forecast_horizon_hours": PREDICTION_LENGTH,
