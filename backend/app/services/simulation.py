@@ -9,6 +9,7 @@ if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
 from ml_service import ml_service
+
 from ..models.schemas import (
     GridMetricsResponse,
     ForecastPoint,
@@ -65,6 +66,17 @@ def get_24h_forecast() -> ForecastResponse:
 
     acc_pct = round((1.0 - acc["mape"]) * 100.0, 1) if acc["mape"] < 1 else round(100.0 - acc["mape"], 1)
 
+    series_compat = [
+        {
+            "timestamp": p.time,
+            "actual_load": p.historical,
+            "predicted_load": p.predicted,
+            "baseline_load": p.lowerConfidence,
+            "lightgbm_load": p.predicted,
+        }
+        for p in points
+    ]
+
     return ForecastResponse(
         horizonHours=24,
         accuracyMape=acc_pct,
@@ -72,6 +84,7 @@ def get_24h_forecast() -> ForecastResponse:
         peakExpectedMW=int(round(dash["tomorrow_peak"])),
         peakWindow=dash["critical_window"],
         points=points,
+        series=series_compat,
     )
 
 def get_risk_timeline() -> RiskTimelineResponse:
@@ -201,6 +214,13 @@ def get_delhi_areas() -> List[DelhiArea]:
                 description=f"Regional grid distribution for {a['name']} ({a['disclaimer']}).",
                 hotspotIssue=f"Substation monitoring operating at {a['utilization']}% utilization.",
                 coordinates=coord,
+                predicted_load=int(round(a["predicted_load"])),
+                capacity=int(round(a["capacity"])),
+                utilization=a["utilization"],
+                risk_level=a["risk_level"],
+                risk_score=int(round(a["utilization"])),
+                main_driver=f"Substation monitoring operating at {a['utilization']}% utilization.",
+                critical_window=a["critical_window"],
             )
         )
     return result
@@ -213,32 +233,65 @@ def get_area_by_id(area_id: str) -> Optional[DelhiArea]:
     return None
 
 def simulate_scenario(req: ScenarioRequest) -> ScenarioResponse:
+    if req.temperature_delta is not None:
+        temp_val = req.temperature_delta + 41.2
+    elif req.temperature is not None:
+        temp_val = req.temperature
+    else:
+        temp_val = 41.2
+
+    if req.demand_growth_percent is not None:
+        growth_val = req.demand_growth_percent
+    elif req.demand_growth is not None:
+        growth_val = req.demand_growth
+    else:
+        growth_val = 0.0
+
+    if req.renewable_delta_percent is not None:
+        solar_val = req.renewable_delta_percent + 10.0
+    elif req.solar_contribution is not None:
+        solar_val = req.solar_contribution
+    else:
+        solar_val = 10.0
+
+    hum_val = req.humidity if req.humidity is not None else 52.0
+
     res = ml_service.run_simulation(
-        temp=req.temperature_delta + 41.2,
-        humidity=52.0,
-        solar=req.renewable_delta_percent + 10.0,
-        demand_growth=req.demand_growth_percent
+        temp=temp_val,
+        humidity=hum_val,
+        solar=solar_val,
+        demand_growth=growth_val
     )
     fc = ml_service.get_forecast_response()
 
     points = []
-    growth_f = 1.0 + (req.demand_growth_percent / 100.0)
-    temp_f = 1.0 + (req.temperature_delta * 0.024)
+    temp_delta = temp_val - 41.2
+    growth_f = 1.0 + (growth_val / 100.0)
+    temp_f = 1.0 + (temp_delta * 0.024)
 
     for pt in fc["series"]:
         base_mw = int(round(pt["predicted_load"]))
         sim_mw = int(round(base_mw * growth_f * temp_f))
         points.append(ScenarioPoint(time=pt["timestamp"], baseline=base_mw, scenario=sim_mw))
 
+    scen_peak = int(round(res["scenario_peak"]))
+    scen_risk_lvl = res["scenario_risk_level"]
+    scen_risk_score = res.get("scenario_risk", 55)
+    alert_msg = res.get("alert_message", f"[Simulated / Modeled Scenario] Counterfactual shift projects peak demand at {scen_peak:,.0f} MW ({scen_risk_lvl} Risk).")
+
     return ScenarioResponse(
         baselinePeakMW=int(round(res["base_peak"])),
-        scenarioPeakMW=int(round(res["scenario_peak"])),
+        scenarioPeakMW=scen_peak,
         deltaMW=int(round(res["peak_change"])),
         deltaPercent=round((res["peak_change"] / res["base_peak"]) * 100.0, 2) if res["base_peak"] > 0 else 0.0,
         baselineRisk=res["base_risk_level"],
-        scenarioRisk=res["scenario_risk_level"],
-        thermalStressDeltaPercent=round(req.temperature_delta * 2.4, 1),
+        scenarioRisk=scen_risk_lvl,
+        thermalStressDeltaPercent=round(temp_delta * 2.4, 1),
         points=points,
+        scenario_peak=scen_peak,
+        scenario_risk=scen_risk_score,
+        scenario_risk_level=scen_risk_lvl,
+        alert_message=alert_msg,
     )
 
 def get_system_health() -> SystemHealthResponse:
@@ -264,4 +317,3 @@ def get_system_health() -> SystemHealthResponse:
         weatherStreamLatencySec=12,
         discoms=discoms,
     )
-

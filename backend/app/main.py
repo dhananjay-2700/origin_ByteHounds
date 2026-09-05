@@ -1,8 +1,18 @@
+import sys
+from pathlib import Path
+
+backend_dir = Path(__file__).resolve().parent.parent
+project_root = backend_dir.parent
+for p in [str(backend_dir), str(project_root)]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
 import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config.settings import settings
+
 from .config import api_credentials
 from .db.session import init_db
 from .services.ingestion import start_background_ingestion

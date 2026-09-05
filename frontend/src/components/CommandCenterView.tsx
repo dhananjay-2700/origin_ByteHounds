@@ -32,10 +32,11 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({ onNavigateTab 
         const weatherData = await weatherRes.json();
 
         setDashboard(dashData);
-        setForecast(forecastData.series.map((item: any) => ({
-          time: item.timestamp,
-          actual: item.actual_load,
-          forecast: item.predicted_load
+        const rawSeries = forecastData?.points || forecastData?.series || (Array.isArray(forecastData) ? forecastData : []);
+        setForecast(rawSeries.map((item: any) => ({
+          time: item.time || item.timestamp,
+          actual: item.historical ?? item.actual_load,
+          forecast: item.predicted ?? item.predicted_load
         })));
         setExplanation(expData);
         setWeather(weatherData);
@@ -57,304 +58,279 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({ onNavigateTab 
       {/* 1. TOP KPI ROW */}
       <ScrollReveal delay={100} direction="up">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        
-        {/* KPI 1: CURRENT LOAD */}
-        <div className="control-card p-7 flex flex-col justify-between hover:border-white/20 transition-all shadow-xl">
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-black text-gray-400 uppercase tracking-widest">CURRENT LOAD</span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                LIVE
-              </span>
+          {/* KPI 1 */}
+          <div className="control-card p-6 border-l-4 border-blue-600 flex flex-col justify-between">
+            <div>
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">CURRENT LOAD</span>
+              <div className="text-3xl font-extrabold text-gray-900 font-sans mt-1">
+                {dashboard?.current_load ? Math.round(dashboard.current_load).toLocaleString() : "--"} <span className="text-sm font-semibold text-gray-500">MW</span>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-xs text-gray-500 font-medium">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2" />
+              Live Delhi Telemetry Dataset
+            </div>
+          </div>
+
+          {/* KPI 2 */}
+          <div className="control-card p-6 border-l-4 border-indigo-600 flex flex-col justify-between">
+            <div>
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">PEAK FORECAST</span>
+              <div className="text-3xl font-extrabold text-gray-900 font-sans mt-1">
+                {dashboard?.tomorrow_peak ? Math.round(dashboard.tomorrow_peak).toLocaleString() : "--"} <span className="text-sm font-semibold text-gray-500">MW</span>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-xs text-gray-500 font-medium">
+              <TrendingUp className="w-4 h-4 mr-1 text-blue-600" />
+              LightGBM 24h Model Output
+            </div>
+          </div>
+
+          {/* KPI 3 */}
+          <div className="control-card p-6 border-l-4 border-purple-600 flex flex-col justify-between">
+            <div>
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">PEAK TIME</span>
+              <div className="text-3xl font-extrabold text-gray-900 font-sans mt-1">
+                {dashboard?.peak_time || "--"}
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-gray-500 font-medium">
+              Forecast Horizon (Next 24h)
+            </div>
+          </div>
+
+          {/* KPI 4 */}
+          <div className="control-card p-6 border-l-4 border-orange-500 flex flex-col justify-between bg-orange-50/20">
+            <div>
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">GRID RISK</span>
+              <div className="flex items-baseline space-x-2 mt-1">
+                <span className="text-3xl font-extrabold text-gray-900 font-sans">{dashboard?.grid_risk_score ?? "--"}</span>
+                <span className="text-sm text-gray-500 font-medium">/ 100</span>
+                <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-bold border border-orange-200 uppercase ml-auto">
+                  {dashboard?.grid_risk_level || "CALCULATING"}
+                </span>
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-gray-500 font-medium flex items-center">
+              <ShieldAlert className="w-4 h-4 mr-1 text-orange-600" />
+              Actionable Grid Stress Index
             </div>
             <div className="text-4xl lg:text-5xl font-black text-white tracking-tighter mt-1">
               {dashboard?.current_load ? Math.round(dashboard.current_load).toLocaleString() : "2,050"}{" "}
               <span className="text-base font-bold text-gray-400">MW</span>
             </div>
           </div>
-          <div className="mt-4 pt-4 border-t border-white/5 flex items-center text-xs text-gray-400 font-medium">
-            Delhi NCT Real Telemetry Dispatch
-          </div>
-        </div>
-
-        {/* KPI 2: PEAK FORECAST */}
-        <div className="control-card p-7 flex flex-col justify-between border-l-4 border-l-[#FF7C1E] hover:border-[#FF7C1E]/50 transition-all shadow-xl">
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-black text-[#FF7C1E] uppercase tracking-widest">PEAK FORECAST</span>
-              <span className="px-2.5 py-0.5 rounded-full bg-[#FF7C1E]/10 text-[#FF7C1E] border border-[#FF7C1E]/30 text-[10px] font-bold uppercase tracking-wider">
-                24H MODEL
-              </span>
-            </div>
-            <div className="text-4xl lg:text-5xl font-black text-white tracking-tighter mt-1">
-              {dashboard?.tomorrow_peak ? Math.round(dashboard.tomorrow_peak).toLocaleString() : "3,911"}{" "}
-              <span className="text-base font-bold text-[#FF7C1E]">MW</span>
-            </div>
-          </div>
-          <div className="mt-4 pt-4 border-t border-white/5 flex items-center text-xs text-gray-400 font-medium">
-            <TrendingUp className="w-4 h-4 mr-1.5 text-[#FF7C1E]" />
-            LightGBM Multi-Horizon Predictor
-          </div>
-        </div>
-
-        {/* KPI 3: PEAK TIME */}
-        <div className="control-card p-7 flex flex-col justify-between hover:border-white/20 transition-all shadow-xl">
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-black text-gray-400 uppercase tracking-widest">PEAK HORIZON</span>
-              <span className="px-2.5 py-0.5 rounded-full bg-white/5 text-gray-300 border border-white/10 text-[10px] font-bold uppercase tracking-wider">
-                CRITICAL
-              </span>
-            </div>
-            <div className="text-3xl lg:text-4xl font-black text-white tracking-tight mt-1">
-              {dashboard?.peak_time || "10:00 IST"}
-            </div>
-          </div>
-          <div className="mt-4 pt-4 border-t border-white/5 text-xs text-gray-400 font-medium">
-            High Concurrency Peak Period
-          </div>
-        </div>
-
-        {/* KPI 4: GRID RISK */}
-        <div className="control-card p-7 flex flex-col justify-between border-l-4 border-l-red-500 hover:border-red-500/50 transition-all shadow-xl bg-gradient-to-b from-red-950/20 to-transparent">
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-black text-gray-400 uppercase tracking-widest">GRID RISK</span>
-              <span className="px-3 py-1 rounded-full bg-red-600 text-white text-[10px] font-black uppercase tracking-widest">
-                {dashboard?.grid_risk_level || "MODERATE"}
-              </span>
-            </div>
-            <div className="flex items-baseline space-x-2 mt-1">
-              <span className="text-4xl lg:text-5xl font-black text-white tracking-tighter">{dashboard?.grid_risk_score ?? "39"}</span>
-              <span className="text-base text-gray-500 font-bold">/ 100</span>
-            </div>
-          </div>
-          <div className="mt-4 pt-4 border-t border-white/5 text-xs text-gray-400 font-medium flex items-center">
-            <ShieldAlert className="w-4 h-4 mr-1.5 text-red-400" />
-            Thermal &amp; Capacity Stress Index
-          </div>
-        </div>
-        
         </div>
       </ScrollReveal>
 
       {/* 2. DEMAND FORECAST & CRITICAL WINDOW CHART */}
       <ScrollReveal delay={200} direction="up">
-        <div className="control-card p-8 shadow-2xl">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div>
-            <div className="inline-block px-3 py-1 rounded-full bg-[#FF7C1E]/10 text-[#FF7C1E] border border-[#FF7C1E]/30 text-[10px] font-black uppercase tracking-widest mb-2">
-              PREDICTIVE POWER CURVE
+        <div className="control-card p-6 border border-gray-100">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 tracking-tight flex items-center space-x-2">
+                <span>24-HOUR DEMAND FORECAST (LIGHTGBM MODEL)</span>
+              </h2>
+              <p className="text-xs text-gray-500">Real Processed Delhi Demand Curve (MW) & Model Pressure Window</p>
             </div>
-            <h2 className="text-2xl font-black text-white tracking-tight uppercase">
-              24-Hour Demand Forecast (LightGBM)
-            </h2>
-            <p className="text-xs text-gray-400 mt-1">Real Processed Delhi Demand Curve (MW) &amp; Operational Pressure Window</p>
-          </div>
-          
-          <div className="flex items-center gap-3 text-xs font-bold">
-            <div className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-black/60 border border-gray-800">
-              <span className="w-2.5 h-2.5 rounded-full bg-white shadow-sm" />
-              <span className="text-gray-200">Actual Load</span>
-            </div>
-            <div className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-black/60 border border-gray-800">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#FF7C1E] shadow-sm" />
-              <span className="text-[#FF7C1E]">LightGBM Forecast</span>
+            <div className="flex items-center space-x-4 text-xs font-semibold">
+              <div className="flex items-center space-x-2">
+                <span className="w-3 h-3 rounded-full bg-blue-600" />
+                <span className="text-gray-700">Actual Load</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="w-3 h-3 rounded-full bg-amber-500" />
+                <span className="text-gray-700">LightGBM Model Prediction</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Chart area */}
-        <div className="h-80 w-full">
-          {forecast.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={forecast} margin={{ top: 15, right: 20, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="actualGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ffffff" stopOpacity={0.25}/>
-                    <stop offset="95%" stopColor="#ffffff" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="forecastGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FF7C1E" stopOpacity={0.45}/>
-                    <stop offset="95%" stopColor="#FF7C1E" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#222222" vertical={false} />
-                <XAxis dataKey="time" stroke="#71717a" fontSize={11} tickLine={false} />
-                <YAxis stroke="#71717a" fontSize={11} tickLine={false} domain={['auto', 'auto']} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: "#000000", borderColor: "#333333", borderRadius: "1rem", boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)" }}
-                  itemStyle={{ color: "#f3f4f6", fontSize: "12px", fontWeight: "bold" }}
-                />
-                
-                <Area type="monotone" dataKey="actual" stroke="#ffffff" strokeWidth={2.5} fillOpacity={1} fill="url(#actualGrad)" name="Actual Load (MW)" />
-                <Area type="monotone" dataKey="forecast" stroke="#FF7C1E" strokeWidth={3} fillOpacity={1} fill="url(#forecastGrad)" name="Forecasted Load (MW)" />
-                
-                {peakPoint && (
-                  <ReferenceDot x={peakPoint.time} y={peakPoint.forecast} r={7} fill="#FF7C1E" stroke="#ffffff" strokeWidth={2.5} />
-                )}
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-full flex items-center justify-center text-sm font-bold text-gray-500">
-              Loading Live Model Forecast Curve...
-            </div>
-          )}
-        </div>
+          {/* Chart area */}
+          <div className="h-80 w-full">
+            {forecast.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={forecast} margin={{ top: 15, right: 20, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="actualGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25}/>
+                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="forecastGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.25}/>
+                      <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                  <XAxis dataKey="time" stroke="#64748b" fontSize={11} tickLine={false} />
+                  <YAxis stroke="#64748b" fontSize={11} tickLine={false} domain={['auto', 'auto']} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0", borderRadius: "0.75rem", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}
+                    itemStyle={{ color: "#0f172a", fontSize: "12px", fontWeight: "600" }}
+                  />
+                  
+                  <Area type="monotone" dataKey="actual" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#actualGrad)" name="Actual Load (MW)" />
+                  <Area type="monotone" dataKey="forecast" stroke="#f59e0b" strokeWidth={3} fillOpacity={1} fill="url(#forecastGrad)" name="Forecasted Load (MW)" />
+                  
+                  {peakPoint && (
+                    <ReferenceDot x={peakPoint.time} y={peakPoint.forecast} r={6} fill="#ef4444" stroke="#ffffff" strokeWidth={2} />
+                  )}
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-sm font-semibold text-gray-400">
+                Loading Live Model Forecast Curve...
+              </div>
+            )}
+          </div>
 
-        {/* Overlay Marker Bar */}
-        <div className="mt-6 p-4 bg-gradient-to-r from-red-950/40 via-black to-black border border-red-500/40 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-          <div className="flex items-center space-x-2.5 text-gray-300 font-bold">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
-            <AlertTriangle className="w-4 h-4 text-red-400" />
-            <span>Critical Pressure Window: {dashboard?.critical_window || "08:00 — 19:00"}</span>
+          {/* Overlay Marker Bar */}
+          <div className="mt-6 p-4 bg-orange-50/80 border border-orange-100 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className="flex items-center space-x-2 text-orange-900 font-semibold">
+              <AlertTriangle className="w-4 h-4 text-orange-600" />
+              <span>Critical Window Identified: {dashboard?.critical_window || "Calculating..."}</span>
+            </div>
+            <div className="flex items-center space-x-2 text-gray-900 font-bold">
+              <span className="text-orange-700">▲ PEAK: {dashboard?.tomorrow_peak ? Math.round(dashboard.tomorrow_peak).toLocaleString() : "--"} MW</span>
+              <span className="text-gray-500 font-normal">at {dashboard?.peak_time || "--"}</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-3 text-white font-bold">
-            <span className="px-3 py-1 rounded-full bg-red-600 text-white text-xs font-black uppercase">
-              ▲ PEAK: {dashboard?.tomorrow_peak ? Math.round(dashboard.tomorrow_peak).toLocaleString() : "3,911"} MW
-            </span>
-            <span className="text-gray-400">at {dashboard?.peak_time || "10:00 IST"}</span>
-          </div>
-        </div>
         </div>
       </ScrollReveal>
 
       {/* 3. HERO CARDS: NEXT RISK, EXPLAINABILITY & WEATHER INTELLIGENCE */}
       <ScrollReveal delay={300} direction="up">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* CARD A: THE NEXT RISK */}
-        <div className="control-card p-7 flex flex-col justify-between border-l-4 border-l-red-500 bg-gradient-to-b from-red-950/30 via-[#12141a] to-[#12141a] shadow-xl">
-          <div>
-            <div className="flex items-center justify-between border-b border-gray-800/80 pb-4 mb-5">
-              <span className="text-xs font-black text-gray-400 tracking-widest flex items-center uppercase">
-                <AlertTriangle className="w-4 h-4 mr-1.5 text-red-400" />
-                NEXT CRITICAL WINDOW
-              </span>
-              <span className="text-xs px-3 py-1 rounded-full bg-red-600 text-white font-black uppercase tracking-wider">
-                {dashboard?.grid_risk_level || "HIGH"}
-              </span>
+          
+          {/* CARD A: THE NEXT RISK */}
+          <div className="control-card p-6 border-l-4 border-red-500 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                <span className="text-xs font-bold text-gray-500 tracking-wider flex items-center">
+                  <AlertTriangle className="w-4 h-4 mr-1.5 text-red-500" />
+                  NEXT CRITICAL WINDOW
+                </span>
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 font-bold border border-red-200">
+                  {dashboard?.grid_risk_level || "HIGH"}
+                </span>
+              </div>
+
+              <div className="text-xl font-bold text-gray-900">Next 24h Window</div>
+              <div className="text-sm font-semibold text-gray-600 mb-4">{dashboard?.critical_window || "--"}</div>
+
+              <div className="space-y-2.5 text-xs border-t border-b border-gray-100 py-3 mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Peak Demand</span>
+                  <span className="text-gray-900 font-bold">{dashboard?.tomorrow_peak ? Math.round(dashboard.tomorrow_peak).toLocaleString() : "--"} MW</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Grid Risk Score</span>
+                  <span className="text-gray-900 font-bold">{dashboard?.grid_risk_score ?? "--"} / 100</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Model Algorithm</span>
+                  <span className="text-gray-900 font-bold">LightGBM Multi-Horizon</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Forecast Temp</span>
+                  <span className="text-gray-900 font-bold">🌡 {weather?.temperature ?? "--"}°C</span>
+                </div>
+              </div>
             </div>
 
-            <div className="text-2xl font-black text-white tracking-tight">Next 24h Window</div>
-            <div className="text-sm font-bold text-[#FF7C1E] mt-1 mb-5">{dashboard?.critical_window || "08:00 — 19:00"}</div>
-
-            <div className="space-y-3 text-xs border-t border-b border-gray-800/80 py-4 mb-6">
-              <div className="flex justify-between">
-                <span className="text-gray-400 font-medium">Peak Demand</span>
-                <span className="text-white font-black">{dashboard?.tomorrow_peak ? Math.round(dashboard.tomorrow_peak).toLocaleString() : "3,911"} MW</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400 font-medium">Grid Risk Score</span>
-                <span className="text-red-400 font-black">{dashboard?.grid_risk_score ?? "39"} / 100</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400 font-medium">Model Algorithm</span>
-                <span className="text-gray-200 font-bold">LightGBM Multi-Horizon</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400 font-medium">Forecast Temp</span>
-                <span className="text-gray-200 font-bold">🌡 {weather?.temperature ?? "14.0"}°C</span>
-              </div>
-            </div>
+            <button
+              onClick={() => onNavigateTab("grid-risk")}
+              className="w-full py-2.5 px-4 rounded-xl bg-gray-900 hover:bg-gray-800 text-white transition text-xs font-semibold flex items-center justify-center space-x-2 cursor-pointer shadow-sm"
+            >
+              <span>View Risk Analysis</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
 
-          <button
-            onClick={() => onNavigateTab("grid-risk")}
-            className="w-full py-4 px-6 rounded-full bg-[#FF7C1E] text-black hover:bg-orange-500 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center space-x-2 shadow-xl cursor-pointer"
-          >
-            <span>Explore Risk Analysis</span>
-            <ArrowRight className="w-4 h-4 stroke-[3]" />
-          </button>
-        </div>
+          {/* CARD B: WHY IS DEMAND INCREASING? (SHAP Explainability) */}
+          <div className="control-card p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                <span className="text-xs font-bold text-gray-500 tracking-wider flex items-center">
+                  <Info className="w-4 h-4 mr-1.5 text-blue-600" />
+                  WHY IS DEMAND INCREASING?
+                </span>
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-semibold">
+                  Feature Importance
+                </span>
+              </div>
 
-        {/* CARD B: WHY IS DEMAND INCREASING? (SHAP Explainability) */}
-        <div className="control-card p-7 flex flex-col justify-between shadow-xl">
-          <div>
-            <div className="flex items-center justify-between border-b border-gray-800/80 pb-4 mb-5">
-              <span className="text-xs font-black text-gray-400 tracking-widest flex items-center uppercase">
-                <Info className="w-4 h-4 mr-1.5 text-cyan-400" />
-                DEMAND DRIVERS (SHAP)
-              </span>
-              <span className="text-[10px] px-2.5 py-1 rounded-full bg-cyan-950/60 text-cyan-400 border border-cyan-500/30 font-bold uppercase tracking-wider">
-                FEATURE ATTRIBUTION
-              </span>
-            </div>
-
-            {/* Feature Bars */}
-            <div className="space-y-4 mb-6">
-              {explanation?.shap_drivers ? explanation.shap_drivers.slice(0, 4).map((driver: any, index: number) => {
-                const width = driver.percentage;
-                return (
-                  <div key={index}>
-                    <div className="flex justify-between text-xs mb-1.5 font-bold">
-                      <span className="text-gray-300">{driver.feature}</span>
-                      <span className="text-[#FF7C1E]">+{driver.percentage}%</span>
+              {/* Feature Bars */}
+              <div className="space-y-3.5 mb-4">
+                {explanation?.shap_drivers ? explanation.shap_drivers.slice(0, 4).map((driver: any, index: number) => {
+                  const width = driver.percentage;
+                  return (
+                    <div key={index}>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-gray-700 font-semibold">{driver.feature}</span>
+                        <span className="text-blue-600 font-bold">+{driver.percentage}%</span>
+                      </div>
+                      <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                        <div className="bg-blue-600 h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, width)}%` }} />
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-900 h-2.5 rounded-full overflow-hidden border border-gray-800">
-                      <div className="bg-gradient-to-r from-[#FF7C1E] to-amber-400 h-full rounded-full" style={{ width: `${Math.min(100, width)}%` }} />
-                    </div>
-                  </div>
-                );
-              }) : (
-                <div className="text-xs text-gray-500">Loading Feature Importances...</div>
-              )}
+                  );
+                }) : (
+                  <div className="text-xs text-gray-400 font-medium">Loading Feature Importances...</div>
+                )}
+              </div>
             </div>
+
+            <p className="text-xs text-gray-600 bg-slate-50 p-3.5 rounded-xl border border-slate-200 italic leading-relaxed">
+              "{explanation?.summary || 'Loading LightGBM model feature attributions...'}"
+            </p>
           </div>
 
-          <p className="text-xs text-gray-300 bg-black/60 p-4 rounded-2xl border border-gray-800 leading-relaxed font-medium">
-            "{explanation?.summary || 'LightGBM model attributes the projected peak primarily to recent 12h demand momentum, diurnal timing, and cooling load.'}"
-          </p>
-        </div>
+          {/* CARD C: WEATHER INTELLIGENCE */}
+          <div className="control-card p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                <span className="text-xs font-bold text-gray-500 tracking-wider flex items-center">
+                  <Sun className="w-4 h-4 mr-1.5 text-amber-500" />
+                  WEATHER INTELLIGENCE
+                </span>
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-semibold">
+                  Open-Meteo Dataset
+                </span>
+              </div>
 
-        {/* CARD C: WEATHER INTELLIGENCE */}
-        <div className="control-card p-7 flex flex-col justify-between shadow-xl">
-          <div>
-            <div className="flex items-center justify-between border-b border-gray-800/80 pb-4 mb-5">
-              <span className="text-xs font-black text-gray-400 tracking-widest flex items-center uppercase">
-                <Sun className="w-4 h-4 mr-1.5 text-[#FF7C1E]" />
-                WEATHER INTELLIGENCE
-              </span>
-              <span className="text-[10px] px-2.5 py-1 rounded-full bg-[#FF7C1E]/10 text-[#FF7C1E] border border-[#FF7C1E]/30 font-bold uppercase tracking-wider">
-                OPEN-METEO
-              </span>
+              <div className="flex items-baseline justify-between mb-4">
+                <div>
+                  <div className="text-3xl font-extrabold text-gray-900">{weather?.temperature ?? "--"}°C</div>
+                  <div className="text-xs font-semibold text-gray-500 mt-0.5">{weather?.condition || "Live Stream"}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-gray-400 font-medium">Humidity</div>
+                  <div className="text-sm font-bold text-gray-800">{weather?.humidity ?? "--"}%</div>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-xl mb-4 text-xs">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-gray-700 font-semibold">Demand Impact</span>
+                  <span className="text-amber-800 font-bold">{weather?.demand_impact || "--"}</span>
+                </div>
+                <p className="text-gray-600 text-xs">
+                  "{weather?.summary || 'Weather impact correlation loaded from dataset.'}"
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-baseline justify-between mb-5">
-              <div>
-                <div className="text-4xl lg:text-5xl font-black text-white tracking-tighter">{weather?.temperature ?? "14.0"}°C</div>
-                <div className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-wider">{weather?.condition || "High Seasonal Temp"}</div>
-              </div>
-              <div className="text-right">
-                <div className="text-xs text-gray-400 uppercase font-bold tracking-wider">Humidity</div>
-                <div className="text-xl font-black text-white mt-1">{weather?.humidity ?? "54"}%</div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-black/60 border border-gray-800 rounded-2xl mb-6 text-xs">
-              <div className="flex justify-between items-center mb-1.5">
-                <span className="text-gray-400 font-bold uppercase tracking-wider">Demand Impact</span>
-                <span className="text-[#FF7C1E] font-black">{weather?.demand_impact || "↑ HIGH"}</span>
-              </div>
-              <p className="text-gray-300 text-xs leading-relaxed font-medium">
-                "{weather?.summary || 'Ambient temperature directly increases cooling-driven electricity demand across Delhi NCT.'}"
-              </p>
-            </div>
+            <button
+              onClick={() => onNavigateTab("forecast")}
+              className="w-full py-2.5 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 transition text-xs font-semibold flex items-center justify-center space-x-1 cursor-pointer"
+            >
+              <span>View Temperature vs Demand</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
-
-          <button
-            onClick={() => onNavigateTab("forecast")}
-            className="w-full py-4 px-6 rounded-full bg-white text-black hover:bg-gray-200 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center space-x-2 shadow-xl cursor-pointer"
-          >
-            <span>Temperature vs Demand</span>
-            <ArrowRight className="w-4 h-4 stroke-[3]" />
-          </button>
-        </div>
 
         </div>
       </ScrollReveal>
     </div>
   );
 };
-

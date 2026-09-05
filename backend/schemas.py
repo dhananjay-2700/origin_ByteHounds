@@ -30,9 +30,8 @@ class DashboardSchema(BaseModel):
     grid_risk_level: str
     critical_window: str
     data_health_score: int
-    peak_24h: Optional[float] = None
-    weather_temp: Optional[float] = None
-    humidity: Optional[float] = None
+    weather_temp: Optional[float] = 14.8
+    humidity: Optional[float] = 70.0
 
 class ForecastPoint(BaseModel):
     timestamp: str
@@ -186,4 +185,3 @@ class DataHealthResponse(BaseModel):
     status_label: str
     metrics: List[DataHealthMetric]
     last_validated: str
-

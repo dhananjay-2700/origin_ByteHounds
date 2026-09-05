@@ -70,7 +70,9 @@ CUSTOM_ALERT_WEBHOOK_URL: str = os.getenv("CUSTOM_ALERT_WEBHOOK_URL", "")
 # 5. DATABASE CONFIGURATION
 # =============================================================================
 _BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DATABASE_URL: str = os.getenv("DATABASE_URL", f"sqlite:///{os.path.join(_BACKEND_DIR, 'gridwise.db')}")
+_DB_PATH = os.path.join(_BACKEND_DIR, 'prvaah_x.db') if os.path.exists(os.path.join(_BACKEND_DIR, 'prvaah_x.db')) else os.path.join(_BACKEND_DIR, 'gridwise.db')
+DATABASE_URL: str = os.getenv("DATABASE_URL", f"sqlite:///{_DB_PATH}")
+
 
 
 # =============================================================================

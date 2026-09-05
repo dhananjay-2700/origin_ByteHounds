@@ -1,107 +1,128 @@
 {
-  "model_name": "PRVAAH X Delhi Electricity Demand Forecaster (TimesFM 2.5 & LightGBM)",
-  "model_version": "2.5.0",
-  "primary_architecture": "google/timesfm-2.5-200m-transformers",
-  "tabular_architecture": "Global Multi-Horizon LightGBM Regressor",
-  "timestamp_utc": "2026-09-04T22:02:44Z",
-  "context_length_hours": 168,
+  "model_name": "PRVAAH X Delhi Electricity Demand Forecaster",
+  "model_version": "0.1.0-draft1",
+  "timestamp_utc": "2026-09-04T23:20:20Z",
+  "model_architecture": "Global Multi-Horizon LightGBM Regressor",
   "forecast_horizon_hours": 24,
-  "lora_parameters": {
-    "r": 8,
-    "lora_alpha": 16,
-    "lora_dropout": 0.05,
-    "bias": "none",
-    "task_type": "FEATURE_EXTRACTION"
+  "features": {
+    "total_count": 38,
+    "feature_list": [
+      "lag_1h",
+      "lag_2h",
+      "lag_3h",
+      "lag_6h",
+      "lag_12h",
+      "lag_24h",
+      "lag_48h",
+      "lag_72h",
+      "lag_168h",
+      "rolling_mean_3h",
+      "rolling_mean_6h",
+      "rolling_mean_12h",
+      "rolling_mean_24h",
+      "rolling_mean_168h",
+      "rolling_std_24h",
+      "temperature",
+      "apparent_temperature",
+      "relative_humidity",
+      "dew_point",
+      "precipitation",
+      "surface_pressure",
+      "cloud_cover",
+      "wind_speed",
+      "temperature_squared",
+      "temp_humidity_interaction",
+      "hour",
+      "day_of_week",
+      "day_of_month",
+      "day_of_year",
+      "month",
+      "weekend",
+      "hour_sin",
+      "hour_cos",
+      "day_of_week_sin",
+      "day_of_week_cos",
+      "day_of_year_sin",
+      "day_of_year_cos",
+      "forecast_horizon"
+    ]
   },
-  "training_summary": {
-    "device": "mps",
-    "trainable_parameters": 9728,
-    "total_parameters": 124952,
-    "train_samples": 12097,
-    "val_samples": 1566,
-    "epochs": 5,
-    "best_val_mse": 623156.1875
+  "splits": {
+    "train": {
+      "count": 14073,
+      "start": "2021-01-07 23:00:00",
+      "end": "2023-12-20 20:00:00"
+    },
+    "validation": {
+      "count": 3015,
+      "start": "2023-12-20 21:00:00",
+      "end": "2024-07-18 22:00:00"
+    },
+    "test": {
+      "count": 3017,
+      "start": "2024-07-18 23:00:00",
+      "end": "2024-12-12 00:00:00"
+    }
+  },
+  "hyperparameters": {
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "max_depth": -1,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "random_state": 42,
+    "n_jobs": -1,
+    "verbose": -1
   },
   "metrics_overall": [
     {
       "model": "Previous Hour",
-      "mae": 791.1528,
-      "rmse": 1033.271,
-      "wape": 16.2616,
-      "mape": 19.0029,
-      "r2": 0.3653,
-      "mean_bias": -15.9534
+      "mae": 780.02,
+      "rmse": 1018.82,
+      "wape": 17.07,
+      "mape": 20.15
     },
     {
       "model": "Previous Day",
-      "mae": 572.9882,
-      "rmse": 852.1014,
-      "wape": 11.7627,
-      "mape": 12.7167,
-      "r2": 0.5612,
-      "mean_bias": -24.0748
+      "mae": 530.86,
+      "rmse": 789.29,
+      "wape": 11.61,
+      "mape": 12.72
     },
     {
       "model": "Previous Week",
-      "mae": 1093.6826,
-      "rmse": 1542.6132,
-      "wape": 22.433,
-      "mape": 25.4587,
-      "r2": -0.4429,
-      "mean_bias": -249.6887
+      "mae": 930.43,
+      "rmse": 1347.65,
+      "wape": 20.36,
+      "mape": 23.45
     },
     {
       "model": "LightGBM",
-      "mae": 411.9911,
-      "rmse": 547.0416,
-      "wape": 8.4682,
-      "mape": 8.4385,
-      "r2": 0.8221,
-      "mean_bias": -217.328
-    },
-    {
-      "model": "TimesFM Zero-Shot",
-      "mae": 5264.1552,
-      "rmse": 5706.0997,
-      "wape": 108.2011,
-      "mape": 109.0589,
-      "r2": -18.3571,
-      "mean_bias": -5249.0278
-    },
-    {
-      "model": "TimesFM LoRA (Primary)",
-      "mae": 653.8577,
-      "rmse": 882.9023,
-      "wape": 13.4396,
-      "mape": 14.9844,
-      "r2": 0.5366,
-      "mean_bias": -260.0304
+      "mae": 371.32,
+      "rmse": 497.85,
+      "wape": 8.13,
+      "mape": 7.89
     }
   ],
   "peak_metrics": {
     "total_evaluated_24h_windows": 1319,
-    "mean_actual_peak_mw": 5926.2357,
-    "mean_predicted_peak_mw": 5365.1128,
-    "mean_peak_magnitude_error_mw": -561.1229,
-    "mae_peak_demand_mw": 634.8079,
-    "mean_absolute_peak_timing_error_hours": 3.9492,
-    "exact_peak_hour_match_pct": 46.6262,
-    "within_1h_peak_match_pct": 65.7316
+    "mean_actual_peak_mw": 5926.23,
+    "mean_predicted_peak_mw": 5365.11,
+    "mean_peak_magnitude_error_mw": -561.12,
+    "mae_peak_demand_mw": 634.80,
+    "mean_absolute_peak_timing_error_hours": 3.94,
+    "exact_peak_hour_match_pct": 46.62,
+    "within_1h_peak_match_pct": 65.73
   },
   "leakage_audit": {
     "status": "PASSED",
     "train_samples": 329319,
     "val_samples": 68787,
     "test_samples": 70110,
-    "feature_count": 44,
+    "feature_count": 38,
     "train_range": "2021-01-07 23:00:00 to 2023-12-20 20:00:00",
     "val_range": "2023-12-20 21:00:00 to 2024-07-18 22:00:00",
     "test_range": "2024-07-18 23:00:00 to 2024-12-11 23:00:00"
-  },
-  "plot_artifacts": {
-    "actual_vs_predicted": "ml/artifacts/plots/actual_vs_predicted.png",
-    "forecast_24h_samples": "ml/artifacts/plots/forecast_24h_samples.png",
-    "peak_day_analysis": "ml/artifacts/plots/peak_day_analysis.png",
-    "error_by_horizon": "ml/artifacts/plots/error_by_horizon.png"
   }
 }

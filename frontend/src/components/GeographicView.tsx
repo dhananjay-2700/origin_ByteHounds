@@ -30,20 +30,35 @@ export const GeographicView: React.FC = () => {
       try {
         const res = await fetch(API_ENDPOINTS.areas);
         const data = await res.json();
-        const formattedAreas = data.map((a: any, idx: number) => ({
-          id: a.id,
-          name: a.name,
-          rank: idx + 1,
-          score: a.risk_score,
-          status: a.risk_level,
-          badgeColor: getBadgeStyle(a.risk_level),
-          demand: `${a.predicted_load.toLocaleString()} MW`,
-          capacity: `${a.capacity.toLocaleString()} MW`,
-          utilization: `${a.utilization}%`,
-          driver: a.main_driver,
-          window: a.critical_window,
-          feeders: []
-        }));
+        const formattedAreas = data.map((a: any, idx: number) => {
+          const predLoad = a.predicted_load ?? a.currentLoadMW ?? a.current_load ?? 0;
+          const cap = a.capacity ?? a.capacityMW ?? 0;
+          const util = a.utilization ?? a.utilizationPercent ?? 0;
+          const rLevel = a.risk_level ?? a.riskLevel ?? "MODERATE";
+          const score = a.risk_score ?? Math.round(util);
+          const driver = a.main_driver ?? a.hotspotIssue ?? a.description ?? "Thermal Cooling Demand";
+          const windowStr = a.critical_window ?? a.peakTime ?? "10:00 IST";
+
+          return {
+            id: a.id,
+            name: a.name,
+            rank: idx + 1,
+            score: score,
+            status: rLevel,
+            badgeColor: rLevel === "CRITICAL" ? "bg-white text-black font-bold" : 
+                       rLevel === "HIGH" ? "bg-gray-300 text-black font-bold" :
+                       rLevel === "MODERATE" ? "bg-gray-500 text-white font-bold" : "bg-gray-700 text-white font-bold",
+            borderColor: rLevel === "CRITICAL" ? "border-white" :
+                        rLevel === "HIGH" ? "border-gray-300" :
+                        rLevel === "MODERATE" ? "border-gray-500" : "border-gray-700",
+            demand: `${Number(predLoad).toLocaleString()} MW`,
+            capacity: `${Number(cap).toLocaleString()} MW`,
+            utilization: `${util}%`,
+            driver: driver,
+            window: windowStr,
+            feeders: []
+          };
+        });
         setAreas(formattedAreas);
         if (formattedAreas.length > 0) {
           fetchAreaDetail(formattedAreas[0].id);
@@ -60,25 +75,39 @@ export const GeographicView: React.FC = () => {
     try {
       const res = await fetch(API_ENDPOINTS.areaDetail(id));
       const data = await res.json();
-      const feedersList = data.feeders || [];
+
+      const predLoad = data.predicted_load ?? data.currentLoadMW ?? data.current_load ?? 0;
+      const cap = data.capacity ?? data.capacityMW ?? 0;
+      const util = data.utilization ?? data.utilizationPercent ?? 0;
+      const rLevel = data.risk_level ?? data.riskLevel ?? "MODERATE";
+      const score = data.risk_score ?? Math.round(util);
+      const driver = data.main_driver ?? data.hotspotIssue ?? data.description ?? "Thermal Cooling Demand";
+      const windowStr = data.critical_window ?? data.peakTime ?? "10:00 IST";
+      const rawFeeders = Array.isArray(data.feeders) ? data.feeders : [
+        { name: `${data.name || 'Regional'} Primary Feeder 1`, current_load: Math.round(predLoad * 0.55), capacity: Math.round(cap * 0.5), status: rLevel },
+        { name: `${data.name || 'Regional'} Secondary Feeder 2`, current_load: Math.round(predLoad * 0.45), capacity: Math.round(cap * 0.5), status: rLevel === "CRITICAL" ? "WARNING" : "NORMAL" },
+      ];
+
       setActiveArea({
         id: data.id,
         name: data.name,
-        score: data.risk_score,
-        status: data.risk_level,
-        badgeColor: getBadgeStyle(data.risk_level),
-        demand: `${data.predicted_load.toLocaleString()} MW`,
-        capacity: `${data.capacity.toLocaleString()} MW`,
-        utilization: `${data.utilization}%`,
-        driver: data.main_driver,
-        window: data.critical_window,
-        feeders: feedersList.map((f: any) => ({
-          name: f.name || f.id,
-          current: `${f.current_load} MW`,
-          cap: `${f.capacity} MW`,
-          status: f.status || f.risk || "NORMAL",
-          statusColor: (f.status || f.risk) === "CRITICAL" ? "text-red-400" : 
-                      (f.status || f.risk) === "HIGH" || (f.status || f.risk) === "WARNING" ? "text-[#FF7C1E]" : "text-emerald-400"
+        score: score,
+        status: rLevel,
+        badgeColor: rLevel === "CRITICAL" ? "bg-white text-black font-bold" : 
+                   rLevel === "HIGH" ? "bg-gray-300 text-black font-bold" :
+                   rLevel === "MODERATE" ? "bg-gray-500 text-white font-bold" : "bg-gray-700 text-white font-bold",
+        demand: `${Number(predLoad).toLocaleString()} MW`,
+        capacity: `${Number(cap).toLocaleString()} MW`,
+        utilization: `${util}%`,
+        driver: driver,
+        window: windowStr,
+        feeders: rawFeeders.map((f: any) => ({
+          name: f.name,
+          current: `${Number(f.current_load ?? f.current ?? 0).toLocaleString()} MW`,
+          cap: `${Number(f.capacity ?? f.cap ?? 0).toLocaleString()} MW`,
+          status: f.status || "NORMAL",
+          statusColor: f.status === "CRITICAL" ? "text-white font-bold" : 
+                      f.status === "WARNING" ? "text-gray-300" : "text-gray-500"
         }))
       });
     } catch (err) {
@@ -90,42 +119,38 @@ export const GeographicView: React.FC = () => {
     <div className="space-y-8 animate-fadeIn pb-16">
       {/* Top Banner with Disclaimer */}
       <ScrollReveal delay={100} direction="up">
-        <div className="control-card p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="control-card p-6 border border-gray-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white">
           <div>
-            <div className="flex items-center space-x-2 text-[#FF7C1E] text-xs font-black uppercase tracking-widest mb-2">
-              <Map className="w-4 h-4" />
+            <div className="flex items-center space-x-2 text-blue-600 text-xs font-semibold uppercase tracking-wider mb-1">
+              <Map className="w-4 h-4 text-blue-600" />
               <span>SPATIAL GRID INTELLIGENCE</span>
             </div>
-            <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">Delhi Grid Regional Risk Distribution</h1>
-            <p className="text-xs md:text-sm text-gray-400 mt-1 font-normal">
-              Modeled electricity load and feeder stress across Delhi administrative zones
-            </p>
+            <h1 className="text-xl font-bold text-gray-900 font-sans">Delhi Grid Regional Risk Distribution</h1>
+            <p className="text-xs text-gray-500 font-medium">Modeled electricity load and feeder stress across Delhi administrative zones</p>
           </div>
 
           {/* Operational Telemetry Disclaimer Pill */}
-          <div className="flex items-center space-x-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gray-300 text-xs font-medium">
-            <Info className="w-4 h-4 text-[#FF7C1E] shrink-0" />
-            <span>Modeled / simulated area intelligence</span>
+          <div className="flex items-center space-x-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs">
+            <Info className="w-4 h-4 text-amber-600 shrink-0" />
+            <span className="font-semibold">“Modeled / simulated area intelligence”</span>
           </div>
         </div>
       </ScrollReveal>
 
       {/* Map & Ranking Section */}
       <ScrollReveal delay={200} direction="up">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* DELHI MAP VISUALIZATION (7 cols) */}
-          <div className="lg:col-span-7 control-card p-8 relative flex flex-col justify-between min-h-[440px]">
+          <div className="lg:col-span-7 control-card p-6 border border-gray-100 bg-white relative flex flex-col justify-between min-h-[420px]">
             <div className="flex items-center justify-between mb-4">
-              <div>
-                <span className="text-xs font-black uppercase tracking-widest text-gray-400">REGIONAL TOPOLOGY</span>
-                <h3 className="text-base font-black text-white tracking-tight">Zone Telemetry Map</h3>
-              </div>
-              <span className="text-xs text-[#FF7C1E] font-semibold">Select marker to inspect</span>
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">DELHI GRID REGIONAL MAP</span>
+              <span className="text-xs text-blue-600 font-semibold">Select region for feeder details</span>
             </div>
 
-            {/* Interactive Regional Diagram */}
-            <div className="relative w-full h-[340px] bg-black/80 rounded-2xl overflow-hidden border border-white/10">
+            {/* Interactive SVG Regional Diagram */}
+            <div className="relative w-full h-[350px] bg-slate-100 rounded-2xl overflow-hidden border border-gray-200">
+              {/* Real Interactive Map of Delhi */}
               <iframe 
                 width="100%" 
                 height="100%" 
@@ -134,88 +159,66 @@ export const GeographicView: React.FC = () => {
                 marginHeight={0} 
                 marginWidth={0} 
                 src="https://www.openstreetmap.org/export/embed.html?bbox=76.84,28.40,77.34,28.88&amp;layer=mapnik" 
-                style={{ border: 0, filter: 'invert(100%) hue-rotate(180deg) brightness(80%) contrast(110%) opacity(0.7)' }}
+                style={{ border: 0, opacity: 0.85 }}
                 className="absolute inset-0 pointer-events-none"
-              />
+              ></iframe>
               
               {/* Interactive Data Overlay */}
-              <svg viewBox="0 0 800 340" className="absolute inset-0 w-full h-full drop-shadow-2xl z-10">
+              <svg viewBox="0 0 800 350" className="absolute inset-0 w-full h-full drop-shadow-xl z-10">
                 {/* North Delhi Marker */}
-                <g onClick={() => fetchAreaDetail("North Delhi")} className="cursor-pointer group">
-                  <circle 
-                    cx="450" 
-                    cy="80" 
-                    r="24" 
-                    className={`transition-all duration-300 ${selectedAreaId === "North Delhi" ? 'fill-[#FF7C1E] stroke-white stroke-2' : 'fill-black/80 stroke-white/20 stroke-1'} hover:fill-[#FF7C1E]`} 
-                  />
-                  <circle cx="450" cy="80" r="5" className={selectedAreaId === "North Delhi" ? "fill-black" : "fill-[#FF7C1E]"} />
-                  <text x="450" y="122" fill="white" className="text-xs font-black pointer-events-none drop-shadow-md" textAnchor="middle">North Delhi</text>
-                  <text x="450" y="136" fill="#FF7C1E" className="text-[10px] font-bold pointer-events-none drop-shadow-md" textAnchor="middle">78 HIGH</text>
+                <g onClick={() => fetchAreaDetail("North Delhi")} className="cursor-pointer group transition-all duration-300">
+                  <circle cx="450" cy="80" r="25" className={`transition-colors duration-500 ${selectedAreaId === "North Delhi" ? 'fill-blue-600' : 'fill-slate-900'} hover:fill-blue-700`} />
+                  <circle cx="450" cy="80" r="6" className="fill-white" />
+                  <text x="450" y="125" fill="#0f172a" className="text-xs font-bold font-sans pointer-events-none drop-shadow-sm" textAnchor="middle">North Delhi</text>
+                  <text x="450" y="140" fill="#f97316" className="text-[10px] font-bold font-sans pointer-events-none drop-shadow-sm" textAnchor="middle">78 HIGH</text>
                 </g>
 
                 {/* South Delhi Marker */}
-                <g onClick={() => fetchAreaDetail("South Delhi")} className="cursor-pointer group">
-                  <circle 
-                    cx="430" 
-                    cy="250" 
-                    r="26" 
-                    className={`transition-all duration-300 ${selectedAreaId === "South Delhi" ? 'fill-[#FF7C1E] stroke-white stroke-2' : 'fill-black/80 stroke-red-500/40 stroke-2'} hover:fill-[#FF7C1E]`} 
-                  />
-                  <circle cx="430" cy="250" r="6" className="fill-red-500 animate-pulse" />
-                  <text x="430" y="295" fill="white" className="text-xs font-black pointer-events-none drop-shadow-md" textAnchor="middle">South Delhi</text>
-                  <text x="430" y="309" fill="#ef4444" className="text-[10px] font-black pointer-events-none drop-shadow-md" textAnchor="middle">86 CRITICAL</text>
+                <g onClick={() => fetchAreaDetail("South Delhi")} className="cursor-pointer group transition-all duration-300">
+                  <circle cx="430" cy="280" r="25" className={`transition-colors duration-500 ${selectedAreaId === "South Delhi" ? 'fill-red-600' : 'fill-slate-900'} hover:fill-red-700`} />
+                  <circle cx="430" cy="280" r="6" className="fill-white animate-pulse" />
+                  <text x="430" y="325" fill="#0f172a" className="text-xs font-bold font-sans pointer-events-none drop-shadow-sm" textAnchor="middle">South Delhi</text>
+                  <text x="430" y="340" fill="#ef4444" className="text-[10px] font-bold font-sans pointer-events-none drop-shadow-sm" textAnchor="middle">86 CRITICAL</text>
                 </g>
 
                 {/* East Delhi Marker */}
-                <g onClick={() => fetchAreaDetail("East Delhi")} className="cursor-pointer group">
-                  <circle 
-                    cx="600" 
-                    cy="180" 
-                    r="24" 
-                    className={`transition-all duration-300 ${selectedAreaId === "East Delhi" ? 'fill-[#FF7C1E] stroke-white stroke-2' : 'fill-black/80 stroke-white/20 stroke-1'} hover:fill-[#FF7C1E]`} 
-                  />
-                  <circle cx="600" cy="180" r="5" className={selectedAreaId === "East Delhi" ? "fill-black" : "fill-amber-400"} />
-                  <text x="600" y="222" fill="white" className="text-xs font-black pointer-events-none drop-shadow-md" textAnchor="middle">East Delhi</text>
-                  <text x="600" y="236" fill="#f59e0b" className="text-[10px] font-bold pointer-events-none drop-shadow-md" textAnchor="middle">51 MOD</text>
+                <g onClick={() => fetchAreaDetail("East Delhi")} className="cursor-pointer group transition-all duration-300">
+                  <circle cx="600" cy="200" r="25" className={`transition-colors duration-500 ${selectedAreaId === "East Delhi" ? 'fill-amber-500' : 'fill-slate-900'} hover:fill-amber-600`} />
+                  <circle cx="600" cy="200" r="6" className="fill-white" />
+                  <text x="600" y="245" fill="#0f172a" className="text-xs font-bold font-sans pointer-events-none drop-shadow-sm" textAnchor="middle">East Delhi</text>
+                  <text x="600" y="260" fill="#d97706" className="text-[10px] font-bold font-sans pointer-events-none drop-shadow-sm" textAnchor="middle">51 MOD</text>
                 </g>
 
                 {/* West Delhi Marker */}
-                <g onClick={() => fetchAreaDetail("West Delhi")} className="cursor-pointer group">
-                  <circle 
-                    cx="280" 
-                    cy="170" 
-                    r="24" 
-                    className={`transition-all duration-300 ${selectedAreaId === "West Delhi" ? 'fill-[#FF7C1E] stroke-white stroke-2' : 'fill-black/80 stroke-white/20 stroke-1'} hover:fill-[#FF7C1E]`} 
-                  />
-                  <circle cx="280" cy="170" r="5" className={selectedAreaId === "West Delhi" ? "fill-black" : "fill-[#FF7C1E]"} />
-                  <text x="280" y="212" fill="white" className="text-xs font-black pointer-events-none drop-shadow-md" textAnchor="middle">West Delhi</text>
-                  <text x="280" y="226" fill="#FF7C1E" className="text-[10px] font-bold pointer-events-none drop-shadow-md" textAnchor="middle">64 HIGH</text>
+                <g onClick={() => fetchAreaDetail("West Delhi")} className="cursor-pointer group transition-all duration-300">
+                  <circle cx="280" cy="180" r="25" className={`transition-colors duration-500 ${selectedAreaId === "West Delhi" ? 'fill-blue-600' : 'fill-slate-900'} hover:fill-blue-700`} />
+                  <circle cx="280" cy="180" r="6" className="fill-white" />
+                  <text x="280" y="225" fill="#0f172a" className="text-xs font-bold font-sans pointer-events-none drop-shadow-sm" textAnchor="middle">West Delhi</text>
+                  <text x="280" y="240" fill="#2563eb" className="text-[10px] font-bold font-sans pointer-events-none drop-shadow-sm" textAnchor="middle">64 HIGH</text>
                 </g>
               </svg>
             </div>
 
-            {/* Area Ranking Horizontal Cards */}
-            <div className="mt-6 pt-5 border-t border-white/5">
-              <span className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3 block">AREA RISK RANKING</span>
-              <div className="flex gap-3.5 overflow-x-auto pb-2">
+            {/* Area Ranking List */}
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 block">AREA RISK RANKING</span>
+              <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
                 {areas.map((a) => (
                   <button
                     key={a.id}
                     onClick={() => fetchAreaDetail(a.id)}
-                    className={`shrink-0 p-4.5 rounded-2xl border w-40 text-left transition-all duration-300 ${
-                      selectedAreaId === a.id
-                        ? "border-[#FF7C1E] bg-[#FF7C1E]/10 shadow-lg shadow-[#FF7C1E]/10"
-                        : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]"
+                    className={`shrink-0 snap-start control-card p-4 border w-40 text-left transition-all cursor-pointer ${
+                      selectedAreaId === a.id 
+                        ? 'border-blue-500 bg-blue-50/60 shadow-md' 
+                        : 'border-gray-100 bg-white hover:border-gray-200 hover:bg-slate-50'
                     }`}
                   >
-                    <div className="flex items-center space-x-1.5 mb-2 text-xs font-semibold text-gray-400">
+                    <div className="flex items-center space-x-2 mb-1.5 text-xs text-gray-500 font-semibold">
                       <span>{a.rank}.</span>
                       <span className="truncate">{a.name.split(" ")[0]}</span>
                     </div>
-                    <div className="text-3xl font-black text-white tracking-tight">{a.score}</div>
-                    <div className={`text-[10px] uppercase font-black tracking-wider mt-1 px-2 py-0.5 rounded-full inline-block ${a.badgeColor}`}>
-                      {a.status}
-                    </div>
+                    <div className="text-2xl font-extrabold text-gray-900 font-sans">{a.score}</div>
+                    <div className="text-[10px] font-bold uppercase text-gray-500 mt-1">{a.status}</div>
                   </button>
                 ))}
               </div>
@@ -223,73 +226,69 @@ export const GeographicView: React.FC = () => {
           </div>
 
           {/* SELECTED AREA DETAIL DRAWER (5 cols) */}
-          <div className="lg:col-span-5 control-card p-8 flex flex-col justify-between">
-            {activeArea ? (
+          <div className="lg:col-span-5 control-card p-6 border border-gray-100 bg-white flex flex-col justify-between">
+            {activeArea && (
               <div>
-                <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
                   <div>
-                    <h2 className="text-2xl font-black text-white tracking-tight">{activeArea.id}</h2>
-                    <span className="text-xs text-gray-400">Detailed Regional Telemetry</span>
+                    <h2 className="text-lg font-bold text-gray-900 font-sans">{activeArea.id}</h2>
+                    <span className="text-xs text-gray-500">Detailed Regional Telemetry</span>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${activeArea.badgeColor}`}>
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 border border-blue-200">
                     {activeArea.score} / 100 {activeArea.status}
                   </span>
                 </div>
 
-                <div className="space-y-3.5">
-                  <div className="flex justify-between items-center py-1.5 border-b border-white/5">
-                    <span className="text-xs text-gray-400 font-medium">Forecast Demand:</span>
-                    <span className="text-sm font-black text-white">{activeArea.demand}</span>
+                <div className="space-y-3">
+                  <div className="flex justify-between border-b border-gray-100 pb-2.5 text-xs">
+                    <span className="text-gray-500 font-semibold">Forecast Demand:</span>
+                    <span className="text-gray-900 font-bold">{activeArea.demand}</span>
                   </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-white/5">
-                    <span className="text-xs text-gray-400 font-medium">Grid Capacity:</span>
-                    <span className="text-sm font-black text-white">{activeArea.capacity}</span>
+                  <div className="flex justify-between border-b border-gray-100 pb-2.5 text-xs">
+                    <span className="text-gray-500 font-semibold">Grid Capacity:</span>
+                    <span className="text-gray-900 font-bold">{activeArea.capacity}</span>
                   </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-white/5">
-                    <span className="text-xs text-gray-400 font-medium">Utilization Rate:</span>
-                    <span className="text-sm font-black text-[#FF7C1E]">{activeArea.utilization}</span>
+                  <div className="flex justify-between border-b border-gray-100 pb-2.5 text-xs">
+                    <span className="text-gray-500 font-semibold">Utilization Rate:</span>
+                    <span className="text-gray-900 font-bold">{activeArea.utilization}</span>
                   </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-white/5">
-                    <span className="text-xs text-gray-400 font-medium">Main Risk Driver:</span>
-                    <span className="text-sm font-bold text-white">{activeArea.driver}</span>
+                  <div className="flex justify-between border-b border-gray-100 pb-2.5 text-xs">
+                    <span className="text-gray-500 font-semibold">Main Risk Driver:</span>
+                    <span className="text-gray-900 font-bold">{activeArea.driver}</span>
                   </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-white/5">
-                    <span className="text-xs text-gray-400 font-medium">Critical Window:</span>
-                    <span className="text-sm font-bold text-white">{activeArea.window}</span>
+                  <div className="flex justify-between border-b border-gray-100 pb-2.5 text-xs">
+                    <span className="text-gray-500 font-semibold">Critical Window:</span>
+                    <span className="text-gray-900 font-bold">{activeArea.window}</span>
                   </div>
                 </div>
 
                 {/* Feeder Breakdown */}
-                <div className="mt-7">
-                  <span className="text-xs font-black uppercase tracking-widest text-gray-300 block mb-3">
+                <div className="mt-6">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-3">
                     SUB-FEEDER TELEMETRY BREAKDOWN
                   </span>
-                  <div className="space-y-2.5">
+                  <div className="space-y-3">
                     {activeArea.feeders.map((f: any, i: number) => (
-                      <div key={i} className="flex justify-between items-center p-3.5 bg-white/[0.03] border border-white/10 rounded-2xl hover:border-white/20 transition">
+                      <div key={i} className="flex justify-between items-center p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
                         <div>
-                          <div className="text-white font-bold text-xs">{f.name}</div>
-                          <div className="text-[10px] text-gray-400 mt-0.5">
+                          <div className="text-gray-900 font-bold text-sm">{f.name}</div>
+                          <div className="text-[11px] text-gray-500 font-medium mt-0.5">
                             Curr: {f.current} | Cap: {f.cap}
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-white font-black text-xs">{f.current}</div>
-                          <div className={`text-[10px] font-black uppercase tracking-wider ${f.statusColor}`}>{f.status}</div>
+                          <div className="text-gray-900 font-bold text-xs mb-0.5">{f.current}</div>
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-blue-600">{f.status}</div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="py-20 text-center text-gray-400 text-sm font-medium">
-                Loading Regional Feeder Data...
-              </div>
             )}
 
-            <div className="mt-6 pt-4 border-t border-white/5 text-[11px] text-gray-500 text-center font-medium">
-              Modeled / simulated area intelligence based on regional transformer hierarchy
+            <div className="mt-6 pt-3 border-t border-gray-100 text-[11px] text-gray-400 text-center italic font-medium">
+              “Modeled / simulated area intelligence”
             </div>
           </div>
 
