@@ -17,7 +17,8 @@ from ..config import (
     DERIVED_WEATHER_FEATURES,
     HORIZON_FEATURE,
     ALL_MODEL_FEATURES,
-    FORECAST_HORIZONS
+    FORECAST_HORIZONS,
+    PEAK_WEIGHTING_CONFIG
 )
 
 logger = logging.getLogger(__name__)
@@ -52,13 +53,18 @@ def create_hourly_base_features(df_aligned: pd.DataFrame) -> pd.DataFrame:
     df["lag_72h"] = demand.shift(71)
     df["lag_168h"] = demand.shift(167)
 
-    # --- D. ROLLING FEATURES (at origin T) ---
+    # --- D. ROLLING & PEAK FEATURES (at origin T) ---
     df["rolling_mean_3h"] = demand.rolling(3, min_periods=3).mean()
     df["rolling_mean_6h"] = demand.rolling(6, min_periods=6).mean()
     df["rolling_mean_12h"] = demand.rolling(12, min_periods=12).mean()
     df["rolling_mean_24h"] = demand.rolling(24, min_periods=24).mean()
     df["rolling_mean_168h"] = demand.rolling(168, min_periods=168).mean()
     df["rolling_std_24h"] = demand.rolling(24, min_periods=24).std()
+    df["rolling_max_24h"] = demand.rolling(24, min_periods=24).max()
+    df["rolling_max_168h"] = demand.rolling(168, min_periods=168).max()
+    df["rolling_min_24h"] = demand.rolling(24, min_periods=24).min()
+    df["peak_ratio_24h"] = df["lag_1h"] / (df["rolling_max_24h"] + 1e-5)
+    df["demand_std_ratio"] = df["rolling_std_24h"] / (df["rolling_mean_24h"] + 1e-5)
 
     # --- A. TIME FEATURES ---
     df["hour"] = df["timestamp"].dt.hour
@@ -168,3 +174,80 @@ def build_multi_horizon_samples(
         f"Dropped {dropped:,} samples with missing target/features due to historical gaps."
     )
     return clean_matrix
+
+
+def compute_peak_sample_weights(
+    y_series: pd.Series,
+    train_thresholds: dict = None,
+    config: dict = None
+) -> tuple:
+    """
+    Computes leakage-safe peak-aware sample weights for LightGBM training.
+    
+    CRITICAL LEAKAGE RULE:
+    Demand quantile thresholds (q_high, q_extreme, q_tail) MUST be derived ONLY from the TRAINING partition.
+    When evaluating or calculating weights on validation/test sets, pre-computed `train_thresholds`
+    from the training set MUST be passed.
+    
+    Weight assignment strategy:
+      - Normal demand (< q_high): weight = 1.0
+      - High demand (q_high <= y < q_extreme): weight scales linearly from 1.0 to high_weight_mult (1.5)
+      - Extreme demand (q_extreme <= y < q_tail): weight scales linearly from extreme_weight_mult (3.0) to tail_weight_mult (4.0)
+      - Tail peak demand (y >= q_tail): weight scales linearly from tail_weight_mult (4.0) to max_weight_cap (6.0)
+    """
+    cfg = config or PEAK_WEIGHTING_CONFIG.copy()
+    if not cfg.get("enabled", True):
+        weights = np.ones(len(y_series), dtype=np.float32)
+        return weights, train_thresholds or {}
+
+    y_vals = y_series.values
+
+    # Determine thresholds strictly from training data
+    if train_thresholds is None:
+        q_high_val = float(np.percentile(y_vals, cfg.get("high_quantile", 0.75) * 100.0))
+        q_extreme_val = float(np.percentile(y_vals, cfg.get("extreme_quantile", 0.90) * 100.0))
+        q_tail_val = float(np.percentile(y_vals, cfg.get("tail_quantile", 0.95) * 100.0))
+        max_val = float(np.max(y_vals))
+        thresholds = {
+            "q_high": q_high_val,
+            "q_extreme": q_extreme_val,
+            "q_tail": q_tail_val,
+            "train_max": max_val
+        }
+    else:
+        thresholds = train_thresholds.copy()
+        q_high_val = thresholds["q_high"]
+        q_extreme_val = thresholds["q_extreme"]
+        q_tail_val = thresholds.get("q_tail", q_extreme_val)
+        max_val = thresholds["train_max"]
+
+    w_high_mult = cfg.get("high_weight_mult", 1.5)
+    w_extreme_mult = cfg.get("extreme_weight_mult", 3.0)
+    w_tail_mult = cfg.get("tail_weight_mult", 4.0)
+    cap = cfg.get("max_weight_cap", 6.0)
+
+    weights = np.ones(len(y_vals), dtype=np.float32)
+
+    # 1. High demand region (q_high <= y < q_extreme) -> 1.0 to 1.5
+    mask_high = (y_vals >= q_high_val) & (y_vals < q_extreme_val)
+    if q_extreme_val > q_high_val:
+        frac_high = (y_vals[mask_high] - q_high_val) / (q_extreme_val - q_high_val)
+        weights[mask_high] = 1.0 + frac_high * (w_high_mult - 1.0)
+
+    # 2. Extreme demand region (q_extreme <= y < q_tail) -> 3.0 to 4.0
+    mask_extreme = (y_vals >= q_extreme_val) & (y_vals < q_tail_val)
+    if q_tail_val > q_extreme_val:
+        frac_extreme = (y_vals[mask_extreme] - q_extreme_val) / (q_tail_val - q_extreme_val)
+        weights[mask_extreme] = w_extreme_mult + frac_extreme * (w_tail_mult - w_extreme_mult)
+
+    # 3. Tail peak demand region (y >= q_tail) -> 4.0 to cap
+    mask_tail = y_vals >= q_tail_val
+    denom_tail = max(1.0, max_val - q_tail_val)
+    frac_tail = (y_vals[mask_tail] - q_tail_val) / denom_tail
+    weights[mask_tail] = w_tail_mult + frac_tail * (cap - w_tail_mult)
+
+    # Cap maximum weight for stability
+    weights = np.clip(weights, 1.0, cap)
+
+    return weights.astype(np.float32), thresholds
+

@@ -1,6 +1,9 @@
 import os
+<<<<<<< Updated upstream
 import sys
 import json
+=======
+>>>>>>> Stashed changes
 import pickle
 from pathlib import Path
 import pandas as pd
@@ -20,6 +23,7 @@ from ml.data.loader import load_power_demand, load_weather_data
 
 class MLService:
     def __init__(self):
+<<<<<<< Updated upstream
         self._cached_forecast_df: Optional[pd.DataFrame] = None
         self._cached_df_power: Optional[pd.DataFrame] = None
         self._cached_df_weather: Optional[pd.DataFrame] = None
@@ -113,6 +117,23 @@ class MLService:
         for i, row in enumerate(forecast_rows):
             ts = pd.to_datetime(row['timestamp']).strftime("%H:%M")
             pred_val = float(row['predicted_demand'])
+=======
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        try:
+            with open(os.path.join(base_dir, 'model.pkl'), 'rb') as f:
+                self.model = pickle.load(f)
+            with open(os.path.join(base_dir, 'metrics.pkl'), 'rb') as f:
+                self.metrics = pickle.load(f)
+        except FileNotFoundError:
+            self.model = None
+            self.metrics = None
+            
+        try:
+            with open(os.path.join(base_dir, 'lgb_model.pkl'), 'rb') as f:
+                self.lgb_model = pickle.load(f)
+        except FileNotFoundError:
+            self.lgb_model = None
+>>>>>>> Stashed changes
             
             # Show actual_load for first half of window, null for future predictions
             if i < half_fc and len(recent_power) >= half_fc:

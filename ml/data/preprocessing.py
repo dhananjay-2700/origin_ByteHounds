@@ -139,6 +139,7 @@ def preprocess_and_align(
     # - temp_humidity_interaction: captures heat-index / apparent discomfort load.
     aligned["temperature_squared"] = aligned["temperature"] ** 2
     aligned["temp_humidity_interaction"] = aligned["temperature"] * aligned["relative_humidity"]
+    aligned["cooling_degree_hours"] = np.maximum(0.0, aligned["temperature"] - 24.0)
 
     logger.info(f"Preprocessed and aligned dataset created with {len(aligned):,} hours.")
     return aligned
