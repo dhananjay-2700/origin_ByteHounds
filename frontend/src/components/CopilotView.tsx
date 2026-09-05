@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Bot, Send, Terminal, Sparkles, User } from "lucide-react";
+import { Bot, Send, Terminal, Sparkles, User, Zap } from "lucide-react";
 import { ScrollReveal } from "./ScrollLayout";
+import { API_ENDPOINTS } from "../lib/api";
 
 interface Message {
   id: string;
@@ -21,7 +22,7 @@ export const CopilotView: React.FC = () => {
     {
       id: "1",
       sender: "copilot",
-      text: "Hello, I am **PRVAAH X Copilot**—your tool-grounded natural language interface to the Delhi Grid AI backend. How can I assist with grid risk or demand forecasts today?",
+      text: "Hello, I am **PravaahX Copilot**—your tool-grounded natural language interface to the Delhi Grid AI backend. How can I assist with grid risk or demand forecasts today?",
     },
   ]);
 
@@ -48,7 +49,7 @@ export const CopilotView: React.FC = () => {
     setIsProcessing(true);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/copilot", {
+      const res = await fetch(API_ENDPOINTS.copilot, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: q }),
@@ -82,7 +83,7 @@ export const CopilotView: React.FC = () => {
 
   const fallbackResponse = (q: string) => {
     const lower = q.toLowerCase();
-    let ans = "The PRVAAH X system is monitoring live Delhi Grid telemetry and ML model predictions.";
+    let ans = "The PravaahX system is monitoring live Delhi Grid telemetry and ML model predictions.";
     let intent = "GENERAL_GRID_QUERY";
     let apis = ["GET /api/dashboard"];
 
@@ -121,7 +122,7 @@ export const CopilotView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn pb-12">
+    <div className="space-y-8 animate-fadeIn pb-16">
       {/* Header */}
       <ScrollReveal delay={100} direction="up">
         <div className="control-card p-6 border border-gray-100 bg-white">

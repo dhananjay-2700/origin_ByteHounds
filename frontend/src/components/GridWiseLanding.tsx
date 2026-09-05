@@ -5,6 +5,8 @@ import { ArrowRight, AlertTriangle, Zap, Activity, Map, MessageSquare, Database,
 import { GridReveal } from "./GridReveal";
 import { ScrollReveal } from "./ScrollReveal";
 
+import { API_ENDPOINTS } from "../lib/api";
+
 interface GridWiseLandingProps {
   onViewForecast?: (targetSection?: string) => void;
   onOpenDataHealth?: () => void;
@@ -16,12 +18,12 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
   const [temperature, setTemperature] = useState(38);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/dashboard")
+    fetch(API_ENDPOINTS.dashboard)
       .then(res => res.json())
       .then(data => setDashboardData(data))
       .catch(err => console.error("Error fetching landing dashboard metrics:", err));
 
-    fetch("http://localhost:8000/api/forecast/accuracy")
+    fetch(API_ENDPOINTS.forecastAccuracy)
       .then(res => res.json())
       .then(data => setAccuracyData(data))
       .catch(err => console.error("Error fetching landing accuracy metrics:", err));

@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ShieldAlert, AlertTriangle, Clock, Activity, Zap } from "lucide-react";
+import { ShieldAlert, AlertTriangle, Clock, Activity, Zap, CheckCircle2 } from "lucide-react";
 import { ScrollReveal } from "./ScrollLayout";
+import { API_ENDPOINTS } from "../lib/api";
 
 export const GridRiskView: React.FC = () => {
   const [riskData, setRiskData] = useState<any>(null);
@@ -13,9 +14,9 @@ export const GridRiskView: React.FC = () => {
     const fetchData = async () => {
       try {
         const [riskRes, anomalyRes, dashRes] = await Promise.all([
-          fetch("http://127.0.0.1:8000/api/risk"),
-          fetch("http://127.0.0.1:8000/api/anomalies"),
-          fetch("http://127.0.0.1:8000/api/dashboard")
+          fetch(API_ENDPOINTS.risk),
+          fetch(API_ENDPOINTS.anomalies),
+          fetch(API_ENDPOINTS.dashboard)
         ]);
         const riskJson = await riskRes.json();
         const anomalyJson = await anomalyRes.json();
@@ -53,7 +54,7 @@ export const GridRiskView: React.FC = () => {
   const activeAnomaly = anomalies.length > 0 ? anomalies[0] : null;
 
   return (
-    <div className="space-y-6 animate-fadeIn pb-12">
+    <div className="space-y-8 animate-fadeIn pb-16">
       {/* 1. HERO RISK SCORE DIAL / CARD */}
       <ScrollReveal delay={100} direction="left">
         <div className="control-card p-6 border-l-4 border-l-orange-500 flex flex-col md:flex-row items-center justify-between gap-6 bg-white">
@@ -185,4 +186,3 @@ export const GridRiskView: React.FC = () => {
     </div>
   );
 };
-

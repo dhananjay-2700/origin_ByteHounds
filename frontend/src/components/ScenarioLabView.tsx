@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Sliders, Play, AlertTriangle, RefreshCw, ArrowUpRight, ArrowDownRight, Info } from "lucide-react";
+import { Sliders, Play, AlertTriangle, RefreshCw, ArrowUpRight, ArrowDownRight, Info, Zap } from "lucide-react";
 import { ScrollReveal } from "./ScrollLayout";
+import { API_ENDPOINTS } from "../lib/api";
 
 export const ScenarioLabView: React.FC = () => {
   const [temperature, setTemperature] = useState<number>(41.2);
@@ -27,7 +28,7 @@ export const ScenarioLabView: React.FC = () => {
   useEffect(() => {
     const fetchBaseline = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/dashboard");
+        const res = await fetch(API_ENDPOINTS.dashboard);
         if (res.ok) {
           const data = await res.json();
           const peak = data?.tomorrow_peak ?? data?.tomorrowPeak ?? 3910;
@@ -114,7 +115,7 @@ export const ScenarioLabView: React.FC = () => {
   const peakChange = simulatedPeak - basePeak;
 
   return (
-    <div className="space-y-6 animate-fadeIn pb-12">
+    <div className="space-y-8 animate-fadeIn pb-16">
       {/* Header Banner */}
       <ScrollReveal delay={100} direction="up">
         <div className="control-card p-6 border border-gray-100 bg-white relative">
@@ -135,7 +136,7 @@ export const ScenarioLabView: React.FC = () => {
         </div>
       </ScrollReveal>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* CONTROLS PANEL (6 cols) */}
         <ScrollReveal delay={200} direction="left" className="lg:col-span-6">

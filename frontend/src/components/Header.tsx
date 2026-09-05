@@ -19,12 +19,12 @@ export const Header: React.FC<HeaderProps> = ({
   dataHealthScore = 94,
 }) => {
   const tabs = [
-    { id: "command-center", label: "Command Center", icon: Zap },
+    { id: "command-center", label: "Command", icon: Zap },
     { id: "forecast", label: "Forecast", icon: Activity },
     { id: "grid-risk", label: "Grid Risk", icon: ShieldAlert },
-    { id: "geographic", label: "Geographic Intelligence", icon: Map },
+    { id: "geographic", label: "Geo Intel", icon: Map },
     { id: "scenario-lab", label: "Scenario Lab", icon: Sliders },
-    { id: "copilot", label: "PRVAAH X Copilot", icon: Bot },
+    { id: "copilot", label: "Copilot", icon: Bot },
   ];
 
   return (
@@ -86,8 +86,8 @@ export const Header: React.FC<HeaderProps> = ({
           })}
         </nav>
 
-        {/* Desktop Data Health Pill */}
-        <div className="hidden md:flex items-center">
+        {/* Data Health Pill - Aligned to Right */}
+        <div className="flex items-center shrink-0">
           <button
             onClick={onOpenDataHealth}
             className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition shadow-xs cursor-pointer"

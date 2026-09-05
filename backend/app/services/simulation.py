@@ -317,4 +317,3 @@ def get_system_health() -> SystemHealthResponse:
         weatherStreamLatencySec=12,
         discoms=discoms,
     )
-

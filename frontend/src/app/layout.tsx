@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PRVAAH X - Demand Forecast & Risk Intelligence",
+  title: "PravaahX - Demand Forecast & Risk Intelligence",
   description: "Don't just predict the peak. Prepare for it. AI-powered grid predictive demand forecasting and risk engine.",
 };
 

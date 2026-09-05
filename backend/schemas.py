@@ -117,10 +117,12 @@ class WeatherResponse(BaseModel):
 
 class FeederSchema(BaseModel):
     id: str
+    name: Optional[str] = None
     current_load: float
     predicted_load: float
     capacity: float
     risk: str
+    status: Optional[str] = None
 
 class AreaSchema(BaseModel):
     id: str
@@ -183,4 +185,3 @@ class DataHealthResponse(BaseModel):
     status_label: str
     metrics: List[DataHealthMetric]
     last_validated: str
-

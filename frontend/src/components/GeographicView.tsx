@@ -1,19 +1,34 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Map, MapPin, AlertCircle, ChevronRight, Info } from "lucide-react";
+import { Map, MapPin, AlertCircle, ChevronRight, Info, Zap } from "lucide-react";
 import { ScrollReveal } from "./ScrollLayout";
+import { API_ENDPOINTS } from "../lib/api";
 
 export const GeographicView: React.FC = () => {
   const [selectedAreaId, setSelectedAreaId] = useState<string>("South Delhi");
-
   const [areas, setAreas] = useState<any[]>([]);
   const [activeArea, setActiveArea] = useState<any>(null);
+
+  const getBadgeStyle = (level: string) => {
+    switch (level?.toUpperCase()) {
+      case "CRITICAL":
+        return "bg-red-500/20 text-red-400 border border-red-500/40";
+      case "HIGH":
+        return "bg-[#FF7C1E]/20 text-[#FF7C1E] border border-[#FF7C1E]/40";
+      case "MODERATE":
+        return "bg-amber-500/20 text-amber-300 border border-amber-500/40";
+      case "LOW":
+        return "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+      default:
+        return "bg-white/10 text-gray-300 border border-white/20";
+    }
+  };
 
   useEffect(() => {
     const fetchAreas = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/areas");
+        const res = await fetch(API_ENDPOINTS.areas);
         const data = await res.json();
         const formattedAreas = data.map((a: any, idx: number) => {
           const predLoad = a.predicted_load ?? a.currentLoadMW ?? a.current_load ?? 0;
@@ -58,7 +73,7 @@ export const GeographicView: React.FC = () => {
   const fetchAreaDetail = async (id: string) => {
     setSelectedAreaId(id);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/areas/${id}`);
+      const res = await fetch(API_ENDPOINTS.areaDetail(id));
       const data = await res.json();
 
       const predLoad = data.predicted_load ?? data.currentLoadMW ?? data.current_load ?? 0;
@@ -101,7 +116,7 @@ export const GeographicView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn pb-12">
+    <div className="space-y-8 animate-fadeIn pb-16">
       {/* Top Banner with Disclaimer */}
       <ScrollReveal delay={100} direction="up">
         <div className="control-card p-6 border border-gray-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white">

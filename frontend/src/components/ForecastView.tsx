@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Activity, CheckCircle2, Cpu, BarChart2 } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceArea } from "recharts";
+import { Activity, CheckCircle2, Cpu, BarChart2, TrendingUp, Sparkles } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { ScrollReveal } from "./ScrollLayout";
+import { API_ENDPOINTS } from "../lib/api";
 
 export const ForecastView: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState<"all" | "xgb" | "baseline" | "lgb">("all");
@@ -16,8 +17,8 @@ export const ForecastView: React.FC = () => {
     const fetchData = async () => {
       try {
         const [forecastRes, accuracyRes] = await Promise.all([
-          fetch("http://127.0.0.1:8000/api/forecast"),
-          fetch("http://127.0.0.1:8000/api/forecast/accuracy")
+          fetch(API_ENDPOINTS.forecast),
+          fetch(API_ENDPOINTS.forecastAccuracy)
         ]);
         const forecastData = await forecastRes.json();
         const accuracyData = await accuracyRes.json();
@@ -43,7 +44,7 @@ export const ForecastView: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-6 animate-fadeIn pb-12">
+    <div className="space-y-8 animate-fadeIn pb-16">
       {/* Header Banner */}
       <ScrollReveal delay={100}>
         <div className="control-card p-6 border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -175,4 +176,3 @@ export const ForecastView: React.FC = () => {
     </div>
   );
 };
-

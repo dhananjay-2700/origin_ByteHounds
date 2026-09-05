@@ -114,15 +114,21 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  // Trigger completion when progress reaches end
+  // Trigger completion when progress reaches end (full exit)
   useEffect(() => {
-    if (displayProgress >= 0.95 && onComplete) {
+    if (displayProgress >= 0.99 && onComplete) {
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      }
       onComplete();
     }
   }, [displayProgress, onComplete]);
 
   const handleSkip = () => {
     setIsSkipped(true);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
     if (onComplete) onComplete();
   };
 
@@ -184,7 +190,7 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
               textShadow: "0 0 60px rgba(34,211,238,0.45)",
             }}
           >
-            PRVAAH X
+            PravaahX
           </h1>
 
           <p className="mt-5 text-lg sm:text-2xl font-medium text-cyan-100 font-mono tracking-wide max-w-2xl mx-auto italic">

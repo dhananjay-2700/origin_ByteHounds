@@ -2,6 +2,7 @@
 
 import React from "react";
 import { X, CheckCircle, Database, ShieldCheck } from "lucide-react";
+import { API_ENDPOINTS } from "../lib/api";
 
 interface DataHealthModalProps {
   isOpen: boolean;
@@ -15,7 +16,7 @@ export const DataHealthModal: React.FC<DataHealthModalProps> = ({ isOpen, onClos
     if (!isOpen) return;
     const fetchHealth = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/data-health");
+        const res = await fetch(API_ENDPOINTS.dataHealth);
         if (res.ok) {
           const data = await res.json();
           setHealthData(data);

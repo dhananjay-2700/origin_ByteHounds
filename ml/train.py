@@ -1,5 +1,6 @@
 """
-PRVAAH X - ML FOUNDATION
+PRVAAH X - TIMESFM 2.5 & LIGHTGBM DEMAND FORECASTING ENGINE
+Master Training Entry Point
 Master Training Entry Point
 
 Refactored architecture replacing tabular LightGBM as primary model with:
@@ -88,7 +89,7 @@ def run_training_pipeline() -> None:
     set_seed(RANDOM_SEED)
 
     logger.info("==================================================")
-    logger.info("PRVAAH X - ML FOUNDATION TRAINING")
+    logger.info("PRVAAH X - TIMESFM 2.5 & LIGHTGBM TRAINING PIPELINE")
     logger.info("==================================================")
 
     # 1. LOAD RAW DATA
@@ -214,7 +215,7 @@ def run_training_pipeline() -> None:
     timesfm.save(MODELS_DIR)
 
     metadata = {
-        "model_name": "PRVAAH X Delhi Electricity Demand Forecaster",
+        "model_name": "PRVAAH X Delhi Electricity Demand Forecaster (TimesFM 2.5 Primary)",
         "model_version": "2.5.0-lora",
         "primary_architecture": "google/timesfm-2.5-200m-transformers",
         "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { AlertTriangle, TrendingUp, Thermometer, ShieldAlert, ArrowRight, Sun, Info } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea, ReferenceDot } from "recharts";
 import { ScrollReveal } from "./ScrollLayout";
+import { API_ENDPOINTS } from "../lib/api";
 
 interface CommandCenterProps {
   onNavigateTab: (tab: string) => void;
@@ -20,10 +21,10 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({ onNavigateTab 
     const fetchData = async () => {
       try {
         const [dashRes, forecastRes, expRes, weatherRes] = await Promise.all([
-          fetch("http://127.0.0.1:8000/api/dashboard"),
-          fetch("http://127.0.0.1:8000/api/forecast"),
-          fetch("http://127.0.0.1:8000/api/explanation"),
-          fetch("http://127.0.0.1:8000/api/weather")
+          fetch(API_ENDPOINTS.dashboard),
+          fetch(API_ENDPOINTS.forecast),
+          fetch(API_ENDPOINTS.explanation),
+          fetch(API_ENDPOINTS.weather)
         ]);
         const dashData = await dashRes.json();
         const forecastData = await forecastRes.json();
@@ -53,7 +54,7 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({ onNavigateTab 
     : null;
 
   return (
-    <div className="space-y-6 animate-fadeIn pb-12">
+    <div className="space-y-8 animate-fadeIn pb-16">
       {/* 1. TOP KPI ROW */}
       <ScrollReveal delay={100} direction="up">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -113,6 +114,10 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({ onNavigateTab 
             <div className="mt-4 text-xs text-gray-500 font-medium flex items-center">
               <ShieldAlert className="w-4 h-4 mr-1 text-orange-600" />
               Actionable Grid Stress Index
+            </div>
+            <div className="text-4xl lg:text-5xl font-black text-white tracking-tighter mt-1">
+              {dashboard?.current_load ? Math.round(dashboard.current_load).toLocaleString() : "2,050"}{" "}
+              <span className="text-base font-bold text-gray-400">MW</span>
             </div>
           </div>
         </div>
@@ -329,4 +334,3 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({ onNavigateTab 
     </div>
   );
 };
-

@@ -59,7 +59,7 @@ const SECTIONS = [
   { id: "grid-risk",      label: "Grid Risk",             icon: "🛡" },
   { id: "geographic",     label: "Geographic Intel",      icon: "🗺" },
   { id: "scenario-lab",   label: "Scenario Lab",          icon: "🧪" },
-  { id: "copilot",        label: "PRVAAH X Copilot",      icon: "🤖" },
+  { id: "copilot",        label: "PravaahX Copilot",      icon: "🤖" },
 ];
 
 interface SidebarProps {
@@ -81,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ active, onNav, dataHealthScore
           >
             ⚡
           </div>
-          <span className="text-sm font-black tracking-widest text-white font-mono">PRVAAH X</span>
+          <span className="text-sm font-black tracking-widest text-white font-mono">PravaahX</span>
         </div>
         <div className="text-[10px] text-gray-500 font-mono tracking-wider pl-10">AI DELHI GRID</div>
         {/* Tricolour bar */}
