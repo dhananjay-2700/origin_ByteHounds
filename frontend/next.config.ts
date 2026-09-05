@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
-const backendUrl = process.env.BACKEND_URL || "http://127.0.0.1:8000";
+const backendUrl =
+  process.env.BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://pravaahx-backend.onrender.com";
 
 const nextConfig: NextConfig = {
   output: process.env.NEXT_OUTPUT_STANDALONE === "true" ? "standalone" : undefined,
