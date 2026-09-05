@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { ArrowRight, AlertTriangle, Zap, Activity, Map, MessageSquare, Database, CheckCircle, BrainCircuit, LineChart, Target } from "lucide-react";
 import { GridReveal } from "./GridReveal";
 
+import { API_ENDPOINTS } from "../lib/api";
+
 interface GridWiseLandingProps {
   onViewForecast?: (targetSection?: string) => void;
   onOpenDataHealth?: () => void;
@@ -15,27 +17,27 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
   const [temperature, setTemperature] = useState(38);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/dashboard")
+    fetch(API_ENDPOINTS.dashboard)
       .then(res => res.json())
       .then(data => setDashboardData(data))
       .catch(err => console.error("Error fetching landing dashboard metrics:", err));
 
-    fetch("http://localhost:8000/api/forecast/accuracy")
+    fetch(API_ENDPOINTS.forecastAccuracy)
       .then(res => res.json())
       .then(data => setAccuracyData(data))
       .catch(err => console.error("Error fetching landing accuracy metrics:", err));
   }, []);
 
-  const peakVal = dashboardData ? Math.round(dashboardData.peak_24h).toLocaleString() : "3,911";
-  const currentLoadVal = dashboardData ? Math.round(dashboardData.current_load).toLocaleString() : "2,050";
-  const peakTimeVal = dashboardData ? dashboardData.peak_time : "10:00 IST";
+  const peakVal = dashboardData ? Math.round(dashboardData.peak_24h || dashboardData.tomorrow_peak || 3911).toLocaleString() : "3,911";
+  const currentLoadVal = dashboardData ? Math.round(dashboardData.current_load || 2050).toLocaleString() : "2,050";
+  const peakTimeVal = dashboardData?.peak_time || "10:00 IST";
   const riskScoreVal = dashboardData ? Math.round(dashboardData.grid_risk_score) : 42;
-  const tempVal = dashboardData ? dashboardData.weather_temp.toFixed(1) : "14.8";
-  const windowVal = dashboardData ? dashboardData.critical_window : "09:00 - 11:00 IST";
+  const tempVal = dashboardData?.weather_temp != null ? Number(dashboardData.weather_temp).toFixed(1) : "14.8";
+  const windowVal = dashboardData?.critical_window || "08:00 — 19:00";
 
-  const maeVal = accuracyData ? `${Math.round(accuracyData.mae)} MW` : "371 MW";
-  const rmseVal = accuracyData ? `${Math.round(accuracyData.rmse)} MW` : "472 MW";
-  const mapeVal = accuracyData ? `${accuracyData.mape.toFixed(1)}%` : "7.9%";
+  const maeVal = accuracyData ? `${Math.round(accuracyData.mae)} MW` : "412 MW";
+  const rmseVal = accuracyData ? `${Math.round(accuracyData.rmse)} MW` : "547 MW";
+  const mapeVal = accuracyData ? `${(accuracyData.mape < 1 ? accuracyData.mape * 100 : accuracyData.mape).toFixed(1)}%` : "8.4%";
 
   // Scenario simulation based on dataset current load
   const baseDemand = dashboardData ? Math.round(dashboardData.current_load) : 2050;
@@ -63,7 +65,7 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
                 THE GRID KNOWS THE PEAK IS COMING.
               </h1>
               <p className="text-2xl lg:text-4xl font-bold text-[#FF7C1E] tracking-tight">
-                PRVAAH X sees it before everyone else does.
+                PravaahX sees it before everyone else does.
               </p>
               <p className="text-xl text-gray-400 max-w-2xl leading-relaxed">
                 AI-powered electricity demand forecasting and grid-risk intelligence that predicts demand, identifies critical windows, explains the drivers and lets operators test what happens next.
@@ -136,7 +138,7 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
         </div>
       </section>
 
-      {/* ── 03 THE "PRVAAH X MOMENT" ── */}
+      {/* ── 03 THE "PRAVAAHX MOMENT" ── */}
       <section className="bg-[#FF7C1E] text-black py-32 px-6 relative overflow-hidden">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 items-center">
           <div className="flex-1 space-y-8 relative z-10">
@@ -229,7 +231,7 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
             <ArrowRight className="w-12 h-12 text-white transform rotate-90" />
           </div>
           
-          <div className="text-6xl font-black tracking-tighter">PRVAAH X</div>
+          <div className="text-6xl font-black tracking-tighter">PravaahX</div>
           
           <div className="flex justify-center">
             <ArrowRight className="w-12 h-12 text-white transform rotate-90" />
@@ -334,7 +336,7 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
               KNOW WHEN THE GRID IS UNDER PRESSURE.
             </h2>
             <p className="text-xl text-gray-400 leading-relaxed font-medium">
-              PRVAAH X identifies the exact period where predicted demand, ramp rate, weather stress and uncertainty combine to create elevated grid pressure.
+              PravaahX identifies the exact period where predicted demand, ramp rate, weather stress and uncertainty combine to create elevated grid pressure.
             </p>
 
             <button 
@@ -516,13 +518,13 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
               YOU SHOULDN'T HAVE TO READ THE DASHBOARD.
             </h2>
             <p className="text-xl text-gray-400 font-medium">
-              PRVAAH X Copilot provides grounded natural language answers to complex grid queries.
+              PravaahX Copilot provides grounded natural language answers to complex grid queries.
             </p>
             <button 
               onClick={() => onViewForecast?.("copilot")}
               className="px-8 py-4 bg-[#FF7C1E] text-black font-black uppercase tracking-widest text-xs rounded-full hover:bg-orange-600 transition flex items-center space-x-3 cursor-pointer shadow-lg"
             >
-              <span>Open PRVAAH X Copilot</span>
+              <span>Open PravaahX Copilot</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -533,7 +535,7 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
                 <div className="w-10 h-10 bg-[#FF7C1E] rounded-full flex items-center justify-center">
                   <MessageSquare className="w-5 h-5 text-black" />
                 </div>
-                <div className="font-black text-xl tracking-widest uppercase">PRVAAH X COPILOT</div>
+                <div className="font-black text-xl tracking-widest uppercase">PRAVAAHX COPILOT</div>
               </div>
               
               <div className="space-y-4 text-sm">
@@ -557,7 +559,7 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
               AI IS ONLY AS GOOD AS THE DATA BEHIND IT.
             </h2>
             <p className="text-xl text-gray-600 font-medium">
-              PRVAAH X continuously checks the quality of the data feeding its predictions.
+              PravaahX continuously checks the quality of the data feeding its predictions.
             </p>
             <button 
               onClick={onOpenDataHealth}
@@ -605,14 +607,14 @@ export const GridWiseLanding: React.FC<GridWiseLandingProps> = ({ onViewForecast
               onClick={() => onViewForecast?.("command-center")} 
               className="w-full sm:w-auto px-12 py-6 bg-[#FF7C1E] text-black font-black uppercase tracking-widest text-sm rounded-full hover:bg-orange-600 transition flex items-center justify-center space-x-3 cursor-pointer shadow-2xl"
             >
-              <span>EXPLORE PRVAAH X</span>
+              <span>EXPLORE PRAVAAHX</span>
               <ArrowRight className="w-5 h-5" />
             </button>
           </div>
           
           <div className="pt-24 border-t border-gray-900 flex flex-col md:flex-row justify-between items-center gap-8 text-left">
             <div>
-              <div className="text-3xl font-black tracking-widest uppercase mb-4">PRVAAH X</div>
+              <div className="text-3xl font-black tracking-widest uppercase mb-4">PravaahX</div>
               <p className="text-gray-500 font-medium">Built for smarter grid decisions.</p>
             </div>
           </div>

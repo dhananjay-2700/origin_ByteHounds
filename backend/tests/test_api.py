@@ -1,13 +1,7 @@
 from fastapi.testclient import TestClient
 from app.main import app
 from app.db.session import init_db
-<<<<<<< Updated upstream
-=======
-
 # Initialize database schema and seeds for test suite
-init_db()
->>>>>>> Stashed changes
-
 init_db()
 client = TestClient(app)
 
@@ -15,7 +9,7 @@ def test_root():
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
-    assert data["platform"] == "PRVAAH X"
+    assert data["platform"] == "PravaahX"
     assert "credentials_config_file" in data
 
 def test_health():

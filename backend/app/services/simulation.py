@@ -1,8 +1,7 @@
 import math
-<<<<<<< Updated upstream
 import sys
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 
 # Ensure project root & backend are in sys.path
 backend_dir = Path(__file__).resolve().parent.parent.parent
@@ -10,10 +9,6 @@ if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
 from ml_service import ml_service
-
-=======
-from typing import List, Dict, Tuple, Optional
->>>>>>> Stashed changes
 from ..models.schemas import (
     GridMetricsResponse,
     ForecastPoint,

@@ -49,23 +49,24 @@ body {
   background: #3f3f46;
 }
 
-/* ── Premium Cards ── */
+/* ── Premium Cards (Matching Editorial Reference) ── */
 .control-card {
-  background: var(--navy-card);
-  border: 1px solid var(--border);
-  border-radius: 0; /* Sharp, editorial edges instead of rounded */
-  transition: border-color 0.2s, background 0.2s;
+  background: #12141a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .control-card:hover {
-  border-color: rgba(255,255,255,0.2);
+  border-color: rgba(255, 124, 30, 0.3);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.6);
 }
 
 /* ── Risk Accent cards ── */
-.card-normal { border-left: 3px solid var(--risk-normal); }
-.card-watch { border-left: 3px solid var(--risk-watch); }
-.card-high { border-left: 3px solid var(--risk-high); }
-.card-critical { border-left: 3px solid var(--risk-critical); }
+.card-normal { border-left: 4px solid var(--risk-normal); }
+.card-watch { border-left: 4px solid var(--risk-watch); }
+.card-high { border-left: 4px solid #FF7C1E; }
+.card-critical { border-left: 4px solid var(--risk-critical); }
 
 /* ── Glow effects (Restrained) ── */
 .glow-critical { box-shadow: 0 0 40px rgba(239,68,68,0.15); }

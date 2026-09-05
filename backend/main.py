@@ -23,7 +23,7 @@ from ml_service import ml_service
 # Ensure tables are created
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="PRVAAH X MVP API", version="2.0.0")
+app = FastAPI(title="PravaahX MVP API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,6 +32,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+from app.routes import telemetry, alerts, analytics, model_management, system
+app.include_router(telemetry.router, prefix="/api")
+app.include_router(alerts.router, prefix="/api")
+app.include_router(analytics.router, prefix="/api")
+app.include_router(model_management.router, prefix="/api")
+app.include_router(system.router, prefix="/api")
+
+@app.get("/")
+def root():
+    return {
+        "platform": "PravaahX",
+        "descriptor": "Delhi Grid Intelligence Engine & Demand Forecasting API",
+        "status": "online",
+        "version": "2.0.0",
+        "docs": "/docs",
+        "frontend": "http://localhost:3000"
+    }
 
 @app.get("/api/dashboard", response_model=schemas.DashboardSchema)
 @app.get("/dashboard", response_model=schemas.DashboardSchema)
@@ -106,15 +124,15 @@ def get_area_detail(area_id: str, db: Session = Depends(get_db)):
     for a in areas:
         if a.id.lower() == area_id.lower() or a.name.lower() == area_id.lower():
             a.feeders = [
-                schemas.FeederSchema(id=f"{a.id[:2]}-F1", current_load=round(a.current_load*0.5, 1), predicted_load=round(a.predicted_load*0.5, 1), capacity=round(a.capacity*0.5, 1), risk=a.risk_level),
-                schemas.FeederSchema(id=f"{a.id[:2]}-F2", current_load=round(a.current_load*0.5, 1), predicted_load=round(a.predicted_load*0.5, 1), capacity=round(a.capacity*0.5, 1), risk=a.risk_level)
+                schemas.FeederSchema(id=f"{a.id[:2]}-F1", name=f"{a.name} Feeder 1", current_load=round(a.current_load*0.5, 1), predicted_load=round(a.predicted_load*0.5, 1), capacity=round(a.capacity*0.5, 1), risk=a.risk_level, status=a.risk_level),
+                schemas.FeederSchema(id=f"{a.id[:2]}-F2", name=f"{a.name} Feeder 2", current_load=round(a.current_load*0.5, 1), predicted_load=round(a.predicted_load*0.5, 1), capacity=round(a.capacity*0.5, 1), risk=a.risk_level, status=a.risk_level)
             ]
             return a
             
     first = areas[0]
     first.feeders = [
-        schemas.FeederSchema(id="SD-F1", current_load=round(first.current_load*0.5, 1), predicted_load=round(first.predicted_load*0.5, 1), capacity=round(first.capacity*0.5, 1), risk=first.risk_level),
-        schemas.FeederSchema(id="SD-F2", current_load=round(first.current_load*0.5, 1), predicted_load=round(first.predicted_load*0.5, 1), capacity=round(first.capacity*0.5, 1), risk=first.risk_level)
+        schemas.FeederSchema(id="SD-F1", name="South Delhi Feeder 1", current_load=round(first.current_load*0.5, 1), predicted_load=round(first.predicted_load*0.5, 1), capacity=round(first.capacity*0.5, 1), risk=first.risk_level, status=first.risk_level),
+        schemas.FeederSchema(id="SD-F2", name="South Delhi Feeder 2", current_load=round(first.current_load*0.5, 1), predicted_load=round(first.predicted_load*0.5, 1), capacity=round(first.capacity*0.5, 1), risk=first.risk_level, status=first.risk_level)
     ]
     return first
 

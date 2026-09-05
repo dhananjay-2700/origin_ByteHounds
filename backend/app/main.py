@@ -101,7 +101,7 @@ def api_anomalies_alias():
 @app.get("/", tags=["Root"])
 def root():
     return {
-        "platform": "PRVAAH X",
+        "platform": "PravaahX",
         "descriptor": "Delhi Grid Intelligence Engine",
         "status": "online",
         "version": settings.VERSION,

@@ -30,6 +30,9 @@ class DashboardSchema(BaseModel):
     grid_risk_level: str
     critical_window: str
     data_health_score: int
+    peak_24h: Optional[float] = None
+    weather_temp: Optional[float] = None
+    humidity: Optional[float] = None
 
 class ForecastPoint(BaseModel):
     timestamp: str
@@ -115,10 +118,12 @@ class WeatherResponse(BaseModel):
 
 class FeederSchema(BaseModel):
     id: str
+    name: Optional[str] = None
     current_load: float
     predicted_load: float
     capacity: float
     risk: str
+    status: Optional[str] = None
 
 class AreaSchema(BaseModel):
     id: str

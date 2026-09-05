@@ -1,9 +1,6 @@
 import os
-<<<<<<< Updated upstream
 import sys
 import json
-=======
->>>>>>> Stashed changes
 import pickle
 from pathlib import Path
 import pandas as pd
@@ -23,13 +20,29 @@ from ml.data.loader import load_power_demand, load_weather_data
 
 class MLService:
     def __init__(self):
-<<<<<<< Updated upstream
         self._cached_forecast_df: Optional[pd.DataFrame] = None
         self._cached_df_power: Optional[pd.DataFrame] = None
         self._cached_df_weather: Optional[pd.DataFrame] = None
         self._feature_importances: Optional[pd.DataFrame] = None
         self._overall_metrics: Optional[pd.DataFrame] = None
         self._last_refresh_time: Optional[datetime] = None
+
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        try:
+            with open(os.path.join(base_dir, 'model.pkl'), 'rb') as f:
+                self.model = pickle.load(f)
+            with open(os.path.join(base_dir, 'metrics.pkl'), 'rb') as f:
+                self.metrics = pickle.load(f)
+        except Exception:
+            self.model = None
+            self.metrics = None
+            
+        try:
+            with open(os.path.join(base_dir, 'lgb_model.pkl'), 'rb') as f:
+                self.lgb_model = pickle.load(f)
+        except Exception:
+            self.lgb_model = None
+
         self.load_real_data()
 
     def load_real_data(self):
@@ -117,23 +130,7 @@ class MLService:
         for i, row in enumerate(forecast_rows):
             ts = pd.to_datetime(row['timestamp']).strftime("%H:%M")
             pred_val = float(row['predicted_demand'])
-=======
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        try:
-            with open(os.path.join(base_dir, 'model.pkl'), 'rb') as f:
-                self.model = pickle.load(f)
-            with open(os.path.join(base_dir, 'metrics.pkl'), 'rb') as f:
-                self.metrics = pickle.load(f)
-        except FileNotFoundError:
-            self.model = None
-            self.metrics = None
-            
-        try:
-            with open(os.path.join(base_dir, 'lgb_model.pkl'), 'rb') as f:
-                self.lgb_model = pickle.load(f)
-        except FileNotFoundError:
-            self.lgb_model = None
->>>>>>> Stashed changes
+
             
             # Show actual_load for first half of window, null for future predictions
             if i < half_fc and len(recent_power) >= half_fc:
@@ -284,17 +281,22 @@ class MLService:
 
         if self._feature_importances is not None and not self._feature_importances.empty:
             df_fi = self._feature_importances.copy()
+            if 'gain_share_pct' in df_fi.columns:
+                df_fi['gain_share_pct'] = pd.to_numeric(df_fi['gain_share_pct'], errors='coerce').fillna(0.0)
             top5 = df_fi.head(5)
-            total_top = top5['gain_share_pct'].sum()
-            drivers = []
+            total_top = float(top5['gain_share_pct'].sum())
+            parsed_drivers = []
             for _, row in top5.iterrows():
                 feat_name = str(row['feature']).replace('_', ' ').title()
-                pct = int(round((row['gain_share_pct'] / total_top) * 95)) if total_top > 0 else 20
-                drivers.append({
+                val = float(row.get('gain_share_pct', 0.0))
+                pct = int(round((val / total_top) * 95)) if total_top > 0 else 20
+                parsed_drivers.append({
                     "feature": feat_name,
                     "percentage": max(5, pct),
                     "impact": f"+{pct}%"
                 })
+            if parsed_drivers:
+                drivers = parsed_drivers
 
         dash = self.get_dashboard_metrics()
         return {
