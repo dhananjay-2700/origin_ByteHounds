@@ -1,0 +1,13 @@
+# Netlify Configuration for PravaahX Frontend
+[build]
+  base = "frontend"
+  publish = ".next"
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# Automatically handle Next.js App Router & SSR
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

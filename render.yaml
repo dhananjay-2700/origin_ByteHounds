@@ -1,0 +1,29 @@
+services:
+  # PravaahX Backend Web Service
+  - type: web
+    name: pravaahx-backend
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r backend/requirements.txt"
+    startCommand: "cd backend && python main.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: PORT
+        value: 8000
+
+  # PravaahX Frontend Next.js Web Service
+  - type: web
+    name: pravaahx-frontend
+    runtime: node
+    plan: free
+    buildCommand: "cd frontend && npm install && npm run build"
+    startCommand: "cd frontend && npm start"
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: pravaahx-backend
+          property: host
