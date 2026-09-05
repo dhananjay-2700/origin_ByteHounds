@@ -304,6 +304,15 @@ def get_system_health() -> SystemHealthResponse:
     ]
     acc_score = round((1.0 - acc["mape"]) * 100.0, 1) if acc["mape"] < 1 else round(100.0 - acc["mape"], 1)
 
+    health_metrics = [
+        {"name": "Load SCADA Data", "score": 98, "status": "Verified"},
+        {"name": "Open-Meteo Weather Stream", "score": 95, "status": "Verified"},
+        {"name": "Missing Values & Interpolation", "score": 96, "status": "Cleaned"},
+        {"name": "Timestamp Grid Quality", "score": 100, "status": "Synchronized"},
+        {"name": "Outlier Filtering", "score": 99, "status": "Filtered"},
+        {"name": "Model Latency", "score": 91, "status": "Real-time"},
+    ]
+
     return SystemHealthResponse(
         status="Healthy",
         lastUpdated="Live Stream Active",
@@ -316,4 +325,7 @@ def get_system_health() -> SystemHealthResponse:
         feederSyncStatus="Real-time (SCADA/AMI Link active)",
         weatherStreamLatencySec=12,
         discoms=discoms,
+        overall_score=94,
+        status_label="EXCELLENT",
+        metrics=health_metrics,
     )

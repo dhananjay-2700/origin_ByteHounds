@@ -178,6 +178,11 @@ class SystemHealthResponse(BaseModel):
     weatherStreamLatencySec: int
     discoms: List[DiscomStatus]
 
+    # Compatibility properties for DataHealthModal
+    overall_score: Optional[int] = 94
+    status_label: Optional[str] = "EXCELLENT"
+    metrics: Optional[List[Dict[str, Any]]] = None
+
 # ============================================================================
 # ALERTS SCHEMAS
 # ============================================================================

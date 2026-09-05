@@ -99,14 +99,53 @@ def api_dashboard_alias():
     }
 
 @app.get("/api/explanation", tags=["Explainability"])
+@app.get("/explanation", tags=["Explainability"])
 def api_explanation_alias():
     from .services.simulation import get_shap_factors
     return get_shap_factors()
 
 @app.get("/api/anomalies", tags=["Anomaly Detection"])
+@app.get("/anomalies", tags=["Anomaly Detection"])
 def api_anomalies_alias():
     from .services.simulation import get_anomaly_status
     return get_anomaly_status()
+
+@app.get("/api/weather", tags=["Weather Intelligence"])
+@app.get("/weather", tags=["Weather Intelligence"])
+def api_weather_alias():
+    from ml_service import ml_service
+    return ml_service.get_weather_intelligence()
+
+@app.get("/api/risk/future", tags=["Grid Risk"])
+@app.get("/risk/future", tags=["Grid Risk"])
+def api_risk_future_alias():
+    from .services.simulation import get_risk_timeline
+    return get_risk_timeline()
+
+@app.get("/api/data-health", tags=["Data Health"])
+@app.get("/data-health", tags=["Data Health"])
+def api_data_health_alias():
+    from .services.simulation import get_system_health
+    return get_system_health()
+
+@app.get("/forecast", tags=["Forecast"])
+def api_forecast_direct_alias():
+    from .services.simulation import get_24h_forecast
+    return get_24h_forecast()
+
+@app.get("/risk", tags=["Grid Risk"])
+def api_risk_direct_alias():
+    from .services.simulation import get_risk_timeline
+    return get_risk_timeline()
+
+@app.get("/areas", tags=["Area Intelligence"])
+def api_areas_direct_alias():
+    from .services.simulation import get_delhi_areas
+    return get_delhi_areas()
+
+@app.post("/simulation", tags=["Scenario Lab"])
+def api_simulation_direct_alias(req: scenario.ScenarioRequest):
+    return scenario.simulate_scenario(req)
 
 @app.get("/", tags=["Root"])
 def root():
