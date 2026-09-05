@@ -13,12 +13,12 @@ const DEFAULT_FULL_SERIES = [
   { time: "06:00", actual: 5120, xgboost: 5100, baseline: 4950, lightgbm: 5100 },
   { time: "08:00", actual: 6150, xgboost: 6200, baseline: 5900, lightgbm: 6200 },
   { time: "10:00", actual: 6940, xgboost: 3911, baseline: 3750, lightgbm: 3911 },
-  { time: "12:00", actual: null, xgboost: 3850, baseline: 3680, lightgbm: 3850 },
-  { time: "14:00", actual: null, xgboost: 3790, baseline: 3620, lightgbm: 3790 },
-  { time: "16:00", actual: null, xgboost: 3650, baseline: 3500, lightgbm: 3650 },
-  { time: "18:00", actual: null, xgboost: 3420, baseline: 3300, lightgbm: 3420 },
-  { time: "20:00", actual: null, xgboost: 3150, baseline: 3050, lightgbm: 3150 },
-  { time: "22:00", actual: null, xgboost: 2800, baseline: 2700, lightgbm: 2800 },
+  { time: "12:00", actual: 7450, xgboost: 3850, baseline: 3680, lightgbm: 3850 },
+  { time: "14:00", actual: 7890, xgboost: 3790, baseline: 3620, lightgbm: 3790 },
+  { time: "16:00", actual: 8120, xgboost: 3650, baseline: 3500, lightgbm: 3650 },
+  { time: "18:00", actual: 7950, xgboost: 3420, baseline: 3300, lightgbm: 3420 },
+  { time: "20:00", actual: 7310, xgboost: 3150, baseline: 3050, lightgbm: 3150 },
+  { time: "22:00", actual: 6420, xgboost: 2800, baseline: 2700, lightgbm: 2800 },
 ];
 
 export const ForecastView: React.FC = () => {
@@ -27,8 +27,10 @@ export const ForecastView: React.FC = () => {
   const [forecastSeries, setForecastSeries] = useState<any[]>(DEFAULT_FULL_SERIES);
   const [metrics, setMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const fetchData = async () => {
       try {
         const fetchSafe = async (url: string) => {
@@ -69,6 +71,8 @@ export const ForecastView: React.FC = () => {
     };
     fetchData();
   }, []);
+
+  const chartData = (forecastSeries && forecastSeries.length > 0) ? forecastSeries : DEFAULT_FULL_SERIES;
 
   return (
     <div className="space-y-8 animate-fadeIn pb-16">
@@ -145,10 +149,10 @@ export const ForecastView: React.FC = () => {
             </div>
           </div>
 
-          <div className="h-96 w-full">
-            {forecastSeries.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={forecastSeries} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
+          <div className="h-96 w-full min-h-[380px]">
+            {isMounted ? (
+              <ResponsiveContainer width="100%" height="100%" minHeight={380}>
+                <LineChart data={chartData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#222733" vertical={false} />
                   <XAxis 
                     dataKey="time" 
@@ -183,6 +187,7 @@ export const ForecastView: React.FC = () => {
                     stroke="#ffffff" 
                     strokeWidth={2.5} 
                     dot={{ r: 3, fill: '#ffffff', strokeWidth: 0 }} 
+                    connectNulls={true}
                   />
                   <Line 
                     type="monotone" 
@@ -191,6 +196,7 @@ export const ForecastView: React.FC = () => {
                     stroke="#FF7C1E" 
                     strokeWidth={3.5} 
                     dot={{ r: 4, fill: '#FF7C1E', strokeWidth: 0 }} 
+                    connectNulls={true}
                   />
                   
                   {(selectedModel === "all" || selectedModel === "baseline") && (
@@ -202,13 +208,14 @@ export const ForecastView: React.FC = () => {
                       strokeDasharray="4 4" 
                       dot={false} 
                       name="Previous Day Baseline (MW)" 
+                      connectNulls={true}
                     />
                   )}
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-sm text-gray-500 font-medium">
-                Loading Live Forecast Series...
+              <div className="h-full flex items-center justify-center text-xs text-gray-500 font-bold">
+                Initializing Forecast Chart...
               </div>
             )}
           </div>

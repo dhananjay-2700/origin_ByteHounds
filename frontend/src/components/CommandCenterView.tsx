@@ -17,12 +17,12 @@ const DEFAULT_FORECAST_SERIES = [
   { time: "06:00", actual: 5120, forecast: 5100 },
   { time: "08:00", actual: 6150, forecast: 6200 },
   { time: "10:00", actual: 6940, forecast: 3911 },
-  { time: "12:00", actual: null, forecast: 3850 },
-  { time: "14:00", actual: null, forecast: 3790 },
-  { time: "16:00", actual: null, forecast: 3650 },
-  { time: "18:00", actual: null, forecast: 3420 },
-  { time: "20:00", actual: null, forecast: 3150 },
-  { time: "22:00", actual: null, forecast: 2800 },
+  { time: "12:00", actual: 7450, forecast: 3850 },
+  { time: "14:00", actual: 7890, forecast: 3790 },
+  { time: "16:00", actual: 8120, forecast: 3650 },
+  { time: "18:00", actual: 7950, forecast: 3420 },
+  { time: "20:00", actual: 7310, forecast: 3150 },
+  { time: "22:00", actual: 6420, forecast: 2800 },
 ];
 
 export const CommandCenterView: React.FC<CommandCenterProps> = ({ onNavigateTab }) => {
@@ -31,8 +31,10 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({ onNavigateTab 
   const [explanation, setExplanation] = useState<any>(null);
   const [weather, setWeather] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const fetchData = async () => {
       try {
         const fetchSafe = async (url: string) => {
@@ -76,9 +78,9 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({ onNavigateTab 
     fetchData();
   }, []);
 
-  const peakPoint = forecast.length > 0 
-    ? forecast.reduce((max, pt) => ((pt.forecast || 0) > (max?.forecast || 0) ? pt : max), forecast[0])
-    : null;
+  const chartData = (forecast && forecast.length > 0) ? forecast : DEFAULT_FORECAST_SERIES;
+
+  const peakPoint = chartData.reduce((max, pt) => ((pt.forecast || 0) > (max?.forecast || 0) ? pt : max), chartData[0]);
 
   return (
     <div className="space-y-8 animate-fadeIn pb-16">
@@ -194,10 +196,10 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({ onNavigateTab 
         </div>
 
         {/* Chart area */}
-        <div className="h-80 w-full">
-          {forecast.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={forecast} margin={{ top: 15, right: 20, left: 0, bottom: 0 }}>
+        <div className="h-80 w-full min-h-[320px]">
+          {isMounted ? (
+            <ResponsiveContainer width="100%" height="100%" minHeight={320}>
+              <AreaChart data={chartData} margin={{ top: 15, right: 20, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="actualGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#ffffff" stopOpacity={0.25}/>
@@ -216,17 +218,17 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({ onNavigateTab 
                   itemStyle={{ color: "#f3f4f6", fontSize: "12px", fontWeight: "bold" }}
                 />
                 
-                <Area type="monotone" dataKey="actual" stroke="#ffffff" strokeWidth={2.5} fillOpacity={1} fill="url(#actualGrad)" name="Actual Load (MW)" />
-                <Area type="monotone" dataKey="forecast" stroke="#FF7C1E" strokeWidth={3} fillOpacity={1} fill="url(#forecastGrad)" name="Forecasted Load (MW)" />
+                <Area type="monotone" dataKey="actual" stroke="#ffffff" strokeWidth={2.5} fillOpacity={1} fill="url(#actualGrad)" name="Actual Load (MW)" connectNulls={true} />
+                <Area type="monotone" dataKey="forecast" stroke="#FF7C1E" strokeWidth={3} fillOpacity={1} fill="url(#forecastGrad)" name="Forecasted Load (MW)" connectNulls={true} />
                 
-                {peakPoint && (
+                {peakPoint && peakPoint.time && (
                   <ReferenceDot x={peakPoint.time} y={peakPoint.forecast} r={7} fill="#FF7C1E" stroke="#ffffff" strokeWidth={2.5} />
                 )}
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full flex items-center justify-center text-sm font-bold text-gray-500">
-              Loading Live Model Forecast Curve...
+            <div className="h-full flex items-center justify-center text-xs font-bold text-gray-500">
+              Initializing Power Curve...
             </div>
           )}
         </div>
