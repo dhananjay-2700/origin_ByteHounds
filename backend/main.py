@@ -51,6 +51,15 @@ def root():
         "frontend": "http://localhost:3000"
     }
 
+@app.get("/api/health")
+@app.get("/health")
+def health_check():
+    return {
+        "status": "ok",
+        "platform": "PravaahX",
+        "timestamp": datetime.now().isoformat()
+    }
+
 @app.get("/api/dashboard", response_model=schemas.DashboardSchema)
 @app.get("/dashboard", response_model=schemas.DashboardSchema)
 def get_dashboard(db: Session = Depends(get_db)):
