@@ -7,18 +7,18 @@ import { ScrollReveal } from "./ScrollLayout";
 import { API_ENDPOINTS } from "../lib/api";
 
 const DEFAULT_FULL_SERIES = [
-  { time: "00:00", actual: 5420, xgboost: 5380, baseline: 5200, lightgbm: 5380 },
-  { time: "02:00", actual: 4980, xgboost: 4950, baseline: 4800, lightgbm: 4950 },
-  { time: "04:00", actual: 4710, xgboost: 4680, baseline: 4600, lightgbm: 4680 },
-  { time: "06:00", actual: 5120, xgboost: 5100, baseline: 4950, lightgbm: 5100 },
-  { time: "08:00", actual: 6150, xgboost: 6200, baseline: 5900, lightgbm: 6200 },
-  { time: "10:00", actual: 6940, xgboost: 3911, baseline: 3750, lightgbm: 3911 },
-  { time: "12:00", actual: 7450, xgboost: 3850, baseline: 3680, lightgbm: 3850 },
-  { time: "14:00", actual: 7890, xgboost: 3790, baseline: 3620, lightgbm: 3790 },
-  { time: "16:00", actual: 8120, xgboost: 3650, baseline: 3500, lightgbm: 3650 },
-  { time: "18:00", actual: 7950, xgboost: 3420, baseline: 3300, lightgbm: 3420 },
-  { time: "20:00", actual: 7310, xgboost: 3150, baseline: 3050, lightgbm: 3150 },
-  { time: "22:00", actual: 6420, xgboost: 2800, baseline: 2700, lightgbm: 2800 },
+  { time: "00:00", actual: 5420, xgboost: 5380, baseline: 5200, lightgbm: 5390 },
+  { time: "02:00", actual: 4980, xgboost: 4950, baseline: 4800, lightgbm: 4960 },
+  { time: "04:00", actual: 4710, xgboost: 4680, baseline: 4600, lightgbm: 4690 },
+  { time: "06:00", actual: 5280, xgboost: 5250, baseline: 5100, lightgbm: 5260 },
+  { time: "08:00", actual: 6450, xgboost: 6420, baseline: 6200, lightgbm: 6430 },
+  { time: "10:00", actual: 7210, xgboost: 7180, baseline: 6900, lightgbm: 7190 },
+  { time: "12:00", actual: 7750, xgboost: 7720, baseline: 7400, lightgbm: 7730 },
+  { time: "14:00", actual: 8090, xgboost: 8050, baseline: 7750, lightgbm: 8060 },
+  { time: "16:00", actual: 8350, xgboost: 8320, baseline: 7950, lightgbm: 8330 },
+  { time: "18:00", actual: 7950, xgboost: 7920, baseline: 7600, lightgbm: 7930 },
+  { time: "20:00", actual: 7210, xgboost: 7180, baseline: 6850, lightgbm: 7190 },
+  { time: "22:00", actual: 6320, xgboost: 6280, baseline: 6000, lightgbm: 6290 },
 ];
 
 const DEFAULT_ACCURACY = {

@@ -149,7 +149,7 @@ class MLService:
         if self._cached_df_power is not None and not self._cached_df_power.empty and 'power_demand_mw' in self._cached_df_power.columns:
             recent_power = self._cached_df_power['power_demand_mw'].dropna().tail(24)
         else:
-            recent_power = pd.Series([5420, 5150, 4980, 4850, 4710, 4900, 5120, 5650, 6150, 6680, 6940, 7250])
+            recent_power = pd.Series([5420, 5150, 4980, 4850, 4710, 4900, 5120, 5650, 6150, 6680, 7210, 7750, 8090, 8350, 8120, 7950, 7640, 7310, 6890, 6420, 5980, 5650])
 
         series = []
         forecast_rows = self._cached_forecast_df.to_dict('records')
