@@ -5,10 +5,81 @@ import { Map, MapPin, AlertCircle, ChevronRight, Info, Zap } from "lucide-react"
 import { ScrollReveal } from "./ScrollLayout";
 import { API_ENDPOINTS } from "../lib/api";
 
+const DEFAULT_AREAS = [
+  {
+    id: "South Delhi",
+    name: "South Delhi Grid",
+    rank: 1,
+    score: 86,
+    status: "CRITICAL",
+    badgeColor: "bg-red-500/20 text-red-400 border border-red-500/40",
+    demand: "2,744 MW",
+    capacity: "2,940 MW",
+    utilization: "93.3%",
+    driver: "High Residential AC Density",
+    window: "08:00 — 19:00",
+    feeders: [
+      { name: "South Delhi Feeder 1", current: "1,372 MW", cap: "1,470 MW", status: "CRITICAL", statusColor: "text-red-400" },
+      { name: "South Delhi Feeder 2", current: "1,372 MW", cap: "1,470 MW", status: "CRITICAL", statusColor: "text-red-400" }
+    ]
+  },
+  {
+    id: "North Delhi",
+    name: "North Delhi Grid",
+    rank: 2,
+    score: 78,
+    status: "HIGH",
+    badgeColor: "bg-[#FF7C1E]/20 text-[#FF7C1E] border border-[#FF7C1E]/40",
+    demand: "2,450 MW",
+    capacity: "2,744 MW",
+    utilization: "89.2%",
+    driver: "Commercial & Industrial Ramp",
+    window: "08:00 — 19:00",
+    feeders: [
+      { name: "North Delhi Feeder 1", current: "1,225 MW", cap: "1,372 MW", status: "HIGH", statusColor: "text-[#FF7C1E]" },
+      { name: "North Delhi Feeder 2", current: "1,225 MW", cap: "1,372 MW", status: "HIGH", statusColor: "text-[#FF7C1E]" }
+    ]
+  },
+  {
+    id: "East Delhi",
+    name: "East Delhi Grid",
+    rank: 3,
+    score: 80,
+    status: "HIGH",
+    badgeColor: "bg-[#FF7C1E]/20 text-[#FF7C1E] border border-[#FF7C1E]/40",
+    demand: "2,254 MW",
+    capacity: "2,450 MW",
+    utilization: "92.0%",
+    driver: "Sub-station Transformer Heating",
+    window: "08:00 — 19:00",
+    feeders: [
+      { name: "East Delhi Feeder 1", current: "1,127 MW", cap: "1,225 MW", status: "HIGH", statusColor: "text-[#FF7C1E]" },
+      { name: "East Delhi Feeder 2", current: "1,127 MW", cap: "1,225 MW", status: "HIGH", statusColor: "text-[#FF7C1E]" }
+    ]
+  },
+  {
+    id: "West Delhi",
+    name: "West Delhi Grid",
+    rank: 4,
+    score: 75,
+    status: "MODERATE",
+    badgeColor: "bg-amber-500/20 text-amber-300 border border-amber-500/40",
+    demand: "2,352 MW",
+    capacity: "2,744 MW",
+    utilization: "85.7%",
+    driver: "Domestic Inverter Loads",
+    window: "08:00 — 19:00",
+    feeders: [
+      { name: "West Delhi Feeder 1", current: "1,176 MW", cap: "1,372 MW", status: "MODERATE", statusColor: "text-amber-400" },
+      { name: "West Delhi Feeder 2", current: "1,176 MW", cap: "1,372 MW", status: "MODERATE", statusColor: "text-amber-400" }
+    ]
+  }
+];
+
 export const GeographicView: React.FC = () => {
   const [selectedAreaId, setSelectedAreaId] = useState<string>("South Delhi");
-  const [areas, setAreas] = useState<any[]>([]);
-  const [activeArea, setActiveArea] = useState<any>(null);
+  const [areas, setAreas] = useState<any[]>(DEFAULT_AREAS);
+  const [activeArea, setActiveArea] = useState<any>(DEFAULT_AREAS[0]);
 
   const getBadgeStyle = (level: string) => {
     switch (level?.toUpperCase()) {
@@ -29,24 +100,26 @@ export const GeographicView: React.FC = () => {
     const fetchAreas = async () => {
       try {
         const res = await fetch(API_ENDPOINTS.areas);
-        const data = await res.json();
-        const formattedAreas = data.map((a: any, idx: number) => ({
-          id: a.id,
-          name: a.name,
-          rank: idx + 1,
-          score: a.risk_score,
-          status: a.risk_level,
-          badgeColor: getBadgeStyle(a.risk_level),
-          demand: `${a.predicted_load.toLocaleString()} MW`,
-          capacity: `${a.capacity.toLocaleString()} MW`,
-          utilization: `${a.utilization}%`,
-          driver: a.main_driver,
-          window: a.critical_window,
-          feeders: []
-        }));
-        setAreas(formattedAreas);
-        if (formattedAreas.length > 0) {
-          fetchAreaDetail(formattedAreas[0].id);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            const formattedAreas = data.map((a: any, idx: number) => ({
+              id: a.id,
+              name: a.name,
+              rank: idx + 1,
+              score: a.risk_score,
+              status: a.risk_level,
+              badgeColor: getBadgeStyle(a.risk_level),
+              demand: `${Math.round(a.predicted_load).toLocaleString()} MW`,
+              capacity: `${Math.round(a.capacity).toLocaleString()} MW`,
+              utilization: `${a.utilization}%`,
+              driver: a.main_driver,
+              window: a.critical_window,
+              feeders: []
+            }));
+            setAreas(formattedAreas);
+            fetchAreaDetail(formattedAreas[0].id);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch areas", err);

@@ -5,6 +5,15 @@ import { ShieldAlert, AlertTriangle, Clock, Activity, Zap, CheckCircle2 } from "
 import { ScrollReveal } from "./ScrollLayout";
 import { API_ENDPOINTS } from "../lib/api";
 
+const DEFAULT_TIMELINE = [
+  { time: "08:00", score: 45, level: "MODERATE" },
+  { time: "10:00", score: 82, level: "CRITICAL" },
+  { time: "12:00", score: 78, level: "HIGH" },
+  { time: "14:00", score: 75, level: "HIGH" },
+  { time: "16:00", score: 68, level: "MODERATE" },
+  { time: "18:00", score: 55, level: "MODERATE" },
+];
+
 export const GridRiskView: React.FC = () => {
   const [riskData, setRiskData] = useState<any>(null);
   const [anomalies, setAnomalies] = useState<any[]>([]);
@@ -13,17 +22,25 @@ export const GridRiskView: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [riskRes, anomalyRes, dashRes] = await Promise.all([
-          fetch(API_ENDPOINTS.risk),
-          fetch(API_ENDPOINTS.anomalies),
-          fetch(API_ENDPOINTS.dashboard)
+        const fetchSafe = async (url: string) => {
+          try {
+            const res = await fetch(url);
+            if (res.ok) return await res.json();
+          } catch (e) {
+            console.warn(`Fetch failed for ${url}:`, e);
+          }
+          return null;
+        };
+
+        const [riskJson, anomalyJson, dashJson] = await Promise.all([
+          fetchSafe(API_ENDPOINTS.risk),
+          fetchSafe(API_ENDPOINTS.anomalies),
+          fetchSafe(API_ENDPOINTS.dashboard)
         ]);
-        const riskJson = await riskRes.json();
-        const anomalyJson = await anomalyRes.json();
-        const dashJson = await dashRes.json();
-        setRiskData(riskJson);
-        setAnomalies(anomalyJson);
-        setDashboard(dashJson);
+
+        if (riskJson) setRiskData(riskJson);
+        if (anomalyJson && Array.isArray(anomalyJson)) setAnomalies(anomalyJson);
+        if (dashJson) setDashboard(dashJson);
       } catch (err) {
         console.error("Failed to fetch risk data", err);
       }
@@ -39,7 +56,9 @@ export const GridRiskView: React.FC = () => {
     { name: "Forecast Uncertainty", weight: 28, color: "from-gray-400 to-gray-200" },
   ];
 
-  const timeline = riskData?.timeline || [];
+  const timeline = (riskData?.timeline && Array.isArray(riskData.timeline) && riskData.timeline.length > 0)
+    ? riskData.timeline
+    : DEFAULT_TIMELINE;
 
   const getBadgeClass = (level: string) => {
     switch (level?.toUpperCase()) {
