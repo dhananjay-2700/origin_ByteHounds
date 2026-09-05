@@ -45,133 +45,127 @@ export const ForecastView: React.FC = () => {
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header Banner */}
       <ScrollReveal delay={100}>
-        <div className="control-card p-6 border border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center space-x-2 text-white text-xs font-mono font-bold uppercase mb-1">
-            <Activity className="w-4 h-4 text-cyan-400" />
-            <span>MACHINE LEARNING DEMAND PIPELINE</span>
+        <div className="control-card p-6 border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center space-x-2 text-blue-600 text-xs font-semibold uppercase tracking-wider mb-1">
+              <Activity className="w-4 h-4 text-blue-600" />
+              <span>MACHINE LEARNING DEMAND PIPELINE</span>
+            </div>
+            <h1 className="text-xl font-bold text-gray-900 font-sans">24-Hour Electricity Demand Forecast</h1>
+            <p className="text-xs text-gray-500">Comparing Previous Day Baseline and Trained LightGBM Model</p>
           </div>
-          <h1 className="text-xl font-bold text-white font-mono">24-Hour Electricity Demand Forecast</h1>
-          <p className="text-xs text-gray-400">Comparing Previous Day Baseline and Trained LightGBM Model</p>
-        </div>
 
-        {/* Model Selector Buttons */}
-        <div className="flex items-center bg-gray-900/80 p-1 rounded-xl border border-gray-800">
-          <button
-            onClick={() => setSelectedModel("all")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              selectedModel === "all" ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "text-gray-400 hover:text-white"
-            }`}
-          >
-            All Models
-          </button>
-          <button
-            onClick={() => setSelectedModel("lgb")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              selectedModel === "lgb" ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "text-gray-400 hover:text-white"
-            }`}
-          >
-            LightGBM
-          </button>
-          <button
-            onClick={() => setSelectedModel("baseline")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              selectedModel === "baseline" ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "text-gray-400 hover:text-white"
-            }`}
-          >
-            Baseline
-          </button>
-        </div>
+          {/* Model Selector Buttons */}
+          <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200">
+            <button
+              onClick={() => setSelectedModel("all")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                selectedModel === "all" ? "bg-white text-blue-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              All Models
+            </button>
+            <button
+              onClick={() => setSelectedModel("lgb")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                selectedModel === "lgb" ? "bg-white text-blue-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              LightGBM
+            </button>
+            <button
+              onClick={() => setSelectedModel("baseline")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                selectedModel === "baseline" ? "bg-white text-blue-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Baseline
+            </button>
+          </div>
         </div>
       </ScrollReveal>
 
       {/* Main Interactive Forecast Chart */}
       <ScrollReveal delay={200}>
-        <div className="control-card p-6 border border-gray-800">
-        <div className="h-80 w-full">
-          {forecastSeries.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={forecastSeries} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-              <defs>
-                <linearGradient id="colorXgb" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ffffff" stopOpacity={0.2}/>
-                  <stop offset="95%" stopColor="#ffffff" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-              <XAxis dataKey="time" stroke="#666" tick={{fill: '#666', fontSize: 10}} tickMargin={10} />
-              <YAxis domain={['auto', 'auto']} stroke="#666" tick={{fill: '#666', fontSize: 10}} tickMargin={10} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#000', border: '1px solid #333', color: '#fff', fontSize: '12px' }}
-                itemStyle={{ color: '#ccc' }}
-              />
-              
-              <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-              
-              <Line type="monotone" dataKey="actual" name="Actual Load (MW)" stroke="#22d3ee" strokeWidth={2.5} dot={{r: 3, fill: '#22d3ee', strokeWidth: 0}} />
-              <Line type="monotone" dataKey="lightgbm" name="LightGBM Model (MW)" stroke="#fbbf24" strokeWidth={3} dot={{r: 4, fill: '#fbbf24', strokeWidth: 0}} />
-              
-              {(selectedModel === "all" || selectedModel === "baseline") && (
-                  <Line type="monotone" dataKey="baseline" stroke="#9ca3af" strokeWidth={1.5} strokeDasharray="3 3" dot={false} name="Previous Day Baseline (MW)" />
-              )}
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-full flex items-center justify-center text-sm font-mono text-gray-500">
-              Loading Live Forecast Series...
-            </div>
-          )}
-        </div>
+        <div className="control-card p-6 border border-gray-100">
+          <div className="h-80 w-full">
+            {forecastSeries.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={forecastSeries} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="time" stroke="#64748b" tick={{fill: '#64748b', fontSize: 11}} tickMargin={10} />
+                <YAxis domain={['auto', 'auto']} stroke="#64748b" tick={{fill: '#64748b', fontSize: 11}} tickMargin={10} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '0.75rem', color: '#0f172a', fontSize: '12px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
+                  itemStyle={{ color: '#0f172a', fontWeight: '600' }}
+                />
+                
+                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px', fontWeight: '500' }} />
+                
+                <Line type="monotone" dataKey="actual" name="Actual Load (MW)" stroke="#2563eb" strokeWidth={3} dot={{r: 3, fill: '#2563eb', strokeWidth: 0}} />
+                <Line type="monotone" dataKey="lightgbm" name="LightGBM Model (MW)" stroke="#f59e0b" strokeWidth={3} dot={{r: 4, fill: '#f59e0b', strokeWidth: 0}} />
+                
+                {(selectedModel === "all" || selectedModel === "baseline") && (
+                    <Line type="monotone" dataKey="baseline" stroke="#94a3b8" strokeWidth={2} strokeDasharray="3 3" dot={false} name="Previous Day Baseline (MW)" />
+                )}
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-sm font-semibold text-gray-400">
+                Loading Live Forecast Series...
+              </div>
+            )}
+          </div>
         </div>
       </ScrollReveal>
 
       {/* Accuracy & Model Evaluation Cards */}
       <ScrollReveal delay={300}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="control-card p-4 border border-gray-800 bg-black flex flex-col justify-center">
-            <div className="text-gray-500 font-mono text-[10px] uppercase flex items-center gap-1 mb-1">
-              <Cpu className="w-3 h-3" /> Mean Absolute Error (MAE)
+          <div className="control-card p-5 border border-gray-100 bg-white flex flex-col justify-center">
+            <div className="text-gray-500 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 mb-1">
+              <Cpu className="w-4 h-4 text-blue-600" /> Mean Absolute Error (MAE)
             </div>
-            <div className="text-2xl font-bold text-white font-mono flex items-baseline gap-1">
-              {metrics?.mae ?? "--"} <span className="text-xs text-gray-500">MW</span>
+            <div className="text-2xl font-extrabold text-gray-900 font-sans flex items-baseline gap-1 mt-1">
+              {metrics?.mae ?? "--"} <span className="text-xs text-gray-500 font-medium">MW</span>
             </div>
-            <div className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3 text-emerald-400" /> High Precision
+            <div className="text-xs text-emerald-600 font-semibold mt-2 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5" /> High Precision
             </div>
           </div>
 
-          <div className="control-card p-4 border border-gray-800 bg-black flex flex-col justify-center">
-            <div className="text-gray-500 font-mono text-[10px] uppercase flex items-center gap-1 mb-1">
-              <BarChart2 className="w-3 h-3" /> MAPE / WAPE Error
+          <div className="control-card p-5 border border-gray-100 bg-white flex flex-col justify-center">
+            <div className="text-gray-500 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 mb-1">
+              <BarChart2 className="w-4 h-4 text-blue-600" /> MAPE / WAPE Error
             </div>
-            <div className="text-2xl font-bold text-white font-mono">
+            <div className="text-2xl font-extrabold text-gray-900 font-sans mt-1">
               {metrics?.mape ? (metrics.mape * 100).toFixed(2) : (metrics?.mape ?? "--")}%
             </div>
-            <div className="text-xs text-gray-400 mt-1">
+            <div className="text-xs text-gray-500 font-medium mt-2">
               Test Set Validation Performance
             </div>
           </div>
 
-          <div className="control-card p-4 border border-gray-800 bg-black flex flex-col justify-center">
-            <div className="text-gray-500 font-mono text-[10px] uppercase flex items-center gap-1 mb-1">
-              <CheckCircle2 className="w-3 h-3" /> Peak Demand Error
+          <div className="control-card p-5 border border-gray-100 bg-white flex flex-col justify-center">
+            <div className="text-gray-500 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 mb-1">
+              <CheckCircle2 className="w-4 h-4 text-blue-600" /> Peak Demand Error
             </div>
-            <div className="text-2xl font-bold text-white font-mono">
+            <div className="text-2xl font-extrabold text-gray-900 font-sans mt-1">
               {metrics?.peak_error ? `${metrics.peak_error}%` : "--"}
             </div>
-            <div className="text-xs text-gray-400 mt-1">
+            <div className="text-xs text-gray-500 font-medium mt-2">
               Timing Error: {metrics?.peak_timing_error || "0 mins"}
             </div>
           </div>
 
-          <div className="control-card p-4 border border-gray-800 bg-black flex flex-col justify-center">
-            <div className="text-gray-500 font-mono text-[10px] uppercase flex items-center gap-1 mb-1">
-              <Activity className="w-3 h-3" /> Active Production Model
+          <div className="control-card p-5 border border-gray-100 bg-white flex flex-col justify-center">
+            <div className="text-gray-500 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 mb-1">
+              <Activity className="w-4 h-4 text-blue-600" /> Active Production Model
             </div>
-            <div className="text-lg font-bold text-white font-mono">
+            <div className="text-lg font-bold text-gray-900 font-sans mt-1">
               {metrics?.best_model || "LightGBM Multi-Horizon"}
             </div>
-            <div className="text-xs text-gray-400 mt-1">
+            <div className="text-xs text-gray-500 font-medium mt-2">
               Trained on 393,440 Delhi Records
             </div>
           </div>

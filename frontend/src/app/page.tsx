@@ -17,12 +17,8 @@ export default function Home() {
   const [isDataHealthOpen, setIsDataHealthOpen] = useState<boolean>(false);
   const [showForecast, setShowForecast] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("command-center");
-  const [introCompleted, setIntroCompleted] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      return sessionStorage.getItem("intro_completed") === "true";
-    }
-    return false;
-  });
+  const [introCompleted, setIntroCompleted] = useState<boolean>(false);
+  const [isClient, setIsClient] = useState<boolean>(false);
 
   const landingRef = useRef<HTMLDivElement>(null);
   const savedScrollY = useRef<number>(0);
@@ -31,9 +27,13 @@ export default function Home() {
   const handleCompleteIntro = () => {
     setIntroCompleted(true);
     if (typeof window !== "undefined") {
-      sessionStorage.setItem("intro_completed", "true");
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
   };
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     if (!showForecast && returningToHomeRef.current) {
@@ -59,7 +59,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-gray-100 flex flex-col font-sans relative">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans relative">
       {showForecast ? (
         <div className="w-full flex flex-col min-h-screen">
           {/* Header Navigation */}
@@ -75,18 +75,18 @@ export default function Home() {
 
           {/* Feature Page Container */}
           <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-800/80">
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
               <button 
                 onClick={handleBackToHome} 
-                className="flex items-center gap-2 text-gray-400 hover:text-amber-400 transition-colors uppercase tracking-widest text-xs font-bold font-mono cursor-pointer"
+                className="flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors uppercase tracking-wider text-xs font-bold font-sans cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back to Previous Location</span>
               </button>
 
-              <div className="flex items-center space-x-2 text-xs font-mono text-gray-400">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                <span className="uppercase tracking-widest text-white font-bold">
+              <div className="flex items-center space-x-2 text-xs font-sans text-slate-500">
+                <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                <span className="uppercase tracking-wider text-slate-900 font-bold">
                   {activeTab === "command-center" && "Command Center Dashboard"}
                   {activeTab === "forecast" && "24-Hour Demand Forecast"}
                   {activeTab === "grid-risk" && "Grid Risk Intelligence"}
@@ -114,12 +114,12 @@ export default function Home() {
       ) : (
         <>
           {/* 1. Opening Sticky Parallax Scroll Animation with Photos (Renders ONCE only) */}
-          {!introCompleted && (
+          {isClient && !introCompleted && (
             <ParallaxIntroAnimation onComplete={handleCompleteIntro} />
           )}
 
           {/* 2. Main Storytelling MVP Content */}
-          <div ref={landingRef} className="relative z-10 w-full bg-[#0d0f12]">
+          <div ref={landingRef} className="relative z-10 w-full bg-white">
             <GridWiseLanding 
               onViewForecast={(sec) => handleOpenFeature(sec)} 
               onOpenDataHealth={() => setIsDataHealthOpen(true)}

@@ -102,19 +102,19 @@ export const ScenarioLabView: React.FC = () => {
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header Banner */}
       <ScrollReveal delay={100} direction="up">
-        <div className="control-card p-6 border border-gray-800 relative">
+        <div className="control-card p-6 border border-gray-100 bg-white relative">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-2 text-purple-400 text-xs font-mono font-bold uppercase">
+            <div className="flex items-center space-x-2 text-purple-600 text-xs font-semibold uppercase tracking-wider">
               <Sliders className="w-4 h-4" />
               <span>PREDICTIVE SCENARIO LAB</span>
             </div>
-            <span className="px-2.5 py-1 rounded-full bg-purple-950/60 border border-purple-500/40 text-purple-300 text-[11px] font-mono font-bold flex items-center">
-              <Info className="w-3 h-3 mr-1 text-purple-400" />
+            <span className="px-3 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-semibold flex items-center">
+              <Info className="w-3.5 h-3.5 mr-1.5 text-purple-600" />
               Simulated / Modeled Scenario Tool
             </span>
           </div>
-          <h1 className="text-xl font-bold text-white font-mono">"What happens if tomorrow gets hotter?"</h1>
-          <p className="text-xs text-gray-400 mt-1">
+          <h1 className="text-xl font-bold text-gray-900 font-sans">"What happens if tomorrow gets hotter?"</h1>
+          <p className="text-xs text-gray-500 font-medium mt-1">
             Hypothetical counterfactual testing tool. Adjust variables below to run modeled what-if simulations against live ML baseline forecasts.
           </p>
         </div>
@@ -124,180 +124,180 @@ export const ScenarioLabView: React.FC = () => {
         
         {/* CONTROLS PANEL (6 cols) */}
         <ScrollReveal delay={200} direction="left" className="lg:col-span-6">
-          <div className="control-card p-6 border border-gray-800 space-y-6 h-full">
-          <h2 className="text-xs font-mono text-gray-300 uppercase font-bold tracking-wider border-b border-gray-800 pb-3">
-            SIMULATION PARAMETERS
-          </h2>
+          <div className="control-card p-6 border border-gray-100 bg-white space-y-6 h-full">
+            <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100 pb-3">
+              SIMULATION PARAMETERS
+            </h2>
 
-          {/* Slider 1: Temperature */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs font-mono">
-              <span className="text-gray-300">Temperature (°C)</span>
-              <span className="text-amber-400 font-bold">{temperature}°C</span>
+            {/* Slider 1: Temperature */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-sans">
+                <span className="text-gray-700 font-semibold">Temperature (°C)</span>
+                <span className="text-amber-600 font-bold">{temperature}°C</span>
+              </div>
+              <input
+                type="range"
+                min="30"
+                max="45"
+                step="0.5"
+                value={temperature}
+                onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-amber-500"
+              />
+              <div className="flex justify-between text-[10px] text-gray-400 font-semibold">
+                <span>30°C</span>
+                <span>41.2°C (Base)</span>
+                <span>45°C</span>
+              </div>
             </div>
-            <input
-              type="range"
-              min="30"
-              max="45"
-              step="0.5"
-              value={temperature}
-              onChange={(e) => setTemperature(parseFloat(e.target.value))}
-              className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
-            />
-            <div className="flex justify-between text-[10px] text-gray-400 font-mono">
-              <span>30°C</span>
-              <span>41.2°C (Base)</span>
-              <span>45°C</span>
-            </div>
-          </div>
 
-          {/* Slider 2: Humidity */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs font-mono">
-              <span className="text-gray-300">Humidity (%)</span>
-              <span className="text-cyan-400 font-bold">{humidity}%</span>
+            {/* Slider 2: Humidity */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-sans">
+                <span className="text-gray-700 font-semibold">Humidity (%)</span>
+                <span className="text-blue-600 font-bold">{humidity}%</span>
+              </div>
+              <input
+                type="range"
+                min="20"
+                max="80"
+                step="1"
+                value={humidity}
+                onChange={(e) => setHumidity(parseFloat(e.target.value))}
+                className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              />
+              <div className="flex justify-between text-[10px] text-gray-400 font-semibold">
+                <span>20%</span>
+                <span>52% (Base)</span>
+                <span>80%</span>
+              </div>
             </div>
-            <input
-              type="range"
-              min="20"
-              max="80"
-              step="1"
-              value={humidity}
-              onChange={(e) => setHumidity(parseFloat(e.target.value))}
-              className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-            />
-            <div className="flex justify-between text-[10px] text-gray-400 font-mono">
-              <span>20%</span>
-              <span>52% (Base)</span>
-              <span>80%</span>
-            </div>
-          </div>
 
-          {/* Slider 3: Solar Contribution */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs font-mono">
-              <span className="text-gray-300">Rooftop Solar Offset (%)</span>
-              <span className="text-emerald-400 font-bold">{solar}%</span>
+            {/* Slider 3: Solar Contribution */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-sans">
+                <span className="text-gray-700 font-semibold">Rooftop Solar Offset (%)</span>
+                <span className="text-emerald-600 font-bold">{solar}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="30"
+                step="1"
+                value={solar}
+                onChange={(e) => setSolar(parseFloat(e.target.value))}
+                className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+              />
+              <div className="flex justify-between text-[10px] text-gray-400 font-semibold">
+                <span>0%</span>
+                <span>10% (Base)</span>
+                <span>30%</span>
+              </div>
             </div>
-            <input
-              type="range"
-              min="0"
-              max="30"
-              step="1"
-              value={solar}
-              onChange={(e) => setSolar(parseFloat(e.target.value))}
-              className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-emerald-400"
-            />
-            <div className="flex justify-between text-[10px] text-gray-400 font-mono">
-              <span>0%</span>
-              <span>10% (Base)</span>
-              <span>30%</span>
-            </div>
-          </div>
 
-          {/* Slider 4: Demand Growth */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs font-mono">
-              <span className="text-gray-300">Demand Growth (%)</span>
-              <span className="text-purple-400 font-bold">{demandGrowth > 0 ? `+${demandGrowth}` : demandGrowth}%</span>
+            {/* Slider 4: Demand Growth */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-sans">
+                <span className="text-gray-700 font-semibold">Demand Growth (%)</span>
+                <span className="text-purple-600 font-bold">{demandGrowth > 0 ? `+${demandGrowth}` : demandGrowth}%</span>
+              </div>
+              <input
+                type="range"
+                min="-5"
+                max="10"
+                step="0.5"
+                value={demandGrowth}
+                onChange={(e) => setDemandGrowth(parseFloat(e.target.value))}
+                className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-purple-600"
+              />
+              <div className="flex justify-between text-[10px] text-gray-400 font-semibold">
+                <span>-5%</span>
+                <span>0% (Base)</span>
+                <span>+10%</span>
+              </div>
             </div>
-            <input
-              type="range"
-              min="-5"
-              max="10"
-              step="0.5"
-              value={demandGrowth}
-              onChange={(e) => setDemandGrowth(parseFloat(e.target.value))}
-              className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-purple-400"
-            />
-            <div className="flex justify-between text-[10px] text-gray-400 font-mono">
-              <span>-5%</span>
-              <span>0% (Base)</span>
-              <span>+10%</span>
-            </div>
-          </div>
 
-          {/* Run Simulation Trigger */}
-          <button
-            onClick={handleRunSimulation}
-            disabled={isLoading}
-            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold font-mono text-sm hover:from-purple-500 hover:to-indigo-500 transition shadow-lg flex items-center justify-center space-x-2 disabled:opacity-50"
-          >
-            {isLoading ? (
-              <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>COMPUTING SCENARIO MODEL...</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4 fill-white" />
-                <span>RUN WHAT-IF SIMULATION</span>
-              </>
-            )}
-          </button>
+            {/* Run Simulation Trigger */}
+            <button
+              onClick={handleRunSimulation}
+              disabled={isLoading}
+              className="w-full py-3.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition shadow-md flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+            >
+              {isLoading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>COMPUTING SCENARIO MODEL...</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 fill-white" />
+                  <span>RUN WHAT-IF SIMULATION</span>
+                </>
+              )}
+            </button>
           </div>
         </ScrollReveal>
 
         {/* RESULTS COMPARISON PANEL (6 cols) */}
         <ScrollReveal delay={300} direction="right" className="lg:col-span-6">
           <div className="space-y-6">
-          
-          {/* Side-by-Side Cards */}
-          <div className="grid grid-cols-2 gap-4 font-mono">
-            {/* BASE CASE */}
-            <div className="control-card p-5 border-l-4 border-l-gray-500">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">ML BASELINE</span>
-              <div className="text-xs text-gray-400">Peak Demand</div>
-              <div className="text-2xl font-extrabold text-white mt-1">
-                {basePeak.toLocaleString()} <span className="text-xs font-normal">MW</span>
+            
+            {/* Side-by-Side Cards */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* BASE CASE */}
+              <div className="control-card p-5 border-l-4 border-l-gray-400 bg-white">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">ML BASELINE</span>
+                <div className="text-xs text-gray-500 font-medium">Peak Demand</div>
+                <div className="text-2xl font-extrabold text-gray-900 font-sans mt-1">
+                  {basePeak.toLocaleString()} <span className="text-xs font-medium text-gray-500">MW</span>
+                </div>
+                
+                <div className="mt-4 pt-3 border-t border-gray-100">
+                  <div className="text-[10px] text-gray-500 font-semibold">Model Risk Score</div>
+                  <div className="text-sm font-bold text-amber-600">{baseRiskScore} ({baseRiskLevel})</div>
+                </div>
               </div>
-              
-              <div className="mt-4 pt-3 border-t border-gray-800">
-                <div className="text-[10px] text-gray-400">Model Risk Score</div>
-                <div className="text-sm font-bold text-amber-400">{baseRiskScore} ({baseRiskLevel})</div>
-              </div>
-            </div>
 
-            {/* SIMULATED CASE */}
-            <div className="control-card p-5 border-l-4 border-l-purple-500 glow-high bg-purple-950/20">
-              <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider block mb-1">MODELED SCENARIO</span>
-              <div className="text-xs text-purple-300">Projected Peak</div>
-              <div className="text-2xl font-extrabold text-purple-300 mt-1">
-                {simulatedPeak.toLocaleString()} <span className="text-xs font-normal">MW</span>
-              </div>
-              
-              <div className="mt-4 pt-3 border-t border-gray-800/80">
-                <div className="text-[10px] text-purple-300/80">Scenario Risk</div>
-                <div className="text-sm font-bold text-purple-300">
-                  {simulatedRiskScore} ({simulatedRiskLevel})
+              {/* SIMULATED CASE */}
+              <div className="control-card p-5 border-l-4 border-l-purple-600 bg-purple-50/50">
+                <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wider block mb-1">MODELED SCENARIO</span>
+                <div className="text-xs text-purple-600 font-medium">Projected Peak</div>
+                <div className="text-2xl font-extrabold text-purple-900 font-sans mt-1">
+                  {simulatedPeak.toLocaleString()} <span className="text-xs font-medium text-purple-600">MW</span>
+                </div>
+                
+                <div className="mt-4 pt-3 border-t border-purple-100">
+                  <div className="text-[10px] text-purple-700 font-semibold">Scenario Risk</div>
+                  <div className="text-sm font-bold text-purple-900">
+                    {simulatedRiskScore} ({simulatedRiskLevel})
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* PEAK CHANGE INDICATOR */}
-          <div className="control-card p-5 border border-gray-800 flex items-center justify-between font-mono">
-            <div>
-              <span className="text-xs text-gray-400 uppercase">SIMULATED PEAK DELTA</span>
-              <div className="text-xl font-extrabold text-white mt-0.5">
-                {peakChange >= 0 ? `+${peakChange.toLocaleString()}` : peakChange.toLocaleString()} MW
+            {/* PEAK CHANGE INDICATOR */}
+            <div className="control-card p-5 border border-gray-100 bg-white flex items-center justify-between">
+              <div>
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">SIMULATED PEAK DELTA</span>
+                <div className="text-2xl font-extrabold text-gray-900 font-sans mt-0.5">
+                  {peakChange >= 0 ? `+${peakChange.toLocaleString()}` : peakChange.toLocaleString()} MW
+                </div>
+              </div>
+              <div className={`p-3 rounded-2xl ${peakChange >= 0 ? "bg-red-50 text-red-600 border border-red-200" : "bg-emerald-50 text-emerald-600 border border-emerald-200"}`}>
+                {peakChange >= 0 ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
               </div>
             </div>
-            <div className={`p-3 rounded-full ${peakChange >= 0 ? "bg-rose-500/20 text-rose-400 border border-rose-500/40" : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"}`}>
-              {peakChange >= 0 ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
-            </div>
-          </div>
 
-          {/* SCENARIO ALERT BANNER */}
-          <div className="control-card p-5 border-l-4 border-l-purple-500 bg-purple-950/40 text-xs">
-            <div className="flex items-center space-x-2 text-purple-300 font-bold uppercase mb-2">
-              <AlertTriangle className="w-4 h-4 text-purple-400" />
-              <span>MODELED WHAT-IF OUTCOME</span>
+            {/* SCENARIO ALERT BANNER */}
+            <div className="control-card p-5 border-l-4 border-l-purple-600 bg-purple-50/80 border border-purple-100 text-xs">
+              <div className="flex items-center space-x-2 text-purple-900 font-bold uppercase mb-2">
+                <AlertTriangle className="w-4 h-4 text-purple-600" />
+                <span>MODELED WHAT-IF OUTCOME</span>
+              </div>
+              <p className="text-purple-900 leading-relaxed font-sans font-medium">
+                {alertMessage}
+              </p>
             </div>
-            <p className="text-purple-200 leading-relaxed font-mono">
-              {alertMessage}
-            </p>
-          </div>
 
           </div>
         </ScrollReveal>
