@@ -25,12 +25,44 @@ const DEFAULT_FORECAST_SERIES = [
   { time: "22:00", actual: 6420, forecast: 2800 },
 ];
 
+const DEFAULT_DASHBOARD = {
+  current_load: 8120,
+  tomorrow_peak: 3911,
+  peak_24h: 3911,
+  peak_time: "10:00 IST",
+  grid_risk_score: 39,
+  grid_risk_level: "MODERATE",
+  critical_window: "08:00 — 19:00",
+  data_health_score: 98,
+  weather_temp: 14.8,
+  humidity: 54,
+};
+
+const DEFAULT_EXPLANATION = {
+  summary: "LightGBM model attributes the projected peak primarily to recent 12h demand momentum, diurnal timing, and cooling load.",
+  shap_drivers: [
+    { feature: "Recent Load Lags", percentage: 34 },
+    { feature: "Hour of Day (Diurnal)", percentage: 21 },
+    { feature: "Ambient Temperature", percentage: 19 },
+    { feature: "Relative Humidity", percentage: 14 },
+    { feature: "Solar Contribution Offset", percentage: 12 },
+  ]
+};
+
+const DEFAULT_WEATHER = {
+  temperature: 14.8,
+  condition: "High Seasonal Temp",
+  humidity: 54,
+  demand_impact: "↑ HIGH",
+  summary: "Ambient temperature of 14.8°C directly increases cooling-driven electricity demand across Delhi NCT."
+};
+
 export const CommandCenterView: React.FC<CommandCenterProps> = ({ onNavigateTab }) => {
-  const [dashboard, setDashboard] = useState<any>(null);
+  const [dashboard, setDashboard] = useState<any>(DEFAULT_DASHBOARD);
   const [forecast, setForecast] = useState<any[]>(DEFAULT_FORECAST_SERIES);
-  const [explanation, setExplanation] = useState<any>(null);
-  const [weather, setWeather] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [explanation, setExplanation] = useState<any>(DEFAULT_EXPLANATION);
+  const [weather, setWeather] = useState<any>(DEFAULT_WEATHER);
+  const [loading, setLoading] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
