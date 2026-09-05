@@ -5,6 +5,8 @@
 
 *"Don't just predict the peak. Prepare for it."*
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-pravaah--x.netlify.app-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://pravaah-x.netlify.app/)
+
 [![FastAPI](https://img.shields.io/badge/FastAPI-2.0.0-009688.svg?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black.svg?style=flat&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB.svg?style=flat&logo=react&logoColor=black)](https://reactjs.org/)
@@ -13,6 +15,8 @@
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC.svg?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Tests](https://img.shields.io/badge/Tests-14%2F14%20Passing-brightgreen.svg?style=flat)]()
 [![License](https://img.shields.io/badge/License-MIT-purple.svg?style=flat)]()
+
+**🌐 Live Deployment:** [https://pravaah-x.netlify.app/](https://pravaah-x.netlify.app/)
 
 </div>
 
@@ -365,11 +369,13 @@ cd frontend && npm run build
 
 ## 🌐 Production Deployment
 
-See [DEPLOYMENT.md](file:///Users/dhananjay/Documents/GitHub/origin_ByteHounds/DEPLOYMENT.md) for detailed deployment walkthroughs.
+- 🚀 **Live Production Site**: [https://pravaah-x.netlify.app/](https://pravaah-x.netlify.app/)
+- 📖 **Full Deployment Guide**: See [DEPLOYMENT.md](DEPLOYMENT.md) for step-by-step configurations.
 
-### Option 1: Netlify (Frontend) + Render (Backend)
-- **Frontend**: Connect `origin_ByteHounds` to Netlify. Root directory: `frontend`. Build command: `npm run build`. Environment variable: `BACKEND_URL=https://your-backend.onrender.com`.
-- **Backend**: Connect `origin_ByteHounds` to Render as a Python Web Service. Build command: `pip install -r backend/requirements.txt`. Start command: `cd backend && python main.py`.
+### Architecture in Production:
+- **Frontend**: Deployed on **Netlify** with global CDN caching, automatic branch previews, and edge asset distribution.
+- **Backend**: Deployed on **Render** as an auto-scaling Python Web Service serving FastAPI REST endpoints and ML inference.
+- **Self-Hosted / VPS**: 1-Command container orchestration with Docker Compose.
 
 ### Option 2: 1-Command Docker Compose
 Run both services with production-ready containers:
