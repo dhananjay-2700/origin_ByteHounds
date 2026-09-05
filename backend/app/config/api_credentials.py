@@ -13,6 +13,9 @@ Since you are training your own model, NO external third-party LLM keys
 
 import os
 from typing import Optional
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # =============================================================================
