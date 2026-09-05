@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Zap, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 interface ParallaxIntroProps {
   onComplete?: () => void;
@@ -232,11 +232,6 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
             willChange: "opacity, filter, transform",
           }}
         >
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono font-bold mb-6 backdrop-blur-md">
-            <Zap className="w-4 h-4 fill-amber-400/20" />
-            <span>DELHI GRID DEMAND &amp; RISK INTELLIGENCE</span>
-          </div>
-
           <h1
             className="text-5xl sm:text-7xl lg:text-9xl font-black italic tracking-wider font-mono"
             style={{
@@ -250,12 +245,6 @@ export const ParallaxIntroAnimation: React.FC<ParallaxIntroProps> = ({ onComplet
           <p className="mt-5 text-lg sm:text-2xl font-medium text-cyan-100 font-mono tracking-wide max-w-2xl mx-auto italic">
             "Don't just predict the peak. Prepare for it."
           </p>
-
-          <div className="mt-8 flex flex-wrap justify-center gap-3 text-xs font-mono text-gray-300">
-            <span className="px-3 py-1.5 rounded-md bg-gray-900/90 border border-gray-800">● 24h Demand Forecasting</span>
-            <span className="px-3 py-1.5 rounded-md bg-gray-900/90 border border-gray-800">● SHAP Driver Attribution</span>
-            <span className="px-3 py-1.5 rounded-md bg-gray-900/90 border border-gray-800">● Interactive What-If Scenario Lab</span>
-          </div>
         </div>
 
         {/* ── Skip button ── */}
