@@ -21,3 +21,7 @@ out/
 Thumbs.db
 .vscode/
 .idea/
+
+# SQLite Databases
+*.db
+*.sqlite3
