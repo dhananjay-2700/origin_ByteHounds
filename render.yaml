@@ -22,7 +22,7 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 20.18.0
-      - key: BACKEND_URL
+      - key: NEXT_PUBLIC_API_URL
         fromService:
           type: web
           name: pravaahx-backend

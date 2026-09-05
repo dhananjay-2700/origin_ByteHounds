@@ -39,7 +39,7 @@ Pravaah AI is production-ready. You can deploy it using any of the three options
    - **Framework Preset**: `Next.js`
    - **Root Directory**: Click `Edit` and select `frontend`.
 4. Add **Environment Variables**:
-   - `BACKEND_URL`: `https://pravaahx-backend.onrender.com` *(Replace with your actual backend URL from Step 1)*
+   - `NEXT_PUBLIC_API_URL`: `https://pravaahx-backend.onrender.com` *(Replace with your actual backend URL from Step 1)*
 5. Click **Deploy**.
 
 #### Option B: Via Netlify
@@ -97,7 +97,7 @@ If you use Render, a `render.yaml` specification is already included in the root
 
 | Variable | Service | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `BACKEND_URL` | Frontend | `http://127.0.0.1:8000` | URL of the deployed FastAPI backend |
+| `NEXT_PUBLIC_API_URL` | Frontend | `http://127.0.0.1:8000` | URL of the deployed FastAPI backend |
 | `PORT` | Backend / Frontend | `8000` / `3000` | Port for the HTTP server to bind to |
 | `HOST` | Backend | `0.0.0.0` | Bind address (0.0.0.0 for external access) |
 
