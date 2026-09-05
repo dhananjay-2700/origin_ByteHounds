@@ -1,4 +1,4 @@
-# Production Dockerfile for PravaahX Backend
+# Production Dockerfile for Pravaah AI Backend
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \

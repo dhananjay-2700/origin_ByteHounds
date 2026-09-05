@@ -150,7 +150,7 @@ def api_simulation_direct_alias(req: scenario.ScenarioRequest):
 @app.get("/", tags=["Root"])
 def root():
     return {
-        "platform": "PravaahX",
+        "platform": "Pravaah AI",
         "descriptor": "Delhi Grid Intelligence Engine",
         "status": "online",
         "version": settings.VERSION,

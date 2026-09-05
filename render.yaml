@@ -1,5 +1,5 @@
 services:
-  # PravaahX Backend Web Service
+  # Pravaah AI Backend Web Service
   - type: web
     name: pravaahx-backend
     runtime: python
@@ -12,7 +12,7 @@ services:
       - key: PORT
         value: 8000
 
-  # PravaahX Frontend Next.js Web Service
+  # Pravaah AI Frontend Next.js Web Service
   - type: web
     name: pravaahx-frontend
     runtime: node

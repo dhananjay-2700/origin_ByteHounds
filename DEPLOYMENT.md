@@ -1,6 +1,6 @@
-# 🚀 PravaahX Deployment Guide
+# 🚀 Pravaah AI Deployment Guide
 
-PravaahX is production-ready. You can deploy it using any of the three options below depending on your preference.
+Pravaah AI is production-ready. You can deploy it using any of the three options below depending on your preference.
 
 ---
 

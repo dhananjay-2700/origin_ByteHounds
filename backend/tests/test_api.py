@@ -17,7 +17,7 @@ def test_root():
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
-    assert data["platform"] == "PravaahX"
+    assert data["platform"] == "Pravaah AI"
     assert "credentials_config_file" in data
 
 def test_health():

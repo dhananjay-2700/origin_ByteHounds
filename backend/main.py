@@ -23,7 +23,7 @@ from ml_service import ml_service
 # Ensure tables are created
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="PravaahX MVP API", version="2.0.0")
+app = FastAPI(title="Pravaah AI MVP API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -43,7 +43,7 @@ app.include_router(system.router, prefix="/api")
 @app.get("/")
 def root():
     return {
-        "platform": "PravaahX",
+        "platform": "Pravaah AI",
         "descriptor": "Delhi Grid Intelligence Engine & Demand Forecasting API",
         "status": "online",
         "version": "2.0.0",
@@ -56,7 +56,7 @@ def root():
 def health_check():
     return {
         "status": "ok",
-        "platform": "PravaahX",
+        "platform": "Pravaah AI",
         "timestamp": datetime.now().isoformat()
     }
 

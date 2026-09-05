@@ -128,7 +128,7 @@ export function HomeClient({ initialIntroCompleted = false }: HomeClientProps) {
                   {activeTab === "grid-risk" && "Grid Risk Intelligence"}
                   {activeTab === "geographic" && "Geographic Intelligence"}
                   {activeTab === "scenario-lab" && "Interactive Scenario Lab"}
-                  {activeTab === "copilot" && "PravaahX Copilot"}
+                  {activeTab === "copilot" && "Pravaah AI Copilot"}
                 </span>
               </div>
             </div>

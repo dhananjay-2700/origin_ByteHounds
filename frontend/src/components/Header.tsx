@@ -40,7 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
             <Zap className="w-4 h-4 fill-black" />
           </div>
           <span className="text-xl font-black text-white tracking-tight group-hover:text-[#FF7C1E] transition-colors whitespace-nowrap">
-            PravaahX
+            Pravaah AI
           </span>
         </div>
 

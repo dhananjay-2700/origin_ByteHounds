@@ -3,7 +3,7 @@ from typing import List
 from . import api_credentials
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "PravaahX — Delhi Grid Intelligence Backend"
+    PROJECT_NAME: str = "Pravaah AI — Delhi Grid Intelligence Backend"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api"
     

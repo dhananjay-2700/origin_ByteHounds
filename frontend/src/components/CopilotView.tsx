@@ -22,7 +22,7 @@ export const CopilotView: React.FC = () => {
     {
       id: "1",
       sender: "copilot",
-      text: "Hello, I am **PravaahX Copilot**—your tool-grounded natural language interface to the Delhi Grid AI backend. How can I assist with grid risk or demand forecasts today?",
+      text: "Hello, I am **Pravaah AI Copilot**—your tool-grounded natural language interface to the Delhi Grid AI backend. How can I assist with grid risk or demand forecasts today?",
     },
   ]);
 
@@ -78,7 +78,7 @@ export const CopilotView: React.FC = () => {
 
   const fallbackResponse = (q: string) => {
     const lower = q.toLowerCase();
-    let ans = "The PravaahX system is monitoring live Delhi Grid telemetry and ML model predictions.";
+    let ans = "The Pravaah AI system is monitoring live Delhi Grid telemetry and ML model predictions.";
     let intent = "GENERAL_GRID_QUERY";
     let apis = ["GET /api/dashboard"];
 
@@ -126,7 +126,7 @@ export const CopilotView: React.FC = () => {
               <Bot className="w-4 h-4" />
               <span>GROUNDED AI ASSISTANT</span>
             </div>
-            <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">PravaahX COPILOT</h1>
+            <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">Pravaah AI COPILOT</h1>
             <p className="text-xs md:text-sm text-gray-400 mt-1 font-normal">
               Natural-language tool runner grounded directly in backend forecast & risk services
             </p>

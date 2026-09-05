@@ -1,4 +1,4 @@
-# Netlify Configuration for PravaahX Frontend
+# Netlify Configuration for Pravaah AI Frontend
 [build]
   base = "frontend"
   publish = ".next"
